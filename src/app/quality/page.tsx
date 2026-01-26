@@ -209,7 +209,7 @@ export default function Quality() {
                                         <div className="container">
                                             <div className="section-header">
                                                 <h2>Testing Facilities</h2>
-                                                <p align="left" style={{ fontSize: "20px" }}>
+                                                <p style={{ fontSize: "20px", textAlign: "left" }}>
                                                     (a) 29 channel Optical emission Spectrometer
                                                     <br />
                                                     (b) Microscope

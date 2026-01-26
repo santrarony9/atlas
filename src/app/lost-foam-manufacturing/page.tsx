@@ -297,7 +297,7 @@ export default function LostFoam() {
                             <div className="container">
                                 <div className="section-header">
                                     <h2>Differences with Sand casting process</h2>
-                                    <p align="left" style={{ fontSize: '20px' }}>
+                                    <p style={{ fontSize: '20px', textAlign: 'left' }}>
                                         1. No usage of cores.<br />
                                         2. No additives, binders, resins etc for treating sand.<br />
                                         3. No risers.<br />
@@ -309,7 +309,7 @@ export default function LostFoam() {
                             <div className="container">
                                 <div className="section-header">
                                     <h2>Advantages of Lost Foam Casting process</h2>
-                                    <p align="left" style={{ fontSize: '20px' }}>
+                                    <p style={{ fontSize: '20px', textAlign: 'left' }}>
                                         1. Outstanding results with complex/engineered castings involcing multiple cores.<br />
                                         2. Excellent surface finish.<br />
                                         3. Dimensionally accurate. Near net-shape castings achievable.<br />
