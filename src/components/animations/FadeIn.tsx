@@ -25,7 +25,7 @@ export default function FadeIn({ children, delay = 0, direction = "up", classNam
             transition: {
                 duration: 0.6,
                 delay: delay,
-                ease: [0.22, 1, 0.36, 1], // Custom cubic-bezier for "premium" feel
+                ease: [0.22, 1, 0.36, 1] as const, // Custom cubic-bezier for "premium" feel
             },
         },
     };
