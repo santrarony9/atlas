@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Montserrat } from "next/font/google";
 import "./globals.css";
 import "./custom.css";
 
 const inter = Inter({ subsets: ["latin"] });
+const montserrat = Montserrat({ subsets: ["latin"], weight: ["400", "600", "700"], variable: "--font-montserrat" });
 
 export const metadata: Metadata = {
     title: "Atlas Foundries",
@@ -33,7 +34,7 @@ export default function RootLayout({
                 <link rel="stylesheet" type="text/css" href="/css/jquery.mmenu.all.css" />
                 <link rel="stylesheet" type="text/css" href="/css/demo.css" />
             </head>
-            <body className={inter.className}>{children}</body>
+            <body className={`${inter.className} ${montserrat.variable}`}>{children}</body>
         </html>
     );
 }
