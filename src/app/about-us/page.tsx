@@ -14,6 +14,8 @@ export default function AboutUs() {
                         alt="About Atlas Foundries"
                         fill
                         className="object-cover"
+                        sizes="100vw"
+                        priority
                     />
                     <div className="absolute inset-0 bg-brand-blue/80"></div>
                 </div>
@@ -48,6 +50,7 @@ export default function AboutUs() {
                                 alt="Factory Interior"
                                 fill
                                 className="object-cover"
+                                sizes="(max-width: 768px) 100vw, 50vw"
                             />
                         </div>
                     </div>

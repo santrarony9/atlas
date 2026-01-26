@@ -43,6 +43,8 @@ export default function Infrastructure() {
                         alt="Infrastructure"
                         fill
                         className="object-cover"
+                        sizes="100vw"
+                        priority
                     />
                     <div className="absolute inset-0 bg-brand-blue/90"></div>
                 </div>

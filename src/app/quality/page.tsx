@@ -14,6 +14,8 @@ export default function Quality() {
                         alt="Quality Assurance"
                         fill
                         className="object-cover"
+                        sizes="100vw"
+                        priority
                     />
                     <div className="absolute inset-0 bg-brand-blue/90"></div>
                 </div>
@@ -41,7 +43,13 @@ export default function Quality() {
                                 To deliver superior quality products at a reasonable price and in time-bound manner. To achieve customer satisfaction through meeting quality requirements of product and process. To elicit customer appreciation through continuous improvement in products and processes.
                             </p>
                             <div className="mt-6 relative h-48 rounded-lg overflow-hidden">
-                                <Image src="/images2/qp.png" alt="Policy" fill className="object-cover" />
+                                <Image
+                                    src="/images2/qp.png"
+                                    alt="Policy"
+                                    fill
+                                    className="object-cover"
+                                    sizes="(max-width: 768px) 100vw, 50vw"
+                                />
                             </div>
                         </div>
 
@@ -55,7 +63,13 @@ export default function Quality() {
                                 We follow a continuous improvement methodology. Our team focuses on training and sensitizing staff to the importance of "Right First Time". Supervisors implement control systems at every stage to ensure we achieve zero-defect performance levels.
                             </p>
                             <div className="mt-6 relative h-48 rounded-lg overflow-hidden">
-                                <Image src="/images2/qa.png" alt="Assurance" fill className="object-cover" />
+                                <Image
+                                    src="/images2/qa.png"
+                                    alt="Assurance"
+                                    fill
+                                    className="object-cover"
+                                    sizes="(max-width: 768px) 100vw, 50vw"
+                                />
                             </div>
                         </div>
                     </div>

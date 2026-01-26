@@ -50,6 +50,8 @@ export default function LostFoam() {
                         alt="Lost Foam Process"
                         fill
                         className="object-cover"
+                        sizes="100vw"
+                        priority
                     />
                     <div className="absolute inset-0 bg-brand-blue/90"></div>
                 </div>
@@ -103,6 +105,7 @@ export default function LostFoam() {
                                     alt={steps[activeStep].title}
                                     fill
                                     className="object-cover"
+                                    sizes="(max-width: 768px) 100vw, 50vw"
                                 />
                             </div>
                             <div>
