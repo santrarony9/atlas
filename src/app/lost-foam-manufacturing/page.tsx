@@ -114,7 +114,7 @@ export default function LostFoam() {
                         {/* Step Detail */}
                         <FadeIn direction="left" className="lg:col-span-2">
                             <div className="bg-white rounded-xl shadow-2xl p-8 min-h-[500px] flex flex-col relative overflow-hidden">
-                                <key key={activeStep}> {/* Forces re-render for animation */}
+                                <div key={activeStep} className="h-full"> {/* Forces re-render for animation */}
                                     <FadeIn delay={0.1} className="flex flex-col md:flex-row gap-8 items-center h-full">
                                         <div className="w-full md:w-1/2 relative h-64 md:h-80 rounded-lg overflow-hidden shrink-0 shadow-inner">
                                             <Image
@@ -133,7 +133,7 @@ export default function LostFoam() {
                                             </p>
                                         </div>
                                     </FadeIn>
-                                </key>
+                                </div>
                             </div>
                         </FadeIn>
                     </div>
