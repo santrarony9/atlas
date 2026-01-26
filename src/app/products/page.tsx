@@ -1,164 +1,101 @@
 "use client";
 
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import TopBar from "@/components/TopBar";
+import Image from "next/image";
 import Link from "next/link";
-import Script from "next/script";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function Products() {
     const [modalImage, setModalImage] = useState<string | null>(null);
 
-    useEffect(() => {
-        // Preloader
-        const preloader = document.getElementById("preloader");
-        if (preloader) {
-            setTimeout(() => {
-                preloader.classList.add("fade-out");
-            }, 900);
-        }
-    }, []);
-
-    const openModal = (src: string) => {
-        setModalImage(src);
-    };
-
-    const closeModal = () => {
-        setModalImage(null);
-    };
+    const products = [
+        { src: "/images2/Axle_Box_Hosuing.jpg", title: "Axle Box Housing" },
+        { src: "/images2/Cover.jpg", title: "Cover" },
+        { src: "/images2/DE_Frame.jpg", title: "DE Frame" },
+        { src: "/images2/Front_Axle_Bracket.jpg", title: "Front Axle Bracket" },
+        { src: "/images2/73.png", title: "Industrial Valve" },
+    ];
 
     return (
-        <>
-            <div id="wrap">
-                {/* PRELOADER */}
-                <div id="preloader">
-                    <div className="loader-wrap">
-                        <div className="loader-text">
-                            <span className="atlas">ATLAS</span>
-                            <span className="foundries">FOUNDRIES</span>
-                        </div>
-                        <div className="loader-bar">
-                            <span></span>
-                        </div>
+        <div className="bg-white min-h-screen">
+            {/* Page Header */}
+            <div className="relative h-[300px] flex items-center justify-center">
+                <div className="absolute inset-0">
+                    <Image
+                        src="/images2/3.jpg"
+                        alt="Atlas Products"
+                        fill
+                        className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-brand-blue/90"></div>
+                </div>
+                <div className="relative z-10 text-center text-white">
+                    <h1 className="text-5xl font-bold font-montserrat mb-4">Our Products</h1>
+                    <div className="flex justify-center gap-2 text-sm uppercase tracking-widest">
+                        <Link href="/" className="hover:text-brand-orange transition-colors">Home</Link>
+                        <span>/</span>
+                        <span className="text-brand-orange">Products</span>
                     </div>
                 </div>
-
-                <TopBar />
-                <Header />
-
-                {/* Start Banner */}
-                <div className="sub-banner">
-                    <div className="detail">
-                        <div className="container">
-                            <div className="row">
-                                <div className="col-md-12">
-                                    <div className="paging">
-                                        <h2>Products</h2>
-                                        <ul>
-                                            <li>
-                                                <Link href="/">Home</Link>
-                                            </li>
-                                            <li>
-                                                <a>Products</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {/* End Banner */}
-
-                {/* Start Content */}
-                <div className="content">
-                    <div className="gallery">
-                        <div className="container">
-                            <div className="row">
-                                <div className="col-md-12">
-                                    <div className="main-title">
-                                        <h2>
-                                            <span>Our</span> Products
-                                        </h2>
-                                        <p>
-                                            Atlas Foundries is engaged in development and commercial
-                                            production of products across various industries. Inspite
-                                            of being a newcomer in the industry, it has been recognized
-                                            for the adoption of latest technology that results in good
-                                            castings consistently. We are working in the engineered
-                                            casting segment with products for railways and automobiles.
-                                            Our particular focus is on substitution of products that
-                                            are currently being produced through investment casting
-                                            process to save costs without any compromise on the quality.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="product-grid">
-                                {[
-                                    {
-                                        src: "/images2/Axle_Box_Hosuing.jpg",
-                                        title: "Axle Box Housing",
-                                    },
-                                    { src: "/images2/Cover.jpg", title: "Cover" },
-                                    { src: "/images2/DE_Frame.jpg", title: "DE Frame" },
-                                    {
-                                        src: "/images2/Front_Axle_Bracket.jpg",
-                                        title: "Front Axle Bracket",
-                                    },
-                                ].map((item, index) => (
-                                    <div
-                                        key={index}
-                                        className="product-card"
-                                        onClick={() => openModal(item.src)}
-                                    >
-                                        <img src={item.src} alt={item.title} />
-                                        <div className="product-title">
-                                            <h3>{item.title}</h3>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* MODAL */}
-                            <div
-                                className={`modal ${modalImage ? "active" : ""}`}
-                                id="imageModal"
-                                onClick={closeModal}
-                            >
-                                <span className="close-btn" onClick={closeModal}>
-                                    &times;
-                                </span>
-                                <div
-                                    className="modal-content"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    {modalImage && <img id="modalImage" src={modalImage} alt="Product Detail" />}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {/* End Content */}
-
-                <Footer />
-                <a href="#0" className="cd-top"></a>
             </div>
 
-            {/* Scripts */}
-            <Script src="/js/jquery.js" strategy="beforeInteractive" />
-            <Script src="/js/jquery.themepunch.revolution.min.js" strategy="lazyOnload" />
-            <Script src="/js/jquery.themepunch.tools.min.js" strategy="lazyOnload" />
-            <Script src="/js/classie.js" strategy="lazyOnload" />
-            <Script src="/js/jquery-ui-1.10.3.custom.js" strategy="lazyOnload" />
-            <Script src="/js/jquery.fancybox.js" strategy="lazyOnload" />
-            <Script src="/js/jquery.fancybox-media.js" strategy="lazyOnload" />
-            <Script src="/js/tabs.js" strategy="lazyOnload" />
-            <Script src="/js/owl.carousel.js" strategy="lazyOnload" />
-            <Script src="/js/jquery.mmenu.min.all.js" strategy="lazyOnload" />
-            <Script src="/js/custom.js" strategy="lazyOnload" />
-        </>
+            {/* Introduction */}
+            <section className="py-16">
+                <div className="container mx-auto px-4 max-w-4xl text-center">
+                    <h2 className="text-3xl font-bold text-brand-blue mb-6">Engineered for Excellence</h2>
+                    <p className="text-gray-600 leading-relaxed text-lg">
+                        We specialize in replacing complex <strong>Investment Casting</strong> parts with cost-effective <strong>Lost Foam</strong> solutions without compromising quality.
+                        Our products serve critical industries including Railways, Automobiles, and Heavy Engineering.
+                    </p>
+                </div>
+            </section>
+
+            {/* Product Grid */}
+            <section className="py-12 bg-brand-light">
+                <div className="container mx-auto px-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {products.map((product, index) => (
+                            <div
+                                key={index}
+                                className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 group cursor-pointer"
+                                onClick={() => setModalImage(product.src)}
+                            >
+                                <div className="relative h-64 overflow-hidden">
+                                    <Image
+                                        src={product.src}
+                                        alt={product.title}
+                                        fill
+                                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                    />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <span className="text-white font-semibold">View Full Image</span>
+                                    </div>
+                                </div>
+                                <div className="p-6 text-center">
+                                    <h3 className="text-xl font-bold text-brand-blue group-hover:text-brand-orange transition-colors">{product.title}</h3>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Custom Modal */}
+            {modalImage && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 transition-opacity"
+                    onClick={() => setModalImage(null)}
+                >
+                    <button className="absolute top-6 right-6 text-white text-4xl hover:text-brand-orange">&times;</button>
+                    <div className="relative max-w-4xl w-full h-[80vh]">
+                        <Image
+                            src={modalImage}
+                            alt="Full View"
+                            fill
+                            className="object-contain"
+                        />
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }

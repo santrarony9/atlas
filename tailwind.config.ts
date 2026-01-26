@@ -20,6 +20,9 @@ const config: Config = {
                     light: "#F5F5F5", // Light Gray for backgrounds
                     dark: "#1A1A1A", // Dark Gray for text
                 }
+            },
+            fontFamily: {
+                montserrat: ["var(--font-montserrat)", "sans-serif"],
             }
         },
     },

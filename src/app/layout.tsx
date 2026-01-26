@@ -11,6 +11,10 @@ export const metadata: Metadata = {
     description: "Atlas Foundries Website",
 };
 
+import TopBar from "@/components/TopBar";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+
 export default function RootLayout({
     children,
 }: Readonly<{
@@ -18,7 +22,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <head>
+                {/* Legacy CSS - Commented out for Redesign
                 <link href="/css/medical-guide.css" rel="stylesheet" type="text/css" />
                 <link href="/fonts/medical-guide-icons.css" rel="stylesheet" type="text/css" />
                 <link href="/css/default-color.css" rel="stylesheet" id="color" type="text/css" />
@@ -33,8 +37,14 @@ export default function RootLayout({
                 <link href="/css/owl.carousel.css" rel="stylesheet" type="text/css" />
                 <link rel="stylesheet" type="text/css" href="/css/jquery.mmenu.all.css" />
                 <link rel="stylesheet" type="text/css" href="/css/demo.css" />
+                */}
             </head>
-            <body className={`${inter.className} ${montserrat.variable}`}>{children}</body>
-        </html>
+            <body className={`${inter.className} ${montserrat.variable} bg-brand-light`}>
+                <TopBar />
+                <Header />
+                <main>{children}</main>
+                <Footer />
+            </body>
+        </html >
     );
 }

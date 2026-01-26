@@ -1,300 +1,158 @@
 "use client";
 
 import Link from "next/link";
-import Script from "next/script";
-import { useEffect } from "react";
+import Image from "next/image";
 
 export default function Home() {
-    useEffect(() => {
-        // Custom Hero Animation Script (from original index.html)
-        const images = [
-            "/images2/2.jpg",
-            "/images2/3.jpg",
-            "/images2/Cover.jpg",
-            "/images2/about1.png",
-        ];
-
-        let index = 0;
-        let showingFirst = true;
-        const hero = document.querySelector(".hero") as HTMLElement;
-
-        if (hero) {
-            // set initial images
-            hero.style.setProperty("--img1", `url(${images[0]})`);
-            hero.style.setProperty("--img2", `url(${images[1]})`);
-
-            hero.style.setProperty("--before-bg", `url(${images[0]})`);
-            hero.style.setProperty("--after-bg", `url(${images[1]})`);
-
-            hero.style.setProperty("--opacity-before", "1");
-            hero.style.setProperty("--opacity-after", "0");
-
-            const updateBackground = () => {
-                index = (index + 1) % images.length;
-
-                if (showingFirst) {
-                    hero.style.setProperty("--after-bg", `url(${images[index]})`);
-                    hero.style.setProperty("--opacity-after", "1");
-                    hero.style.setProperty("--opacity-before", "0");
-                } else {
-                    hero.style.setProperty("--before-bg", `url(${images[index]})`);
-                    hero.style.setProperty("--opacity-before", "1");
-                    hero.style.setProperty("--opacity-after", "0");
-                }
-
-                showingFirst = !showingFirst;
-            };
-
-            // manual arrows
-            const rightArrow = document.querySelector(".hero-arrow.right") as HTMLElement;
-            const leftArrow = document.querySelector(".hero-arrow.left") as HTMLElement;
-
-            if (rightArrow) rightArrow.onclick = updateBackground;
-            if (leftArrow) leftArrow.onclick = updateBackground;
-
-            // auto change (slow)
-            const intervalId = setInterval(updateBackground, 1000); // Original was 1000
-
-            return () => clearInterval(intervalId);
-        }
-    }, []);
-
-    useEffect(() => {
-        // Preloader script
-        const preloader = document.getElementById("preloader");
-        if (preloader) {
-            setTimeout(() => {
-                preloader.classList.add("fade-out");
-            }, 900);
-        }
-    }, []);
-
     return (
-        <>
-            <div id="wrap">
-                {/* PRELOADER */}
-                <div id="preloader">
-                    <div className="loader-wrap">
-                        <div className="loader-text">
-                            <span className="atlas">ATLAS</span>
-                            <span className="foundries">FOUNDRIES</span>
-                        </div>
-                        <div className="loader-bar">
-                            <span></span>
+        <div className="flex flex-col">
+            {/* Hero Section */}
+            <section className="relative h-screen min-h-[600px] flex items-center">
+                {/* Background Image with Overlay */}
+                <div className="absolute inset-0 z-0">
+                    <Image
+                        src="/images2/Cover.jpg"
+                        alt="Atlas Foundries Factory"
+                        fill
+                        className="object-cover"
+                        priority
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-brand-blue/95 to-brand-blue/60"></div>
+                </div>
+
+                <div className="container mx-auto px-4 relative z-10">
+                    <div className="max-w-3xl text-white">
+                        <span className="text-brand-orange font-bold tracking-widest uppercase mb-4 block">100+ Years of Excellence</span>
+                        <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6 font-montserrat">
+                            Engineered Casting <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-amber-400">Solutions</span>
+                        </h1>
+                        <p className="text-xl text-slate-200 mb-10 leading-relaxed">
+                            Specializing in the <strong>Lost Foam Process</strong> to deliver precision castings for Railway, Marine, and Industrial applications globally.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <Link href="/contact-us" className="px-8 py-4 bg-brand-orange text-white font-bold rounded hover:bg-white hover:text-brand-orange transition-all text-center">
+                                Get a Quote
+                            </Link>
+                            <Link href="/about-us" className="px-8 py-4 border border-white text-white font-bold rounded hover:bg-white hover:text-brand-blue transition-all text-center">
+                                Our Story
+                            </Link>
                         </div>
                     </div>
                 </div>
+            </section>
 
-                {/* Start Header */}
-                <header className="header">
-                    <div className="container">
-                        <div className="header-inner">
-                            {/* Logo */}
-                            <Link href="/" className="logo">
-                                Atlas Foundries
-                            </Link>
-
-                            {/* Navigation */}
-                            <nav className="menu">
-                                <ul>
-                                    <li className="active">
-                                        <Link href="/">Home</Link>
-                                    </li>
-                                    <li>
-                                        <Link href="/about-us">About Us</Link>
-                                    </li>
-                                    <li>
-                                        <Link href="/lost-foam-manufacturing">
-                                            Lost Foam Manufacturing
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link href="/infrastructure">Infrastructure</Link>
-                                    </li>
-                                    <li>
-                                        <Link href="/products">Products</Link>
-                                    </li>
-                                    <li>
-                                        <Link href="/quality">Quality</Link>
-                                    </li>
-                                    <li>
-                                        <Link href="/contact-us">Contact Us</Link>
-                                    </li>
-                                </ul>
-                            </nav>
+            {/* About Section */}
+            <section className="py-20 bg-white">
+                <div className="container mx-auto px-4">
+                    <div className="grid md:grid-cols-2 gap-16 items-center">
+                        <div className="relative h-[500px] rounded-lg overflow-hidden shadow-2xl">
+                            <Image
+                                src="/images2/about1.png"
+                                alt="Foundry Operations"
+                                fill
+                                className="object-cover"
+                            />
                         </div>
-                    </div>
-                </header>
-                {/* End Header */}
-
-                {/* Mobile Menu Start */}
-                <div className="container">
-                    <div id="page">
-                        <header className="header">
-                            <a href="#menu"></a>
-                        </header>
-
-                        <nav id="menu">
-                            <ul>
-                                <li className="select">
-                                    <Link href="/">Home</Link>
+                        <div>
+                            <h4 className="text-brand-orange font-bold uppercase tracking-wider mb-2">About Atlas Foundries</h4>
+                            <h2 className="text-4xl font-bold text-brand-blue mb-6">World-Class Manufacturing in the Heart of India</h2>
+                            <p className="text-gray-600 mb-6 leading-relaxed">
+                                Atlas Foundries is a pioneering force in the metal casting industry. We combine traditional craftsmanship with modern <strong>Lost Foam technology</strong> to produce complex, high-precision components that traditional sand casting cannot achieve.
+                            </p>
+                            <ul className="space-y-4 mb-8">
+                                <li className="flex items-center gap-3">
+                                    <div className="w-6 h-6 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue text-sm">✓</div>
+                                    <span className="font-semibold text-gray-700">ISO 9001:2015 Certified</span>
                                 </li>
-                                <li>
-                                    <Link href="/about-us">About us</Link>
+                                <li className="flex items-center gap-3">
+                                    <div className="w-6 h-6 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue text-sm">✓</div>
+                                    <span className="font-semibold text-gray-700">Specialized in Complex Geometries</span>
                                 </li>
-                                <li>
-                                    <Link href="/lost-foam-manufacturing">
-                                        Lost Foam Manufacturing
-                                    </Link>
-                                </li>
-
-                                <li>
-                                    <Link href="/infrastructure">Infrastructure</Link>
-                                </li>
-
-                                <li>
-                                    <Link href="/products">Products</Link>
-                                </li>
-
-                                <li>
-                                    <Link href="/quality">Quality</Link>
-                                </li>
-
-                                <li>
-                                    <Link href="/contact-us">Contact Us</Link>
+                                <li className="flex items-center gap-3">
+                                    <div className="w-6 h-6 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue text-sm">✓</div>
+                                    <span className="font-semibold text-gray-700">Exporting to 15+ Countries</span>
                                 </li>
                             </ul>
-                        </nav>
+                            <Link href="/about-us" className="text-brand-blue font-bold hover:text-brand-orange transition-colors flex items-center gap-2">
+                                Read More <span>→</span>
+                            </Link>
+                        </div>
                     </div>
                 </div>
-                {/* Mobile Menu End */}
+            </section>
 
-                {/* Start Banner */}
-                <section className="hero">
-                    <div className="hero-overlay"></div>
-
-                    <div className="hero-content">
-                        <h1>
-                            Welcome to Atlas
-                            <br />
-                            Foundries
-                        </h1>
-
-                        <div className="divider"></div>
-
-                        <p className="tagline">
-                            “Casting solutions through Lost Foam Process for
-                            <br />
-                            all your engineered casting requirements”
-                        </p>
-
-                        <p className="location">Location - Kolkata, Howrah</p>
-
-                        <Link href="/about-us" className="hero-btn">
-                            Get Started
-                        </Link>
+            {/* Services / Capabilities Section */}
+            <section className="py-20 bg-brand-light">
+                <div className="container mx-auto px-4">
+                    <div className="text-center max-w-2xl mx-auto mb-16">
+                        <h4 className="text-brand-orange font-bold uppercase tracking-wider mb-2">Our Expertise</h4>
+                        <h2 className="text-4xl font-bold text-brand-blue mb-4">Precision Industries We Serve</h2>
+                        <p className="text-gray-600">Delivering critical components where failure is not an option.</p>
                     </div>
-                    <div className="hero-arrow left">&#10094;</div>
-                    <div className="hero-arrow right">&#10095;</div>
-                </section>
-                {/* End Banner */}
 
-                {/* Footer Bottom (Matches visual structure) */}
-                <div className="footer-bottom">
-                    <div className="container">
-                        <div className="row">
-                            <div className="col-md-6">
-                                <span className="copyrights">
-                                    © Copyright Atlas Foundries. All Rights Reserved Designed by
-                                    Dreamline Production
-                                </span>
+                    <div className="grid md:grid-cols-3 gap-8">
+                        {/* Card 1 */}
+                        <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow group">
+                            <div className="relative h-64 overflow-hidden">
+                                <Image src="/images2/2.jpg" alt="Railway" fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                                <div className="absolute inset-0 bg-brand-blue/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <span className="text-white font-bold text-lg">View Products</span>
+                                </div>
+                            </div>
+                            <div className="p-8">
+                                <h3 className="text-2xl font-bold text-brand-blue mb-3">Railway</h3>
+                                <p className="text-gray-600 mb-4">Couplers, draft gears, and bogie components engineered for durability.</p>
+                                <Link href="/products" className="text-brand-orange font-bold text-sm uppercase">Learn more</Link>
+                            </div>
+                        </div>
+
+                        {/* Card 2 */}
+                        <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow group">
+                            <div className="relative h-64 overflow-hidden">
+                                <Image src="/images2/3.jpg" alt="Marine" fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                                <div className="absolute inset-0 bg-brand-blue/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <span className="text-white font-bold text-lg">View Products</span>
+                                </div>
+                            </div>
+                            <div className="p-8">
+                                <h3 className="text-2xl font-bold text-brand-blue mb-3">Marine</h3>
+                                <p className="text-gray-600 mb-4">Corrosion-resistant castings for ship building and offshore platforms.</p>
+                                <Link href="/products" className="text-brand-orange font-bold text-sm uppercase">Learn more</Link>
+                            </div>
+                        </div>
+
+                        {/* Card 3 */}
+                        <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow group">
+                            <div className="relative h-64 overflow-hidden">
+                                <Image src="/images2/73.png" alt="Industrial" fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                                <div className="absolute inset-0 bg-brand-blue/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <span className="text-white font-bold text-lg">View Products</span>
+                                </div>
+                            </div>
+                            <div className="p-8">
+                                <h3 className="text-2xl font-bold text-brand-blue mb-3">Industrial</h3>
+                                <p className="text-gray-600 mb-4">Valves, pumps, and heavy machinery parts made with Lost Foam precision.</p>
+                                <Link href="/products" className="text-brand-orange font-bold text-sm uppercase">Learn more</Link>
                             </div>
                         </div>
                     </div>
-
-                    <a className="back-to-top" href="#."></a>
                 </div>
+            </section>
 
-                <a href="#0" className="cd-top"></a>
-            </div>
-
-            {/* Scripts */}
-            <Script src="/js/jquery.js" strategy="beforeInteractive" />
-            <Script src="/js/jquery.themepunch.revolution.min.js" strategy="lazyOnload" />
-            <Script src="/js/jquery.themepunch.tools.min.js" strategy="lazyOnload" />
-            <Script src="/js/classie.js" strategy="lazyOnload" />
-            <Script src="/js/jquery-ui-1.10.3.custom.js" strategy="lazyOnload" />
-            <Script src="/js/counter.js" strategy="lazyOnload" />
-            <Script src="/js/tabs.js" strategy="lazyOnload" />
-            <Script src="/js/jquery.mmenu.min.all.js" strategy="lazyOnload" />
-            <Script src="/js/owl.carousel.js" strategy="lazyOnload" />
-            <Script src="/js/custom.js" strategy="lazyOnload" />
-            <Script src="/js/switcher.js" strategy="lazyOnload" />
-            <Script id="revolution-init" strategy="lazyOnload">
-                {`
-          jQuery(document).ready(function () {
-             // Basic revolution init if element exists
-             if(jQuery(".tp-banner").length > 0) {
-                jQuery(".tp-banner").show().revolution({
-                  dottedOverlay: "none",
-                  delay: 16000,
-                  startwidth: 1170,
-                  startheight: 750,
-                  hideThumbs: 200,
-                  thumbWidth: 100,
-                  thumbHeight: 50,
-                  thumbAmount: 5,
-                  navigationType: "bullet",
-                  navigationArrows: "solo",
-                  navigationStyle: "preview4",
-                  touchenabled: "on",
-                  onHoverStop: "off",
-                  swipe_velocity: 0.7,
-                  swipe_min_touches: 1,
-                  swipe_max_touches: 1,
-                  drag_block_vertical: false,
-                  parallax: "mouse",
-                  parallaxBgFreeze: "on",
-                  parallaxLevels: [7, 4, 3, 2, 5, 4, 3, 2, 1, 0],
-                  keyboardNavigation: "off",
-                  navigationHAlign: "center",
-                  navigationVAlign: "bottom",
-                  navigationHOffset: 0,
-                  navigationVOffset: 20,
-                  soloArrowLeftHalign: "left",
-                  soloArrowLeftValign: "center",
-                  soloArrowLeftHOffset: 20,
-                  soloArrowLeftVOffset: 0,
-                  soloArrowRightHalign: "right",
-                  soloArrowRightValign: "center",
-                  soloArrowRightHOffset: 20,
-                  soloArrowRightVOffset: 0,
-                  shadow: 0,
-                  fullWidth: "on",
-                  fullScreen: "off",
-                  spinner: "spinner4",
-                  stopLoop: "off",
-                  stopAfterLoops: -1,
-                  stopAtSlide: -1,
-                  shuffle: "off",
-                  autoHeight: "off",
-                  forceFullWidth: "off",
-                  hideThumbsOnMobile: "off",
-                  hideNavDelayOnMobile: 1500,
-                  hideBulletsOnMobile: "off",
-                  hideArrowsOnMobile: "off",
-                  hideThumbsUnderResolution: 0,
-                  hideSliderAtLimit: 0,
-                  hideCaptionAtLimit: 0,
-                  hideAllCaptionAtLilmit: 0,
-                  startWithSlide: 0,
-                  videoJsPath: "rs-plugin/videojs/",
-                  fullScreenOffsetContainer: "",
-                });
-             }
-          });
-        `}
-            </Script>
-        </>
+            {/* CTA Section */}
+            <section className="py-20 bg-brand-blue relative overflow-hidden">
+                <div className="absolute inset-0 opacity-10">
+                    <Image src="/images2/Cover.jpg" alt="bg" fill className="object-cover" />
+                </div>
+                <div className="container mx-auto px-4 relative z-10 text-center">
+                    <h2 className="text-4xl text-white font-bold mb-6">Ready to upgrade your supply chain?</h2>
+                    <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">Contact us today to discuss your casting requirements and experience the Atlas advantage.</p>
+                    <Link href="/contact-us" className="px-10 py-4 bg-brand-orange text-white font-bold rounded-full hover:bg-white hover:text-brand-orange transition-all shadow-lg inline-block">
+                        Contact Us Now
+                    </Link>
+                </div>
+            </section>
+        </div>
     );
 }
