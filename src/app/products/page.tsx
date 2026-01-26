@@ -2,21 +2,34 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import FadeInItem from "@/components/animations/FadeInItem";
 import StaggerContainer from "@/components/animations/StaggerContainer";
 import ScaleOnHover from "@/components/animations/ScaleOnHover";
+import { client } from "@/sanity/client";
+import { GET_ALL_PRODUCTS } from "@/sanity/lib/queries";
+import { urlFor } from "@/sanity/client";
+
+interface Product {
+    _id: string;
+    title: string;
+    slug: string;
+    imageUrl: string;
+    category?: string;
+}
 
 export default function Products() {
-    const [modalImage, setModalImage] = useState<string | null>(null);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const products = [
-        { src: "/images2/Axle_Box_Hosuing.jpg", title: "Axle Box Housing" },
-        { src: "/images2/Cover.jpg", title: "Cover" },
-        { src: "/images2/DE_Frame.jpg", title: "DE Frame" },
-        { src: "/images2/Front_Axle_Bracket.jpg", title: "Front Axle Bracket" },
-        { src: "/images2/73.png", title: "Industrial Valve" },
-    ];
+    useEffect(() => {
+        const fetchProducts = async () => {
+            const data = await client.fetch(GET_ALL_PRODUCTS);
+            setProducts(data);
+            setLoading(false);
+        };
+        fetchProducts();
+    }, []);
 
     return (
         <div className="bg-white min-h-screen">
@@ -57,57 +70,58 @@ export default function Products() {
             {/* Product Grid */}
             <section className="py-12 bg-brand-light">
                 <div className="container mx-auto px-4">
-                    <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {products.map((product, index) => (
-                            <FadeInItem key={index}>
-                                <ScaleOnHover
-                                    className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 group cursor-pointer"
-                                // onClick is handled by the div inside ScaleOnHover if ScaleOnHover passes props, but ScaleOnHover is a div wrapper.
-                                // We need to move the onClick to the ScaleOnHover or the div inside. 
-                                // Since ScaleOnHover spreads logic, let's wrap the div properly.
-                                >
-                                    <div onClick={() => setModalImage(product.src)}>
-                                        <div className="relative h-64 overflow-hidden">
-                                            <Image
-                                                src={product.src}
-                                                alt={product.title}
-                                                fill
-                                                className="object-cover group-hover:scale-110 transition-transform duration-500"
-                                                sizes="(max-width: 768px) 100vw, 33vw"
-                                            />
-                                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                <span className="text-white font-semibold">View Full Image</span>
+                    {loading ? (
+                        <div className="flex justify-center items-center min-h-[400px]">
+                            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-brand-orange"></div>
+                        </div>
+                    ) : products.length === 0 ? (
+                        <div className="text-center py-20">
+                            <h3 className="text-xl text-gray-500">No products found. Add some in the CMS!</h3>
+                        </div>
+                    ) : (
+                        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {products.map((product) => (
+                                <FadeInItem key={product._id}>
+                                    <ScaleOnHover className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 group h-full flex flex-col">
+                                        <Link href={`/products/${product.slug}`} className="flex-1 flex flex-col">
+                                            <div className="relative h-64 overflow-hidden bg-gray-100">
+                                                {product.imageUrl ? (
+                                                    <Image
+                                                        src={urlFor(product.imageUrl).width(600).height(600).url()}
+                                                        alt={product.title}
+                                                        fill
+                                                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                                        sizes="(max-width: 768px) 100vw, 33vw"
+                                                    />
+                                                ) : (
+                                                    <div className="flex items-center justify-center h-full text-gray-400">
+                                                        No Image
+                                                    </div>
+                                                )}
+                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <span className="text-white font-semibold flex items-center gap-2">
+                                                        View Details <span>→</span>
+                                                    </span>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="p-6 text-center">
-                                            <h3 className="text-xl font-bold text-brand-blue group-hover:text-brand-orange transition-colors">{product.title}</h3>
-                                        </div>
-                                    </div>
-                                </ScaleOnHover>
-                            </FadeInItem>
-                        ))}
-                    </StaggerContainer>
+                                            <div className="p-6 text-center flex-1">
+                                                {product.category && (
+                                                    <span className="text-xs font-bold text-brand-orange uppercase tracking-wider mb-2 block">
+                                                        {product.category}
+                                                    </span>
+                                                )}
+                                                <h3 className="text-xl font-bold text-brand-blue group-hover:text-brand-orange transition-colors">
+                                                    {product.title}
+                                                </h3>
+                                            </div>
+                                        </Link>
+                                    </ScaleOnHover>
+                                </FadeInItem>
+                            ))}
+                        </StaggerContainer>
+                    )}
                 </div>
             </section>
-
-            {/* Custom Modal */}
-            {modalImage && (
-                <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 transition-opacity"
-                    onClick={() => setModalImage(null)}
-                >
-                    <button className="absolute top-6 right-6 text-white text-4xl hover:text-brand-orange">&times;</button>
-                    <div className="relative max-w-4xl w-full h-[80vh]">
-                        <Image
-                            src={modalImage}
-                            alt="Full View"
-                            fill
-                            className="object-contain"
-                            sizes="100vw"
-                        />
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
