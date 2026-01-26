@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { client, urlFor } from "@/sanity/client";
-import { GET_PRODUCT_BY_SLUG } from "@/sanity/lib/queries";
 import FadeIn from "@/components/animations/FadeIn";
 
 interface ProductDetail {
@@ -25,8 +23,15 @@ export default function ProductDetail() {
     useEffect(() => {
         const fetchProduct = async () => {
             if (slug) {
-                const data = await client.fetch(GET_PRODUCT_BY_SLUG, { slug });
-                setProduct(data);
+                try {
+                    const res = await fetch(`/api/products/slug/${slug}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        setProduct(data);
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch product:", error);
+                }
                 setLoading(false);
             }
         };
@@ -76,7 +81,7 @@ export default function ProductDetail() {
                         <div className="bg-gray-100 rounded-2xl overflow-hidden shadow-xl aspect-square relative">
                             {product.imageUrl ? (
                                 <Image
-                                    src={urlFor(product.imageUrl).width(1200).height(1200).url()}
+                                    src={product.imageUrl}
                                     alt={product.title}
                                     fill
                                     className="object-cover"

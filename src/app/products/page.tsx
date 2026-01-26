@@ -6,9 +6,6 @@ import { useState, useEffect } from "react";
 import FadeInItem from "@/components/animations/FadeInItem";
 import StaggerContainer from "@/components/animations/StaggerContainer";
 import ScaleOnHover from "@/components/animations/ScaleOnHover";
-import { client } from "@/sanity/client";
-import { GET_ALL_PRODUCTS } from "@/sanity/lib/queries";
-import { urlFor } from "@/sanity/client";
 
 interface Product {
     _id: string;
@@ -24,8 +21,15 @@ export default function Products() {
 
     useEffect(() => {
         const fetchProducts = async () => {
-            const data = await client.fetch(GET_ALL_PRODUCTS);
-            setProducts(data);
+            try {
+                const res = await fetch("/api/products");
+                if (res.ok) {
+                    const data = await res.json();
+                    setProducts(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch products:", error);
+            }
             setLoading(false);
         };
         fetchProducts();
@@ -76,7 +80,7 @@ export default function Products() {
                         </div>
                     ) : products.length === 0 ? (
                         <div className="text-center py-20">
-                            <h3 className="text-xl text-gray-500">No products found. Add some in the CMS!</h3>
+                            <h3 className="text-xl text-gray-500">No products found. Add some in the Admin Panel!</h3>
                         </div>
                     ) : (
                         <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -87,7 +91,7 @@ export default function Products() {
                                             <div className="relative h-64 overflow-hidden bg-gray-100">
                                                 {product.imageUrl ? (
                                                     <Image
-                                                        src={urlFor(product.imageUrl).width(600).height(600).url()}
+                                                        src={product.imageUrl}
                                                         alt={product.title}
                                                         fill
                                                         className="object-cover group-hover:scale-110 transition-transform duration-500"
