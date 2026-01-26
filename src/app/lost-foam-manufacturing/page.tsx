@@ -3,6 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import FadeIn from "@/components/animations/FadeIn";
+import StaggerContainer from "@/components/animations/StaggerContainer";
+import FadeInItem from "@/components/animations/FadeInItem";
+import ScaleOnHover from "@/components/animations/ScaleOnHover";
 
 export default function LostFoam() {
     const [activeStep, setActiveStep] = useState(0);
@@ -43,7 +48,7 @@ export default function LostFoam() {
     return (
         <div className="bg-white min-h-screen">
             {/* Page Header */}
-            <div className="relative h-[300px] flex items-center justify-center">
+            <div className="relative h-[400px] flex items-center justify-center">
                 <div className="absolute inset-0">
                     <Image
                         src="/images2/4.jpg"
@@ -53,97 +58,120 @@ export default function LostFoam() {
                         sizes="100vw"
                         priority
                     />
-                    <div className="absolute inset-0 bg-brand-blue/90"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-brand-blue/95 to-brand-blue/60"></div>
                 </div>
-                <div className="relative z-10 text-center text-white">
-                    <h1 className="text-5xl font-bold font-montserrat mb-4">Lost Foam Manufacturing</h1>
-                    <div className="flex justify-center gap-2 text-sm uppercase tracking-widest">
-                        <Link href="/" className="hover:text-brand-orange transition-colors">Home</Link>
-                        <span>/</span>
-                        <span className="text-brand-orange">Process</span>
-                    </div>
+                <div className="relative z-10 text-center text-white max-w-4xl px-4">
+                    <FadeIn direction="down" delay={0.1}>
+                        <h1 className="text-5xl md:text-6xl font-bold font-montserrat mb-6">Lost Foam Manufacturing</h1>
+                    </FadeIn>
+                    <FadeIn direction="up" delay={0.2}>
+                        <div className="flex justify-center gap-2 text-sm uppercase tracking-widest text-brand-orange font-bold">
+                            <Link href="/" className="hover:text-white transition-colors">Home</Link>
+                            <span>/</span>
+                            <span>Process</span>
+                        </div>
+                    </FadeIn>
                 </div>
             </div>
 
             {/* Intro */}
             <section className="py-20">
                 <div className="container mx-auto px-4 max-w-4xl text-center">
-                    <h2 className="text-3xl font-bold text-brand-blue mb-6">What is Lost Foam Casting?</h2>
-                    <p className="text-gray-600 leading-relaxed text-lg mb-8">
-                        Lost Foam Casting is a type of evaporative pattern casting, similar to investment casting but using foam instead of wax.
-                        This process combines the <strong>surface finish of investment casting</strong> with the <strong>economical costs of sand casting</strong>.
-                        It is ideal for complex parts that would normally require multiple cores.
-                    </p>
+                    <FadeIn>
+                        <h2 className="text-3xl font-bold text-brand-blue mb-6">What is Lost Foam Casting?</h2>
+                        <p className="text-gray-600 leading-relaxed text-xl mb-8">
+                            Lost Foam Casting is a type of evaporative pattern casting, similar to investment casting but using foam instead of wax.
+                            This process combines the <strong>surface finish of investment casting</strong> with the <strong>economical costs of sand casting</strong>.
+                            It is ideal for complex parts that would normally require multiple cores.
+                        </p>
+                    </FadeIn>
                 </div>
             </section>
 
             {/* Interactive Process Steps */}
             <section className="py-20 bg-brand-light">
                 <div className="container mx-auto px-4">
-                    <h2 className="text-3xl font-bold text-brand-blue mb-12 text-center">The Manufacturing Process</h2>
+                    <FadeIn>
+                        <h2 className="text-4xl font-bold text-brand-blue mb-16 text-center">The Manufacturing Process</h2>
+                    </FadeIn>
 
                     <div className="grid lg:grid-cols-3 gap-8 items-start">
                         {/* Step List */}
-                        <div className="lg:col-span-1 bg-white rounded-xl shadow-lg overflow-hidden">
+                        <FadeIn direction="right" className="lg:col-span-1 bg-white rounded-xl shadow-lg run-flow overflow-hidden">
                             {steps.map((step, index) => (
                                 <button
                                     key={index}
                                     onClick={() => setActiveStep(index)}
-                                    className={`w-full text-left px-6 py-4 border-b last:border-0 hover:bg-gray-50 transition-colors flex items-center justify-between ${activeStep === index ? 'bg-brand-blue text-white hover:bg-brand-blue' : 'text-gray-700'}`}
+                                    className={`w-full text-left px-6 py-5 border-b last:border-0 hover:bg-gray-50 transition-all duration-300 flex items-center justify-between group ${activeStep === index ? 'bg-brand-blue text-white hover:bg-brand-blue' : 'text-gray-600'}`}
                                 >
-                                    <span className="font-semibold">{index + 1}. {step.title}</span>
-                                    {activeStep === index && <span>→</span>}
+                                    <span className={`font-bold text-lg ${activeStep === index ? 'text-brand-orange' : 'text-gray-400 group-hover:text-brand-blue'} mr-4`}>0{index + 1}</span>
+                                    <span className="font-semibold flex-1">{step.title}</span>
+                                    {activeStep === index && <motion.span layoutId="active-arrow" className="text-brand-orange">➜</motion.span>}
                                 </button>
                             ))}
-                        </div>
+                        </FadeIn>
 
                         {/* Step Detail */}
-                        <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-8 flex flex-col md:flex-row gap-8 items-center min-h-[400px]">
-                            <div className="w-full md:w-1/2 relative h-64 md:h-80 rounded-lg overflow-hidden shrink-0">
-                                <Image
-                                    src={steps[activeStep].img}
-                                    alt={steps[activeStep].title}
-                                    fill
-                                    className="object-cover"
-                                    sizes="(max-width: 768px) 100vw, 50vw"
-                                />
+                        <FadeIn direction="left" className="lg:col-span-2">
+                            <div className="bg-white rounded-xl shadow-2xl p-8 min-h-[500px] flex flex-col relative overflow-hidden">
+                                <key key={activeStep}> {/* Forces re-render for animation */}
+                                    <FadeIn delay={0.1} className="flex flex-col md:flex-row gap-8 items-center h-full">
+                                        <div className="w-full md:w-1/2 relative h-64 md:h-80 rounded-lg overflow-hidden shrink-0 shadow-inner">
+                                            <Image
+                                                src={steps[activeStep].img}
+                                                alt={steps[activeStep].title}
+                                                fill
+                                                className="object-cover"
+                                                sizes="(max-width: 768px) 100vw, 50vw"
+                                            />
+                                        </div>
+                                        <div className="w-full md:w-1/2">
+                                            <div className="text-9xl font-bold text-gray-100 absolute top-4 right-4 -z-0 select-none">0{activeStep + 1}</div>
+                                            <h3 className="text-3xl font-bold text-brand-blue mb-6 relative z-10">{steps[activeStep].title}</h3>
+                                            <p className="text-gray-600 leading-relaxed text-lg relative z-10">
+                                                {steps[activeStep].desc}
+                                            </p>
+                                        </div>
+                                    </FadeIn>
+                                </key>
                             </div>
-                            <div>
-                                <h3 className="text-2xl font-bold text-brand-blue mb-4">{steps[activeStep].title}</h3>
-                                <p className="text-gray-600 leading-relaxed text-lg">
-                                    {steps[activeStep].desc}
-                                </p>
-                            </div>
-                        </div>
+                        </FadeIn>
                     </div>
                 </div>
             </section>
 
             {/* Comparison Table */}
-            <section className="py-20">
+            <section className="py-20 lg:py-32">
                 <div className="container mx-auto px-4">
-                    <div className="grid md:grid-cols-2 gap-12">
+                    <div className="grid md:grid-cols-2 gap-16">
                         {/* Differences */}
                         <div>
-                            <h3 className="text-2xl font-bold text-brand-blue mb-6 border-l-4 border-brand-orange pl-4">Differences from Sand Casting</h3>
-                            <ul className="space-y-4">
+                            <FadeIn direction="right">
+                                <h3 className="text-2xl font-bold text-brand-blue mb-8 border-l-4 border-gray-300 pl-4">Differences from Sand Casting</h3>
+                            </FadeIn>
+                            <StaggerContainer className="space-y-4">
                                 {[
                                     "No usage of cores.",
                                     "No additives/binders/resins.",
                                     "No risers required.",
                                     "Sand is 100% recycled."
                                 ].map((item, i) => (
-                                    <li key={i} className="flex gap-3 text-gray-700 p-4 border rounded hover:shadow-md transition-shadow">
-                                        <span className="text-brand-orange font-bold">✓</span> {item}
-                                    </li>
+                                    <FadeInItem key={i}>
+                                        <ScaleOnHover className="flex gap-4 text-gray-700 p-6 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow items-center">
+                                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold shrink-0">VS</div>
+                                            <span className="font-medium">{item}</span>
+                                        </ScaleOnHover>
+                                    </FadeInItem>
                                 ))}
-                            </ul>
+                            </StaggerContainer>
                         </div>
 
                         {/* Advantages */}
                         <div>
-                            <h3 className="text-2xl font-bold text-brand-blue mb-6 border-l-4 border-brand-orange pl-4">Key Advantages</h3>
-                            <ul className="space-y-4">
+                            <FadeIn direction="left">
+                                <h3 className="text-2xl font-bold text-brand-blue mb-8 border-l-4 border-brand-orange pl-4">Key Advantages</h3>
+                            </FadeIn>
+                            <StaggerContainer className="space-y-4">
                                 {[
                                     "Excellent surface finish.",
                                     "Dimensionally accurate (Near net-shape).",
@@ -151,11 +179,14 @@ export default function LostFoam() {
                                     "Environmentally friendly (Green Technology).",
                                     "Substantially reduced machining costs."
                                 ].map((item, i) => (
-                                    <li key={i} className="flex gap-3 text-gray-700 p-4 border rounded hover:shadow-md transition-shadow">
-                                        <span className="text-brand-orange font-bold">★</span> {item}
-                                    </li>
+                                    <FadeInItem key={i}>
+                                        <ScaleOnHover className="flex gap-4 text-gray-700 p-6 bg-brand-blue/5 border border-brand-blue/10 rounded-xl shadow-sm hover:shadow-md transition-shadow items-center">
+                                            <div className="w-10 h-10 rounded-full bg-brand-orange flex items-center justify-center text-white font-bold shrink-0">✓</div>
+                                            <span className="font-medium text-brand-blue">{item}</span>
+                                        </ScaleOnHover>
+                                    </FadeInItem>
                                 ))}
-                            </ul>
+                            </StaggerContainer>
                         </div>
                     </div>
                 </div>
