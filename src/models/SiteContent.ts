@@ -21,6 +21,19 @@ export interface ISiteContent extends Document {
     };
     features: IFeatureCard[];
     contactEmail: string;
+    socialLinks: {
+        facebook: string;
+        twitter: string;
+        linkedin: string;
+        instagram: string;
+        youtube: string;
+    };
+    companyProfileUrl: string;
+    infrastructure: {
+        videoUrl: string;
+        companyImages: string[];
+        certificates: string[];
+    };
     createdAt: Date;
     updatedAt: Date;
 }
@@ -46,7 +59,20 @@ const SiteContentSchema: Schema = new Schema(
             imageUrl: { type: String, default: '/images2/about1.png' }
         },
         features: [FeatureCardSchema],
-        contactEmail: { type: String, default: 'info@atlasfoundries.com' }
+        contactEmail: { type: String, default: 'info@atlasfoundries.com' },
+        socialLinks: {
+            facebook: { type: String, default: "" },
+            twitter: { type: String, default: "" },
+            linkedin: { type: String, default: "" },
+            instagram: { type: String, default: "" },
+            youtube: { type: String, default: "" },
+        },
+        companyProfileUrl: { type: String, default: "" },
+        infrastructure: {
+            videoUrl: { type: String, default: "" },
+            companyImages: [{ type: String }],
+            certificates: [{ type: String }],
+        }
     },
     {
         timestamps: true,
