@@ -1,10 +1,41 @@
-import Image from "next/image";
 import Link from "next/link";
-import dbConnect from "@/lib/db";
-import SiteContent from "@/models/SiteContent";
-import { ISiteContent } from "@/models/SiteContent";
+import { CheckCircle } from "lucide-react";
 
-async function getSiteContent() {
+export default function Infrastructure() {
+    const facilities = [
+        "A covered shed area of 12,000 sqft and a land bank of almost 100,000 sqft for future use.",
+        "Induction Furnace Dual Track 500 kgs.",
+        "Boiler for steam generation.",
+        "Pre-forming Machine.",
+        "2 no.s Hydraulic Moulding Machine for pattern making.",
+        "Gluing and assembly station for mould handling with hot-wire cutting machine.",
+        "Coating Blender with tank of capacity 1800 ltrs.",
+        "Drying rooms for moulds.",
+        "Compressor 93 CFM capacity.",
+        "Compaction Table for Sand box preparations.",
+        "Vacuum system.",
+        "17 no.s Sandboxes to accommodate casting of size upto 650 mm cube.",
+        "Sand plant including sand conveyor and bucket elevator.",
+        "Sand shakeout machine for metal stripping.",
+        "Sand cooler with 30 Hp blower for dust separation.",
+        "Fully mechanised transfer track system for sandbox movement.",
+        "Two EOT cranes.",
+        "Cooling Tower (2 no.s).",
+        "Power infrastructure with VCB, transformer, LT panel for connected load of 630 Kva.",
+        "DG for electrical support.",
+        "3 no.s weighing machines.",
+        "RO water treatment plant.",
+        "Shot Blasting machine.",
+        "Ladle pre-heater and ladles (3 nos).",
+        "Fettling unit with angle grinders, bench grinders, etc.",
+        "A fully equipped lab to ensure quality."
+    ];
+    // ... rest of file until the component return structure
+    // We are only targeting the import section here and then I'll use another chunk for the icon use
+    // Wait, I cannot use multiple chunks in replace_file_content.
+    // I'll just do the import in one go if possible or use multi_replace.
+    // Let's use multi_replace for Infrastructure as it is cleaner for separate areas.
+
     await dbConnect();
     const content = await SiteContent.findOne().lean();
     return content as unknown as ISiteContent | null;
@@ -114,7 +145,7 @@ export default async function Infrastructure() {
                             {facilities.map((item, index) => (
                                 <div key={index} className="flex gap-4 p-4 border rounded-lg hover:border-brand-orange hover:shadow-lg transition-all bg-white">
                                     <div className="w-8 h-8 rounded-full bg-brand-light flex items-center justify-center text-brand-orange shrink-0">
-                                        ✓
+                                        <CheckCircle className="w-5 h-5" />
                                     </div>
                                     <p className="text-gray-700 leading-relaxed">{item}</p>
                                 </div>

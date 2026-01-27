@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Facebook, Twitter, Linkedin, Instagram, Youtube, Download, MapPin, Phone, Mail, Home } from "lucide-react";
 import dbConnect from "@/lib/db";
 import SiteContent from "@/models/SiteContent";
 import { ISiteContent } from "@/models/SiteContent";
@@ -32,28 +33,28 @@ export default async function Footer() {
                         </p>
                         <div className="flex gap-4 mb-6">
                             {content?.socialLinks?.facebook && (
-                                <a href={content.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center hover:bg-brand-orange transition-colors">
-                                    <i className="icon-facebook"></i>
+                                <a href={content.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center hover:bg-brand-orange transition-colors group">
+                                    <Facebook className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
                                 </a>
                             )}
                             {content?.socialLinks?.twitter && (
-                                <a href={content.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center hover:bg-brand-orange transition-colors">
-                                    <i className="icon-twitter"></i>
+                                <a href={content.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center hover:bg-brand-orange transition-colors group">
+                                    <Twitter className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
                                 </a>
                             )}
                             {content?.socialLinks?.linkedin && (
-                                <a href={content.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center hover:bg-brand-orange transition-colors">
-                                    <i className="icon-linkedin"></i>
+                                <a href={content.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center hover:bg-brand-orange transition-colors group">
+                                    <Linkedin className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
                                 </a>
                             )}
                             {content?.socialLinks?.instagram && (
-                                <a href={content.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center hover:bg-brand-orange transition-colors">
-                                    <i className="icon-instagram"></i>
+                                <a href={content.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center hover:bg-brand-orange transition-colors group">
+                                    <Instagram className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
                                 </a>
                             )}
                             {content?.socialLinks?.youtube && (
-                                <a href={content.socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center hover:bg-brand-orange transition-colors">
-                                    <i className="icon-youtube"></i>
+                                <a href={content.socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center hover:bg-brand-orange transition-colors group">
+                                    <Youtube className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
                                 </a>
                             )}
                         </div>
@@ -101,19 +102,19 @@ export default async function Footer() {
                         <h4 className="text-xl font-bold mb-6 border-b-2 border-brand-orange inline-block pb-2">Contact Us</h4>
                         <ul className="space-y-4 text-slate-300 text-sm">
                             <li className="flex gap-3">
-                                <i className="icon-home text-brand-orange mt-1"></i>
+                                <Home className="w-5 h-5 text-brand-orange shrink-0" />
                                 <span>225/2 CIT Road, Scheme VII M,<br />Kolkata - 700054, India</span>
                             </li>
                             <li className="flex gap-3">
-                                <i className="icon-map-marker text-brand-orange mt-1"></i>
+                                <MapPin className="w-5 h-5 text-brand-orange shrink-0" />
                                 <span>Works: Howrah - 711410</span>
                             </li>
                             <li className="flex gap-3">
-                                <i className="icon-phone4 text-brand-orange mt-1"></i>
+                                <Phone className="w-5 h-5 text-brand-orange shrink-0" />
                                 <a href="tel:+919830735480" className="hover:text-white transition-colors">+91 98307 35480</a>
                             </li>
                             <li className="flex gap-3">
-                                <i className="icon-mail text-brand-orange mt-1"></i>
+                                <Mail className="w-5 h-5 text-brand-orange shrink-0" />
                                 <a href="mailto:enquiry@atlasfoundries.com" className="hover:text-white transition-colors">enquiry@atlasfoundries.com</a>
                             </li>
                         </ul>

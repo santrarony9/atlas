@@ -3,38 +3,38 @@
 import { useEffect } from "react";
 
 export default function LanguageSwitcher() {
-    useEffect(() => {
-        // Check if script is already added
-        if (document.getElementById("google-translate-script")) return;
+  useEffect(() => {
+    // Check if script is already added
+    if (document.getElementById("google-translate-script")) return;
 
-        const googleTranslateElementInit = () => {
-            // @ts-ignore
-            new window.google.translate.TranslateElement(
-                {
-                    pageLanguage: "en",
-                    includedLanguages: "en,hi,de,fr,es,zh-CN,ar,ru,ja,pt", // 10 major languages
-                    layout: 0, // Simple layout
-                    autoDisplay: false,
-                },
-                "google_translate_element"
-            );
-        };
+    const googleTranslateElementInit = () => {
+      // @ts-ignore
+      new window.google.translate.TranslateElement(
+        {
+          pageLanguage: "en",
+          includedLanguages: "en,hi,de,fr,es,zh-CN,ar,ru,ja,pt", // 10 major languages
+          layout: 0, // Simple layout
+          autoDisplay: false,
+        },
+        "google_translate_element"
+      );
+    };
 
-        // @ts-ignore
-        window.googleTranslateElementInit = googleTranslateElementInit;
+    // @ts-ignore
+    window.googleTranslateElementInit = googleTranslateElementInit;
 
-        const script = document.createElement("script");
-        script.id = "google-translate-script";
-        script.src =
-            "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
-        script.async = true;
-        document.body.appendChild(script);
-    }, []);
+    const script = document.createElement("script");
+    script.id = "google-translate-script";
+    script.src =
+      "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
 
-    return (
-        <div className="flex items-center">
-            <div id="google_translate_element" className="google-translate-custom" />
-            <style jsx global>{`
+  return (
+    <div className="flex items-center">
+      <div id="google_translate_element" className="google-translate-custom" />
+      <style jsx global>{`
         /* Hide Google branding and customize look */
         .goog-te-gadget {
           color: transparent !important;
@@ -56,12 +56,25 @@ export default function LanguageSwitcher() {
             color: black;
         }
         .goog-logo-link {
-          display: none !important;
+            display: none !important;
         }
         .goog-te-gadget span {
-          display: none !important;
+            display: none !important;
+        }
+        
+        /* HIDE THE TOP BANNER/FRAME */
+        .goog-te-banner-frame.skiptranslate {
+            display: none !important;
+        }
+        body {
+            top: 0px !important; 
+        }
+        /* Hide the google disclaimer tooltips */
+        #goog-gt-tt {
+            display: none !important;
+            visibility: hidden !important;
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 }
