@@ -56,6 +56,13 @@ export default function AdminDashboard() {
     const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            // Check file size (limit to 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert("File size too large! Please upload an image smaller than 10MB.");
+                e.target.value = ""; // Reset input
+                return;
+            }
+
             const reader = new FileReader();
             reader.onloadend = () => {
                 setFormData(prev => ({ ...prev, imageUrl: reader.result as string }));
