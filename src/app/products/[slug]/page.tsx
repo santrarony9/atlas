@@ -13,6 +13,7 @@ interface ProductDetail {
     imageUrl: string;
     description: string;
     category?: string;
+    tags?: { _id: string; name: string; slug: string }[];
 }
 
 export default function ProductDetail() {
@@ -103,6 +104,17 @@ export default function ProductDetail() {
                                 <span className="inline-block bg-brand-orange/10 text-brand-orange text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-4">
                                     {product.category}
                                 </span>
+                            )}
+
+                            {/* Tags */}
+                            {product.tags && product.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-6">
+                                    {product.tags.map((tag) => (
+                                        <span key={tag.slug} className="bg-gray-100 text-gray-600 border border-gray-200 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                                            #{tag.name}
+                                        </span>
+                                    ))}
+                                </div>
                             )}
                             <h1 className="text-4xl md:text-5xl font-bold text-brand-blue mb-8 font-montserrat">{product.title}</h1>
 

@@ -213,6 +213,6 @@ export default function CompanyProfile() {
             </div>
 
         </div>
-        </div >
+
     );
 }

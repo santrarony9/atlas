@@ -65,12 +65,12 @@ export default function LoginPage() {
                     </div>
                     <div className="flex justify-end">
                         <button
-                            type="button"
-                            onClick={() => alert("Please contact the System Administrator to reset your password.")}
+                            <Link
+                            href="/login/forgot"
                             className="text-sm text-brand-orange hover:underline"
                         >
                             Forgot Password?
-                        </button>
+                        </Link>
                     </div>
                     <button
                         type="submit"

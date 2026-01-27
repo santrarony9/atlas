@@ -6,6 +6,7 @@ export interface IProduct extends Document {
     imageUrl: string;
     description: string;
     category: string;
+    tags?: string[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -17,6 +18,7 @@ const ProductSchema: Schema = new Schema(
         imageUrl: { type: String, required: false }, // Store Base64 or URL
         description: { type: String, required: true },
         category: { type: String, required: false },
+        tags: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
     },
     {
         timestamps: true,

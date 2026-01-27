@@ -9,14 +9,14 @@ export async function GET(request: Request) {
         const slug = searchParams.get('slug');
 
         if (slug) {
-            const product = await Product.findOne({ slug });
+            const product = await Product.findOne({ slug }).populate('tags');
             if (!product) {
                 return NextResponse.json({ error: 'Product not found' }, { status: 404 });
             }
             return NextResponse.json(product);
         }
 
-        const products = await Product.find({}).sort({ createdAt: -1 });
+        const products = await Product.find({}).sort({ createdAt: -1 }).populate('tags');
         return NextResponse.json(products);
     } catch (error) {
         return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });

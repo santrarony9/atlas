@@ -10,6 +10,7 @@ interface Product {
     imageUrl: string;
     description: string;
     category: string;
+    tags?: Tag[];
 }
 
 interface SiteContentData {
@@ -27,10 +28,17 @@ interface Category {
     slug: string;
 }
 
+interface Tag {
+    _id: string;
+    name: string;
+    slug: string;
+}
+
 export default function AdminDashboard() {
-    const [activeTab, setActiveTab] = useState<"products" | "users" | "content" | "categories">("products");
+    const [activeTab, setActiveTab] = useState<"products" | "users" | "content" | "categories" | "tags">("products");
     const [products, setProducts] = useState<Product[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
+    const [tags, setTags] = useState<Tag[]>([]);
     const [users, setUsers] = useState<{ _id: string, email: string, role: string }[]>([]);
     const [siteContent, setSiteContent] = useState<SiteContentData | null>(null);
 
@@ -40,7 +48,8 @@ export default function AdminDashboard() {
         slug: "",
         imageUrl: "",
         description: "",
-        category: "Industrial"
+        category: "Industrial",
+        tags: [] as string[]
     });
     const [isEditing, setIsEditing] = useState<string | null>(null);
 
@@ -49,6 +58,9 @@ export default function AdminDashboard() {
 
     // Category Form State
     const [categoryForm, setCategoryForm] = useState({ name: "" });
+
+    // Tag Form State
+    const [tagForm, setTagForm] = useState({ name: "" });
 
     const [loading, setLoading] = useState(false);
 
@@ -87,12 +99,45 @@ export default function AdminDashboard() {
         }
     };
 
+    const fetchTags = async () => {
+        const res = await fetch("/api/tags");
+        if (res.ok) {
+            const data = await res.json();
+            setTags(data);
+        }
+    };
+
     useEffect(() => {
-        if (activeTab === "products") { fetchProducts(); fetchCategories(); }
+        if (activeTab === "products") { fetchProducts(); fetchCategories(); fetchTags(); }
         if (activeTab === "users") fetchUsers();
         if (activeTab === "content") fetchContent();
         if (activeTab === "categories") fetchCategories();
+        if (activeTab === "tags") fetchTags();
     }, [activeTab]);
+
+    // --- Tag Handlers ---
+    const handleTagSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        const res = await fetch("/api/tags", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(tagForm)
+        });
+        if (res.ok) {
+            setTagForm({ name: "" });
+            fetchTags();
+        } else {
+            alert("Error creating tag");
+        }
+        setLoading(false);
+    };
+
+    const handleDeleteTag = async (id: string) => {
+        if (!confirm("Delete this tag?")) return;
+        const res = await fetch(`/api/tags/${id}`, { method: "DELETE" });
+        if (res.ok) fetchTags();
+    };
 
     // --- Product Handlers ---
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -134,7 +179,7 @@ export default function AdminDashboard() {
         });
         if (res.ok) {
             alert("Product saved successfully!");
-            setFormData({ title: "", slug: "", imageUrl: "", description: "", category: "Industrial" });
+            setFormData({ title: "", slug: "", imageUrl: "", description: "", category: "Industrial", tags: [] });
             setIsEditing(null);
             fetchProducts();
         } else {
@@ -155,7 +200,8 @@ export default function AdminDashboard() {
             slug: product.slug,
             imageUrl: product.imageUrl,
             description: product.description,
-            category: product.category || "Industrial"
+            category: product.category || "Industrial",
+            tags: product.tags ? product.tags.map(t => t._id) : []
         });
         setIsEditing(product._id);
         window.scrollTo(0, 0);
@@ -306,7 +352,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="flex gap-2 overflow-x-auto pb-4 md:pb-0 w-full md:w-auto scrollbar-hide">
-                    {(['products', 'categories', 'users', 'content'] as const).map(tab => (
+                    {(['products', 'categories', 'tags', 'users', 'content'] as const).map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -354,6 +400,30 @@ export default function AdminDashboard() {
                                     </select>
                                 </div>
                                 <div>
+                                    <label className={labelClass}>Tags</label>
+                                    <div className="grid grid-cols-2 gap-2 bg-slate-900 p-3 rounded-lg border border-slate-600 max-h-40 overflow-y-auto">
+                                        {tags.map(tag => (
+                                            <label key={tag._id} className="flex items-center gap-2 cursor-pointer hover:text-brand-orange">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.tags.includes(tag._id)}
+                                                    onChange={(e) => {
+                                                        const checked = e.target.checked;
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            tags: checked
+                                                                ? [...prev.tags, tag._id]
+                                                                : prev.tags.filter(id => id !== tag._id)
+                                                        }));
+                                                    }}
+                                                    className="accent-brand-orange"
+                                                />
+                                                <span className="text-sm">{tag.name}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div>
                                     <label className={labelClass}>Image</label>
                                     <input type="file" accept="image/*" onChange={handleImageUpload} className="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-700 file:text-white hover:file:bg-slate-600 transition-all" />
                                 </div>
@@ -366,7 +436,7 @@ export default function AdminDashboard() {
                                 <button type="submit" disabled={loading} className={buttonClass}>
                                     {loading ? "Saving..." : isEditing ? "Update Product" : "Create Product"}
                                 </button>
-                                {isEditing && <button type="button" onClick={() => { setIsEditing(null); setFormData({ title: "", slug: "", imageUrl: "", description: "", category: "Industrial" }); }} className="text-slate-400 hover:text-white font-bold px-4">Cancel</button>}
+                                {isEditing && <button type="button" onClick={() => { setIsEditing(null); setFormData({ title: "", slug: "", imageUrl: "", description: "", category: "Industrial", tags: [] }); }} className="text-slate-400 hover:text-white font-bold px-4">Cancel</button>}
                             </div>
                         </form>
                     </div>
@@ -381,9 +451,16 @@ export default function AdminDashboard() {
                                     </div>
                                     <div className="flex-1">
                                         <h3 className="font-bold text-xl text-white">{product.title}</h3>
-                                        <span className="inline-block mt-1 bg-brand-blue/20 text-brand-blue px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">
-                                            {product.category}
-                                        </span>
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                            <span className="inline-block bg-brand-blue/20 text-brand-blue px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">
+                                                {product.category}
+                                            </span>
+                                            {product.tags && product.tags.length > 0 && product.tags.map((tag: any) => (
+                                                <span key={tag._id || tag} className="inline-block bg-brand-orange/20 text-brand-orange px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">
+                                                    {typeof tag === 'object' ? tag.name : 'Tag'}
+                                                </span>
+                                            ))}
+                                        </div>
                                     </div>
                                     <div className="flex gap-3 mt-4 md:mt-0 w-full md:w-auto">
                                         <button onClick={() => handleEdit(product)} className="flex-1 md:flex-none px-5 py-2.5 bg-slate-700 hover:bg-white hover:text-slate-900 rounded-lg text-sm font-bold transition-all text-center">
@@ -398,6 +475,41 @@ export default function AdminDashboard() {
                         </div>
                     </div>
                 </>
+            )}
+
+            {/* --- TAGS TAB --- */}
+            {activeTab === "tags" && (
+                <div className="max-w-4xl mx-auto">
+                    <div className={cardClass}>
+                        <h2 className="text-2xl font-bold mb-6 text-white">Add New Tag</h2>
+                        <form onSubmit={handleTagSubmit} className="flex gap-4">
+                            <div className="flex-1">
+                                <input
+                                    value={tagForm.name}
+                                    onChange={(e) => setTagForm({ name: e.target.value })}
+                                    className={inputClass}
+                                    placeholder="Tag Name (e.g. High Strength)"
+                                    required
+                                />
+                            </div>
+                            <button type="submit" disabled={loading} className={buttonClass}>
+                                {loading ? "Adding..." : "Add"}
+                            </button>
+                        </form>
+                    </div>
+
+                    <div className="grid gap-4">
+                        {tags.map((tag) => (
+                            <div key={tag._id} className="bg-slate-800 p-4 rounded-xl shadow border border-slate-700 flex items-center justify-between">
+                                <h3 className="font-bold text-lg text-white">{tag.name}</h3>
+                                <button onClick={() => handleDeleteTag(tag._id)} className="px-4 py-2 bg-red-600/20 text-red-500 hover:bg-red-600 hover:text-white rounded-lg text-sm font-bold transition-all">
+                                    Delete
+                                </button>
+                            </div>
+                        ))}
+                        {tags.length === 0 && <p className="text-slate-500 text-center py-8">No tags found.</p>}
+                    </div>
+                </div>
             )}
 
             {/* --- CATEGORIES TAB --- */}
