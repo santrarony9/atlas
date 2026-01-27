@@ -57,6 +57,15 @@ export default function LoginPage() {
                             required
                         />
                     </div>
+                    <div className="flex justify-end">
+                        <button
+                            type="button"
+                            onClick={() => alert("Please contact the System Administrator to reset your password.")}
+                            className="text-sm text-brand-orange hover:underline"
+                        >
+                            Forgot Password?
+                        </button>
+                    </div>
                     <button
                         type="submit"
                         className="w-full bg-brand-blue text-white py-3 rounded-lg font-bold hover:bg-brand-orange transition-colors"
