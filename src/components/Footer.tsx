@@ -1,6 +1,17 @@
 import Link from "next/link";
+import dbConnect from "@/lib/db";
+import SiteContent from "@/models/SiteContent";
+import { ISiteContent } from "@/models/SiteContent";
 
-export default function Footer() {
+async function getSiteContent() {
+    await dbConnect();
+    const content = await SiteContent.findOne().lean();
+    return content as unknown as ISiteContent | null;
+}
+
+export default async function Footer() {
+    const content = await getSiteContent();
+
     return (
         <footer className="bg-brand-blue text-white pt-16 pb-8">
             <div className="container mx-auto px-4">
@@ -19,17 +30,47 @@ export default function Footer() {
                         <p className="text-slate-300 text-sm leading-relaxed mb-6">
                             A leading manufacturer specializing in high-quality castings and precision engineering for global markets.
                         </p>
-                        <div className="flex gap-4">
-                            <a href="#" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center hover:bg-brand-orange transition-colors">
-                                <i className="icon-facebook"></i>
-                            </a>
-                            <a href="#" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center hover:bg-brand-orange transition-colors">
-                                <i className="icon-twitter"></i>
-                            </a>
-                            <a href="#" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center hover:bg-brand-orange transition-colors">
-                                <i className="icon-linkedin"></i>
-                            </a>
+                        <div className="flex gap-4 mb-6">
+                            {content?.socialLinks?.facebook && (
+                                <a href={content.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center hover:bg-brand-orange transition-colors">
+                                    <i className="icon-facebook"></i>
+                                </a>
+                            )}
+                            {content?.socialLinks?.twitter && (
+                                <a href={content.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center hover:bg-brand-orange transition-colors">
+                                    <i className="icon-twitter"></i>
+                                </a>
+                            )}
+                            {content?.socialLinks?.linkedin && (
+                                <a href={content.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center hover:bg-brand-orange transition-colors">
+                                    <i className="icon-linkedin"></i>
+                                </a>
+                            )}
+                            {content?.socialLinks?.instagram && (
+                                <a href={content.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center hover:bg-brand-orange transition-colors">
+                                    <i className="icon-instagram"></i>
+                                </a>
+                            )}
+                            {content?.socialLinks?.youtube && (
+                                <a href={content.socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center hover:bg-brand-orange transition-colors">
+                                    <i className="icon-youtube"></i>
+                                </a>
+                            )}
                         </div>
+
+                        {content?.companyProfileUrl && (
+                            <a
+                                href={content.companyProfileUrl}
+                                target="_blank"
+                                download
+                                className="inline-flex items-center gap-2 bg-brand-orange text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-white hover:text-brand-orange transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                Download Profile (PDF)
+                            </a>
+                        )}
                     </div>
 
                     {/* Column 2: Quick Links */}
