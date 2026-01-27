@@ -31,7 +31,9 @@ export async function GET() {
         }
 
         // IMMEDIATE VERIFICATION
-        const isMatch = await bcrypt.compare(password, finalUser.password);
+        // Force string type as we know we just set it, but TS sees optional in model
+        const hashToVerify = finalUser.password || "";
+        const isMatch = await bcrypt.compare(password, hashToVerify);
 
         return NextResponse.json({
             status: 'Success',
