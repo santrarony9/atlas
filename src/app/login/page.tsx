@@ -9,10 +9,14 @@ export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setLoading(true);
+        setError(""); // Clear previous errors
+
         const res = await signIn("credentials", {
             email,
             password,
@@ -21,8 +25,10 @@ export default function LoginPage() {
 
         if (res?.error) {
             setError("Invalid email or password");
+            setLoading(false);
         } else {
             router.push("/admin");
+            // Keep loading true while redirecting to prevent double clicks
         }
     };
 
@@ -68,9 +74,11 @@ export default function LoginPage() {
                     </div>
                     <button
                         type="submit"
-                        className="w-full bg-brand-blue text-white py-3 rounded-lg font-bold hover:bg-brand-orange transition-colors"
+                        disabled={loading}
+                        className={`w-full py-3 rounded-lg font-bold text-white transition-colors ${loading ? "bg-brand-blue/70 cursor-not-allowed" : "bg-brand-blue hover:bg-brand-orange"
+                            }`}
                     >
-                        Sign In
+                        {loading ? "Signing In..." : "Sign In"}
                     </button>
                 </form>
             </div>

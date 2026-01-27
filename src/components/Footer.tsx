@@ -16,9 +16,9 @@ export default async function Footer() {
     return (
         <footer className="bg-brand-blue text-white pt-16 pb-8">
             <div className="container mx-auto px-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mb-12">
                     {/* Column 1: Company Info */}
-                    <div>
+                    <div className="col-span-2 md:col-span-1 lg:col-span-1">
                         <div className="flex items-center gap-2 mb-6">
                             <div className="w-10 h-10 bg-brand-orange rounded flex items-center justify-center text-white font-bold text-2xl">
                                 A
