@@ -14,14 +14,42 @@ interface SiteContent {
 
 export default function CompanyProfile() {
     const [content, setContent] = useState<SiteContent | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
     useEffect(() => {
         fetch("/api/content")
-            .then((res) => res.json())
-            .then((data) => setContent(data));
+            .then(async (res) => {
+                if (!res.ok) throw new Error("Failed to load content: " + res.statusText);
+                return res.json();
+            })
+            .then((data) => {
+                console.log("PDF Content Loaded:", data);
+                setContent(data);
+            })
+            .catch((err) => {
+                console.error("PDF Content Error:", err);
+                setError(err.message);
+            })
+            .finally(() => setLoading(false));
     }, []);
 
-    if (!content) return <div className="min-h-screen flex items-center justify-center">Loading Profile...</div>;
+    if (loading) return (
+        <div className="min-h-screen flex items-center justify-center flex-col gap-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-orange"></div>
+            <p className="text-slate-500">Generating Profile...</p>
+        </div>
+    );
+
+    if (error) return (
+        <div className="min-h-screen flex items-center justify-center flex-col gap-4 text-red-600">
+            <p className="font-bold">Error loading profile data</p>
+            <p className="text-sm">{error}</p>
+            <button onClick={() => window.location.reload()} className="text-blue-600 underline">Try Again</button>
+        </div>
+    );
+
+    if (!content) return null;
 
     const handlePrint = () => {
         window.print();
