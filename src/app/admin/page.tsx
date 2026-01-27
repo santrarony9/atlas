@@ -21,9 +21,16 @@ interface SiteContentData {
     infrastructure: { videoUrl: string; companyImages: string[]; certificates: string[] };
 }
 
+interface Category {
+    _id: string;
+    name: string;
+    slug: string;
+}
+
 export default function AdminDashboard() {
-    const [activeTab, setActiveTab] = useState<"products" | "users" | "content">("products");
+    const [activeTab, setActiveTab] = useState<"products" | "users" | "content" | "categories">("products");
     const [products, setProducts] = useState<Product[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [users, setUsers] = useState<{ _id: string, email: string, role: string }[]>([]);
     const [siteContent, setSiteContent] = useState<SiteContentData | null>(null);
 
@@ -39,6 +46,9 @@ export default function AdminDashboard() {
 
     // User Form State
     const [userForm, setUserForm] = useState({ email: "", password: "" });
+
+    // Category Form State
+    const [categoryForm, setCategoryForm] = useState({ name: "" });
 
     const [loading, setLoading] = useState(false);
 
@@ -69,10 +79,19 @@ export default function AdminDashboard() {
         }
     };
 
+    const fetchCategories = async () => {
+        const res = await fetch("/api/categories");
+        if (res.ok) {
+            const data = await res.json();
+            setCategories(data);
+        }
+    };
+
     useEffect(() => {
-        if (activeTab === "products") fetchProducts();
+        if (activeTab === "products") { fetchProducts(); fetchCategories(); }
         if (activeTab === "users") fetchUsers();
         if (activeTab === "content") fetchContent();
+        if (activeTab === "categories") fetchCategories();
     }, [activeTab]);
 
     // --- Product Handlers ---
@@ -249,6 +268,30 @@ export default function AdminDashboard() {
         setLoading(false);
     };
 
+    // --- Category Handlers ---
+    const handleCategorySubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        const res = await fetch("/api/categories", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(categoryForm)
+        });
+        if (res.ok) {
+            setCategoryForm({ name: "" });
+            fetchCategories();
+        } else {
+            alert("Error creating category");
+        }
+        setLoading(false);
+    };
+
+    const handleDeleteCategory = async (id: string) => {
+        if (!confirm("Delete this category?")) return;
+        const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
+        if (res.ok) fetchCategories();
+    };
+
     // SHARED STYLES (Dark Mode)
     const cardClass = "bg-slate-800 p-8 rounded-xl shadow-lg mb-12 border border-slate-700";
     const inputClass = "w-full p-3 border border-slate-600 rounded-lg bg-slate-900 text-white focus:ring-2 focus:ring-brand-orange focus:border-transparent outline-none transition-all";
@@ -262,8 +305,8 @@ export default function AdminDashboard() {
                     <h1 className="text-4xl font-bold text-white tracking-tight">Admin<span className="text-brand-orange">Console</span></h1>
                 </div>
 
-                <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto">
-                    {(['products', 'users', 'content'] as const).map(tab => (
+                <div className="flex gap-2 overflow-x-auto pb-4 md:pb-0 w-full md:w-auto scrollbar-hide">
+                    {(['products', 'categories', 'users', 'content'] as const).map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -303,11 +346,11 @@ export default function AdminDashboard() {
                                 </div>
                                 <div>
                                     <label className={labelClass}>Category</label>
-                                    <select name="category" value={formData.category} onChange={handleChange} className={inputClass}>
-                                        <option value="Industrial">Industrial</option>
-                                        <option value="Railway">Railway</option>
-                                        <option value="Marine">Marine</option>
-                                        <option value="Automotive">Automotive</option>
+                                    <select name="category" value={formData.category} onChange={handleChange} className={inputClass} required>
+                                        <option value="" disabled>Select Category</option>
+                                        {categories.map(cat => (
+                                            <option key={cat._id} value={cat.name}>{cat.name}</option>
+                                        ))}
                                     </select>
                                 </div>
                                 <div>
@@ -330,9 +373,9 @@ export default function AdminDashboard() {
 
                     <div className="max-w-6xl mx-auto">
                         <h2 className="text-2xl font-bold mb-6 text-white">Existing Products</h2>
-                        <div className="grid gap-4">
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1">
                             {products.map((product) => (
-                                <div key={product._id} className="bg-slate-800 p-4 rounded-xl shadow border border-slate-700 flex items-center gap-6 hover:border-brand-orange transition-colors">
+                                <div key={product._id} className="bg-slate-800 p-4 rounded-xl shadow border border-slate-700 flex flex-col md:flex-row items-start md:items-center gap-6 hover:border-brand-orange transition-colors">
                                     <div className="h-20 w-20 relative bg-slate-900 rounded-lg overflow-hidden shrink-0 border border-slate-700">
                                         {product.imageUrl && <Image src={product.imageUrl} alt={product.title} fill className="object-cover" />}
                                     </div>
@@ -342,11 +385,11 @@ export default function AdminDashboard() {
                                             {product.category}
                                         </span>
                                     </div>
-                                    <div className="flex gap-3">
-                                        <button onClick={() => handleEdit(product)} className="px-5 py-2.5 bg-slate-700 hover:bg-white hover:text-slate-900 rounded-lg text-sm font-bold transition-all">
+                                    <div className="flex gap-3 mt-4 md:mt-0 w-full md:w-auto">
+                                        <button onClick={() => handleEdit(product)} className="flex-1 md:flex-none px-5 py-2.5 bg-slate-700 hover:bg-white hover:text-slate-900 rounded-lg text-sm font-bold transition-all text-center">
                                             Edit
                                         </button>
-                                        <button onClick={() => handleDelete(product._id)} className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-bold shadow-lg shadow-red-900/20 transition-all transform hover:scale-105">
+                                        <button onClick={() => handleDelete(product._id)} className="flex-1 md:flex-none px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-bold shadow-lg shadow-red-900/20 transition-all transform hover:scale-105 text-center">
                                             Delete
                                         </button>
                                     </div>
@@ -356,6 +399,42 @@ export default function AdminDashboard() {
                     </div>
                 </>
             )}
+
+            {/* --- CATEGORIES TAB --- */}
+            {activeTab === "categories" && (
+                <div className="max-w-4xl mx-auto">
+                    <div className={cardClass}>
+                        <h2 className="text-2xl font-bold mb-6 text-white">Add New Category</h2>
+                        <form onSubmit={handleCategorySubmit} className="flex gap-4">
+                            <div className="flex-1">
+                                <input
+                                    value={categoryForm.name}
+                                    onChange={(e) => setCategoryForm({ name: e.target.value })}
+                                    className={inputClass}
+                                    placeholder="Category Name"
+                                    required
+                                />
+                            </div>
+                            <button type="submit" disabled={loading} className={buttonClass}>
+                                {loading ? "Adding..." : "Add"}
+                            </button>
+                        </form>
+                    </div>
+
+                    <div className="grid gap-4">
+                        {categories.map((cat) => (
+                            <div key={cat._id} className="bg-slate-800 p-4 rounded-xl shadow border border-slate-700 flex items-center justify-between">
+                                <h3 className="font-bold text-lg text-white">{cat.name}</h3>
+                                <button onClick={() => handleDeleteCategory(cat._id)} className="px-4 py-2 bg-red-600/20 text-red-500 hover:bg-red-600 hover:text-white rounded-lg text-sm font-bold transition-all">
+                                    Delete
+                                </button>
+                            </div>
+                        ))}
+                        {categories.length === 0 && <p className="text-slate-500 text-center py-8">No categories found.</p>}
+                    </div>
+                </div>
+            )}
+
 
             {/* --- USERS TAB --- */}
             {activeTab === "users" && (
