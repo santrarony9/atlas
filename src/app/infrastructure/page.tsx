@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { CheckCircle } from "lucide-react";
 import dbConnect from "@/lib/db";
 import SiteContent from "@/models/SiteContent";
