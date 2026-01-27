@@ -81,7 +81,11 @@ export default function Footer() {
 
                 <div className="border-t border-white/10 pt-8 mt-8 flex flex-col md:flex-row justify-between items-center text-sm text-slate-400">
                     <p>&copy; {new Date().getFullYear()} Atlas Foundries. All Rights Reserved.</p>
-                    <p className="mt-2 md:mt-0">Designed by Dreamline Production</p>
+                    <p className="mt-2 md:mt-0">
+                        Designed by Dreamline Production
+                        <span className="mx-2">|</span>
+                        <Link href="/login" className="hover:text-white transition-colors">Admin</Link>
+                    </p>
                 </div>
             </div>
         </footer>
