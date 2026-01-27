@@ -64,8 +64,7 @@ export default function LoginPage() {
                         />
                     </div>
                     <div className="flex justify-end">
-                        <button
-                            <Link
+                        <Link
                             href="/login/forgot"
                             className="text-sm text-brand-orange hover:underline"
                         >
