@@ -11,17 +11,24 @@ export async function GET() {
         const password = 'admin123';
 
         // Check if exists
+        // Check if exists
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         const existingUser = await User.findOne({ email });
 
         if (existingUser) {
+            existingUser.password = hashedPassword;
+            existingUser.role = 'admin'; // ensure they are admin
+            await existingUser.save();
+
             return NextResponse.json({
-                message: 'Admin user already exists!',
-                action: 'Go to /login and use admin@atlas.com / admin123'
+                message: 'Admin user exists - PASSWORD RESET SUCCESSFUL!',
+                action: 'Go to /login and use admin@atlas.com / admin123',
+                note: 'Your password has been reset to admin123'
             });
         }
 
         // Create
-        const hashedPassword = await bcrypt.hash(password, 10);
         await User.create({
             email,
             password: hashedPassword,
