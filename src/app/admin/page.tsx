@@ -16,6 +16,9 @@ interface SiteContentData {
     hero: { title: string; subtitle: string; bgImage: string };
     about: { title: string; heading: string; description: string; imageUrl: string };
     features: { title: string; description: string; imageUrl: string; linkUrl: string }[];
+    socialLinks: { facebook: string; twitter: string; linkedin: string; instagram: string; youtube: string };
+    companyProfileUrl: string;
+    infrastructure: { videoUrl: string; companyImages: string[]; certificates: string[] };
 }
 
 export default function AdminDashboard() {
@@ -57,7 +60,12 @@ export default function AdminDashboard() {
     const fetchContent = async () => {
         const res = await fetch("/api/content");
         if (res.ok) {
-            setSiteContent(await res.json());
+            const data = await res.json();
+            // Initialize possibly missing fields for older documents
+            if (!data.socialLinks) data.socialLinks = { facebook: "", twitter: "", linkedin: "", instagram: "", youtube: "" };
+            if (!data.companyProfileUrl) data.companyProfileUrl = "";
+            if (!data.infrastructure) data.infrastructure = { videoUrl: "", companyImages: [], certificates: [] };
+            setSiteContent(data);
         }
     };
 
@@ -160,7 +168,7 @@ export default function AdminDashboard() {
     };
 
     // --- Content Handlers ---
-    const handleContentChange = (section: 'hero' | 'about' | 'features', field: string, value: string, index?: number) => {
+    const handleContentChange = (section: 'hero' | 'about' | 'features' | 'socialLinks' | 'infrastructure', field: string, value: string | string[], index?: number) => {
         setSiteContent(prev => {
             if (!prev) return null;
             const newData = { ...prev };
@@ -169,23 +177,59 @@ export default function AdminDashboard() {
                 const newFeatures = [...newData.features];
                 newFeatures[index] = { ...newFeatures[index], [field]: value };
                 newData.features = newFeatures;
-            } else if (section !== 'features') {
+            } else if (section === 'socialLinks') {
+                newData.socialLinks = { ...newData.socialLinks, [field]: value };
+            } else if (section === 'infrastructure') {
+                // If it's an array field (images), value is already the new array
+                // If it's a string field (videoUrl), update directly
+                newData.infrastructure = { ...newData.infrastructure, [field]: value };
+            } else {
                 (newData as any)[section] = { ...(newData as any)[section], [field]: value };
             }
             return newData;
         });
     };
 
-    const handleContentImageUpload = (e: ChangeEvent<HTMLInputElement>, section: 'hero' | 'about' | 'features', index?: number) => {
+    // Handler for direct root level fields like companyProfileUrl
+    const handleRootContentChange = (field: string, value: string) => {
+        setSiteContent(prev => {
+            if (!prev) return null;
+            return { ...prev, [field]: value };
+        });
+    };
+
+    const handleContentImageUpload = (e: ChangeEvent<HTMLInputElement>, section: 'hero' | 'about' | 'features' | 'companyProfile' | 'infrastructure', index?: number, arrayField?: 'companyImages' | 'certificates') => {
         const file = e.target.files?.[0];
         if (file) {
+            // Basic size check (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert("File too large. Max 10MB.");
+                return;
+            }
+
             const reader = new FileReader();
             reader.onloadend = () => {
                 const result = reader.result as string;
-                handleContentChange(section, section === 'features' ? 'imageUrl' : (section === 'hero' ? 'bgImage' : 'imageUrl'), result, index);
+                if (section === 'companyProfile') {
+                    handleRootContentChange('companyProfileUrl', result);
+                } else if (section === 'infrastructure' && arrayField) {
+                    // Append to array
+                    if (!siteContent) return;
+                    const currentArray = siteContent.infrastructure[arrayField] || [];
+                    handleContentChange('infrastructure', arrayField, [...currentArray, result]);
+                } else {
+                    handleContentChange(section as any, section === 'features' ? 'imageUrl' : (section === 'hero' ? 'bgImage' : 'imageUrl'), result, index);
+                }
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    const removeInfrastructureImage = (arrayField: 'companyImages' | 'certificates', imgIndex: number) => {
+        if (!siteContent) return;
+        const currentArray = siteContent.infrastructure[arrayField] || [];
+        const newArray = currentArray.filter((_, i) => i !== imgIndex);
+        handleContentChange('infrastructure', arrayField, newArray);
     };
 
     const handleContentSubmit = async (e: React.FormEvent) => {
@@ -224,8 +268,8 @@ export default function AdminDashboard() {
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`px-6 py-2 rounded-full font-bold capitalize whitespace-nowrap transition-all ${activeTab === tab
-                                    ? "bg-brand-orange text-white shadow-lg"
-                                    : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white"
+                                ? "bg-brand-orange text-white shadow-lg"
+                                : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white"
                                 }`}
                         >
                             {tab === 'content' ? 'Site Content' : tab}
@@ -376,6 +420,109 @@ export default function AdminDashboard() {
                                     </div>
                                     <input type="file" accept="image/*" onChange={(e) => handleContentImageUpload(e, 'hero')} className="flex-1 text-slate-300" />
                                 </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* SOCIAL LINKS SECTION */}
+                    <section className="bg-slate-800 p-8 rounded-xl shadow-lg border border-slate-700 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+                        <h3 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+                            🌐 Social Media Links
+                        </h3>
+                        <p className="text-sm text-slate-400 mb-6">Enter the full URLs for your social media profiles (e.g., https://facebook.com/your-page).</p>
+                        <div className="grid md:grid-cols-2 gap-6">
+                            {(['facebook', 'twitter', 'linkedin', 'instagram', 'youtube'] as const).map(platform => (
+                                <div key={platform}>
+                                    <label className={labelClass}>{platform}</label>
+                                    <div className="relative">
+                                        <i className={`icon-${platform} absolute left-3 top-3.5 text-slate-500`}></i>
+                                        <input
+                                            value={siteContent.socialLinks[platform]}
+                                            onChange={(e) => handleContentChange('socialLinks', platform, e.target.value)}
+                                            className={`${inputClass} pl-10`}
+                                            placeholder={`https://${platform}.com/...`}
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* COMPANY PROFILE PDF */}
+                    <section className="bg-slate-800 p-8 rounded-xl shadow-lg border border-slate-700 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
+                        <h3 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+                            📄 Company Profile
+                        </h3>
+                        <div className="bg-slate-900 p-4 rounded-lg border border-slate-700 flex flex-col md:flex-row gap-4 items-center">
+                            <div className="flex-1">
+                                <p className="text-sm text-slate-400 mb-2">Upload your Company Profile PDF here. It will be downloadable from the site.</p>
+                                <input type="file" accept="application/pdf" onChange={(e) => handleContentImageUpload(e, 'companyProfile')} className="w-full text-slate-300" />
+                            </div>
+                            {siteContent.companyProfileUrl && (
+                                <a href={siteContent.companyProfileUrl} target="_blank" rel="noopener noreferrer" className="bg-brand-orange text-white px-4 py-2 rounded font-bold hover:bg-white hover:text-brand-orange transition-colors">
+                                    View Current PDF
+                                </a>
+                            )}
+                        </div>
+                    </section>
+
+                    {/* INFRASTRUCTURE SECTION */}
+                    <section className="bg-slate-800 p-8 rounded-xl shadow-lg border border-slate-700 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
+                        <h3 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+                            🏗️ Infrastructure Page
+                        </h3>
+
+                        {/* Video URL */}
+                        <div className="mb-8">
+                            <label className={labelClass}>Manufacturing Process Video URL (YouTube Embed)</label>
+                            <input
+                                value={siteContent.infrastructure.videoUrl}
+                                onChange={(e) => handleContentChange('infrastructure', 'videoUrl', e.target.value)}
+                                className={inputClass}
+                                placeholder="Paste your YouTube video link here"
+                            />
+                        </div>
+
+                        {/* Company Images */}
+                        <div className="mb-8">
+                            <label className={labelClass}>Company Images Gallery</label>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                {siteContent.infrastructure.companyImages.map((img, idx) => (
+                                    <div key={idx} className="relative aspect-square bg-slate-900 rounded-lg overflow-hidden group">
+                                        <Image src={img} alt="Gallery" fill className="object-cover" />
+                                        <button onClick={() => removeInfrastructureImage('companyImages', idx)} className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity transform hover:scale-110">
+                                            ✕
+                                        </button>
+                                    </div>
+                                ))}
+                                <label className="flex flex-col items-center justify-center aspect-square bg-slate-900 rounded-lg border-2 border-dashed border-slate-700 hover:border-brand-orange cursor-pointer transition-colors">
+                                    <span className="text-4xl text-slate-500">+</span>
+                                    <span className="text-xs text-slate-500 mt-2 uppercase font-bold">Add Image</span>
+                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleContentImageUpload(e, 'infrastructure', undefined, 'companyImages')} />
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* Certificates */}
+                        <div>
+                            <label className={labelClass}>Certificates Gallery</label>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {siteContent.infrastructure.certificates.map((img, idx) => (
+                                    <div key={idx} className="relative aspect-[3/4] bg-slate-900 rounded-lg overflow-hidden group">
+                                        <Image src={img} alt="Certificate" fill className="object-cover" />
+                                        <button onClick={() => removeInfrastructureImage('certificates', idx)} className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity transform hover:scale-110">
+                                            ✕
+                                        </button>
+                                    </div>
+                                ))}
+                                <label className="flex flex-col items-center justify-center aspect-[3/4] bg-slate-900 rounded-lg border-2 border-dashed border-slate-700 hover:border-brand-orange cursor-pointer transition-colors">
+                                    <span className="text-4xl text-slate-500">+</span>
+                                    <span className="text-xs text-slate-500 mt-2 uppercase font-bold">Add Cert</span>
+                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleContentImageUpload(e, 'infrastructure', undefined, 'certificates')} />
+                                </label>
                             </div>
                         </div>
                     </section>
