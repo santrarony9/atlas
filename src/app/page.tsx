@@ -74,38 +74,31 @@ export default function Home() {
                     <div className="absolute inset-0 bg-gradient-to-r from-brand-blue/95 to-brand-blue/60"></div>
                 </div>
 
-                <div className="container mx-auto px-4 relative z-10">
+                <div className="container mx-auto px-6 relative z-10">
                     <div className="max-w-3xl text-white">
                         <FadeIn delay={0.1} direction="down">
-                            <span className="text-brand-orange font-bold tracking-widest uppercase mb-4 block">
+                            <span className="text-brand-orange font-bold tracking-widest uppercase mb-4 block text-sm md:text-base">
                                 {content.hero.subtitle}
                             </span>
                         </FadeIn>
                         <FadeIn delay={0.2} direction="up">
-                            <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6 font-montserrat"
+                            <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight mb-6 font-montserrat"
                                 dangerouslySetInnerHTML={{
-                                    // Allow simple HTML like <br/> or spans if user adds them, or just text
-                                    // But for now let's just render text. If we want coloring, we might need to parse.
-                                    // For simplicity and safety, let's just render text, maybe basic newlines.
-                                    // Actually, let's keep the fancy coloring of 'Solutions' hardcoded? 
-                                    // User asked for full control, so they lose the hardcoded color span unless we provide a rich text editor.
-                                    // Let's preserve the existing style on 'Solutions' by checking if it matches the default, 
-                                    // otherwise render plain text.
                                     __html: content.hero.title.replace('Solutions', '<span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-amber-400">Solutions</span>').replace(/\n/g, '<br/>')
                                 }}
                             />
                         </FadeIn>
                         <FadeIn delay={0.3} direction="up">
-                            <p className="text-xl text-slate-200 mb-10 leading-relaxed">
+                            <p className="text-lg md:text-xl text-slate-200 mb-8 md:mb-10 leading-relaxed max-w-xl">
                                 Specializing in the <strong>Lost Foam Process</strong> to deliver precision castings for Railway, Marine, and Industrial applications globally.
                             </p>
                         </FadeIn>
                         <FadeIn delay={0.4} direction="up">
                             <div className="flex flex-col sm:flex-row gap-4">
-                                <Link href="/contact-us" className="px-8 py-4 bg-brand-orange text-white font-bold rounded hover:bg-white hover:text-brand-orange transition-all text-center">
+                                <Link href="/contact-us" className="px-8 py-3.5 bg-brand-orange text-white font-bold rounded hover:bg-white hover:text-brand-orange transition-all text-center text-sm md:text-base">
                                     Get a Quote
                                 </Link>
-                                <Link href="/about-us" className="px-8 py-4 border border-white text-white font-bold rounded hover:bg-white hover:text-brand-blue transition-all text-center">
+                                <Link href="/about-us" className="px-8 py-3.5 border border-white text-white font-bold rounded hover:bg-white hover:text-brand-blue transition-all text-center text-sm md:text-base">
                                     Our Story
                                 </Link>
                             </div>
