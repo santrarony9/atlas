@@ -13,15 +13,25 @@ const handler = NextAuth({
                 password: { label: "Password", type: "password" },
             },
             async authorize(credentials) {
-                await dbConnect();
+                try {
+                    console.log("Attempting to connect to DB...");
+                    await dbConnect();
+                    console.log("DB Connected. Searching for user:", credentials?.email);
 
-                const user = await User.findOne({ email: credentials?.email });
+                    const user = await User.findOne({ email: credentials?.email });
+                    console.log("User found:", user ? "Yes" : "No");
 
-                if (user && bcrypt.compareSync(credentials!.password, user.password || "")) {
-                    return { id: user._id.toString(), email: user.email, role: user.role };
+                    if (user && bcrypt.compareSync(credentials!.password, user.password || "")) {
+                        console.log("Password match. returning user.");
+                        return { id: user._id.toString(), email: user.email, role: user.role };
+                    }
+
+                    console.log("Invalid credentials or user not found.");
+                    return null; // Login failed
+                } catch (error) {
+                    console.error("Login Error:", error);
+                    throw new Error("Internal Login Error");
                 }
-
-                return null; // Login failed
             },
         }),
     ],
