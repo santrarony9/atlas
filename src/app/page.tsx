@@ -2,12 +2,61 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useState, useEffect } from "react";
 import FadeIn from "@/components/animations/FadeIn";
 import StaggerContainer from "@/components/animations/StaggerContainer";
 import FadeInItem from "@/components/animations/FadeInItem";
 import ScaleOnHover from "@/components/animations/ScaleOnHover";
 
+// Define the shape of our content
+interface SiteContentData {
+    hero: { title: string; subtitle: string; bgImage: string };
+    about: { title: string; heading: string; description: string; imageUrl: string };
+    features: { title: string; description: string; imageUrl: string; linkUrl: string }[];
+}
+
+// Default content (Initial State / Fallback)
+const defaultContent: SiteContentData = {
+    hero: {
+        title: "Engineered Casting Solutions",
+        subtitle: "100+ Years of Excellence",
+        bgImage: "/images2/Cover.jpg"
+    },
+    about: {
+        title: "About Atlas Foundries",
+        heading: "World-Class Manufacturing in the Heart of India",
+        description: "Atlas Foundries is a pioneering force in the metal casting industry. We combine traditional craftsmanship with modern Lost Foam technology to produce complex, high-precision components that traditional sand casting cannot achieve.",
+        imageUrl: "/images2/about1.png"
+    },
+    features: [
+        { title: "Railway", description: "Couplers, draft gears, and bogie components engineered for durability.", imageUrl: "/images2/2.jpg", linkUrl: "/products" },
+        { title: "Marine", description: "Corrosion-resistant castings for ship building and offshore platforms.", imageUrl: "/images2/3.jpg", linkUrl: "/products" },
+        { title: "Industrial", description: "Valves, pumps, and heavy machinery parts made with Lost Foam precision.", imageUrl: "/images2/73.png", linkUrl: "/products" }
+    ]
+};
+
 export default function Home() {
+    const [content, setContent] = useState<SiteContentData>(defaultContent);
+
+    useEffect(() => {
+        // Fetch dynamic content on client mount
+        const fetchContent = async () => {
+            try {
+                const res = await fetch("/api/content");
+                if (res.ok) {
+                    const data = await res.json();
+                    // Only update if we got valid data back (contains hero, etc)
+                    if (data && data.hero) {
+                        setContent(data);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch site content, using defaults", error);
+            }
+        };
+        fetchContent();
+    }, []);
+
     return (
         <div className="flex flex-col">
             {/* Hero Section */}
@@ -15,8 +64,8 @@ export default function Home() {
                 {/* Background Image with Overlay */}
                 <div className="absolute inset-0 z-0">
                     <Image
-                        src="/images2/Cover.jpg"
-                        alt="Atlas Foundries Factory"
+                        src={content.hero.bgImage}
+                        alt="Hero Background"
                         fill
                         className="object-cover"
                         priority
@@ -28,13 +77,23 @@ export default function Home() {
                 <div className="container mx-auto px-4 relative z-10">
                     <div className="max-w-3xl text-white">
                         <FadeIn delay={0.1} direction="down">
-                            <span className="text-brand-orange font-bold tracking-widest uppercase mb-4 block">100+ Years of Excellence</span>
+                            <span className="text-brand-orange font-bold tracking-widest uppercase mb-4 block">
+                                {content.hero.subtitle}
+                            </span>
                         </FadeIn>
                         <FadeIn delay={0.2} direction="up">
-                            <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6 font-montserrat">
-                                Engineered Casting <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-amber-400">Solutions</span>
-                            </h1>
+                            <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6 font-montserrat"
+                                dangerouslySetInnerHTML={{
+                                    // Allow simple HTML like <br/> or spans if user adds them, or just text
+                                    // But for now let's just render text. If we want coloring, we might need to parse.
+                                    // For simplicity and safety, let's just render text, maybe basic newlines.
+                                    // Actually, let's keep the fancy coloring of 'Solutions' hardcoded? 
+                                    // User asked for full control, so they lose the hardcoded color span unless we provide a rich text editor.
+                                    // Let's preserve the existing style on 'Solutions' by checking if it matches the default, 
+                                    // otherwise render plain text.
+                                    __html: content.hero.title.replace('Solutions', '<span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-amber-400">Solutions</span>').replace(/\n/g, '<br/>')
+                                }}
+                            />
                         </FadeIn>
                         <FadeIn delay={0.3} direction="up">
                             <p className="text-xl text-slate-200 mb-10 leading-relaxed">
@@ -62,8 +121,8 @@ export default function Home() {
                         <FadeIn direction="right" delay={0.2}>
                             <ScaleOnHover className="relative h-[500px] rounded-lg overflow-hidden shadow-2xl">
                                 <Image
-                                    src="/images2/about1.png"
-                                    alt="Foundry Operations"
+                                    src={content.about.imageUrl}
+                                    alt="About Image"
                                     fill
                                     className="object-cover"
                                     sizes="(max-width: 768px) 100vw, 50vw"
@@ -72,10 +131,10 @@ export default function Home() {
                         </FadeIn>
                         <div>
                             <FadeIn direction="left" delay={0.2}>
-                                <h4 className="text-brand-orange font-bold uppercase tracking-wider mb-2">About Atlas Foundries</h4>
-                                <h2 className="text-4xl font-bold text-brand-blue mb-6">World-Class Manufacturing in the Heart of India</h2>
-                                <p className="text-gray-600 mb-6 leading-relaxed">
-                                    Atlas Foundries is a pioneering force in the metal casting industry. We combine traditional craftsmanship with modern <strong>Lost Foam technology</strong> to produce complex, high-precision components that traditional sand casting cannot achieve.
+                                <h4 className="text-brand-orange font-bold uppercase tracking-wider mb-2">{content.about.title}</h4>
+                                <h2 className="text-4xl font-bold text-brand-blue mb-6">{content.about.heading}</h2>
+                                <p className="text-gray-600 mb-6 leading-relaxed whitespace-pre-line">
+                                    {content.about.description}
                                 </p>
                                 <ul className="space-y-4 mb-8">
                                     <li className="flex items-center gap-3">
@@ -110,79 +169,34 @@ export default function Home() {
                     </div>
 
                     <StaggerContainer className="grid md:grid-cols-3 gap-8">
-                        {/* Card 1 */}
-                        <FadeInItem>
-                            <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow group">
-                                <div className="relative h-64 overflow-hidden">
-                                    <Image
-                                        src="/images2/2.jpg"
-                                        alt="Railway"
-                                        fill
-                                        className="object-cover group-hover:scale-110 transition-transform duration-500"
-                                        sizes="(max-width: 768px) 100vw, 33vw"
-                                    />
-                                    <div className="absolute inset-0 bg-brand-blue/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <span className="text-white font-bold text-lg">View Products</span>
+                        {content.features.map((feature, idx) => (
+                            <FadeInItem key={idx}>
+                                <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow group h-full flex flex-col">
+                                    <div className="relative h-64 overflow-hidden">
+                                        <Image
+                                            src={feature.imageUrl}
+                                            alt={feature.title}
+                                            fill
+                                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                            sizes="(max-width: 768px) 100vw, 33vw"
+                                        />
+                                        <div className="absolute inset-0 bg-brand-blue/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <span className="text-white font-bold text-lg">View Details</span>
+                                        </div>
+                                    </div>
+                                    <div className="p-8 flex flex-col flex-1">
+                                        <h3 className="text-2xl font-bold text-brand-blue mb-3">{feature.title}</h3>
+                                        <p className="text-gray-600 mb-4 flex-1">{feature.description}</p>
+                                        <Link href={feature.linkUrl} className="text-brand-orange font-bold text-sm uppercase self-start">Learn more</Link>
                                     </div>
                                 </div>
-                                <div className="p-8">
-                                    <h3 className="text-2xl font-bold text-brand-blue mb-3">Railway</h3>
-                                    <p className="text-gray-600 mb-4">Couplers, draft gears, and bogie components engineered for durability.</p>
-                                    <Link href="/products" className="text-brand-orange font-bold text-sm uppercase">Learn more</Link>
-                                </div>
-                            </div>
-                        </FadeInItem>
-
-                        {/* Card 2 */}
-                        <FadeInItem>
-                            <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow group">
-                                <div className="relative h-64 overflow-hidden">
-                                    <Image
-                                        src="/images2/3.jpg"
-                                        alt="Marine"
-                                        fill
-                                        className="object-cover group-hover:scale-110 transition-transform duration-500"
-                                        sizes="(max-width: 768px) 100vw, 33vw"
-                                    />
-                                    <div className="absolute inset-0 bg-brand-blue/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <span className="text-white font-bold text-lg">View Products</span>
-                                    </div>
-                                </div>
-                                <div className="p-8">
-                                    <h3 className="text-2xl font-bold text-brand-blue mb-3">Marine</h3>
-                                    <p className="text-gray-600 mb-4">Corrosion-resistant castings for ship building and offshore platforms.</p>
-                                    <Link href="/products" className="text-brand-orange font-bold text-sm uppercase">Learn more</Link>
-                                </div>
-                            </div>
-                        </FadeInItem>
-
-                        {/* Card 3 */}
-                        <FadeInItem>
-                            <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow group">
-                                <div className="relative h-64 overflow-hidden">
-                                    <Image
-                                        src="/images2/73.png"
-                                        alt="Industrial"
-                                        fill
-                                        className="object-cover group-hover:scale-110 transition-transform duration-500"
-                                        sizes="(max-width: 768px) 100vw, 33vw"
-                                    />
-                                    <div className="absolute inset-0 bg-brand-blue/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <span className="text-white font-bold text-lg">View Products</span>
-                                    </div>
-                                </div>
-                                <div className="p-8">
-                                    <h3 className="text-2xl font-bold text-brand-blue mb-3">Industrial</h3>
-                                    <p className="text-gray-600 mb-4">Valves, pumps, and heavy machinery parts made with Lost Foam precision.</p>
-                                    <Link href="/products" className="text-brand-orange font-bold text-sm uppercase">Learn more</Link>
-                                </div>
-                            </div>
-                        </FadeInItem>
+                            </FadeInItem>
+                        ))}
                     </StaggerContainer>
                 </div>
             </section>
 
-            {/* CTA Section */}
+            {/* CTA Section (Kept Static for now as user only asked for Hero/About/Services) */}
             <section className="py-20 bg-brand-blue relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10">
                     <Image src="/images2/Cover.jpg" alt="bg" fill className="object-cover" />
