@@ -21,11 +21,11 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="en" className="scroll-smooth">
             <head>
                 {/* Global metadata and fonts are handled by Next.js */}
             </head>
-            <body className={`${inter.className} ${montserrat.variable} bg-brand-light`}>
+            <body className={`${inter.className} ${montserrat.variable} bg-brand-light antialiased`}>
                 <TopBar />
                 <Header />
                 <main>{children}</main>
