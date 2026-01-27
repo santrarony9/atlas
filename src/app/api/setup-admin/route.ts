@@ -16,29 +16,33 @@ export async function GET() {
 
         const existingUser = await User.findOne({ email });
 
+        let finalUser;
         if (existingUser) {
             existingUser.password = hashedPassword;
             existingUser.role = 'admin'; // ensure they are admin
-            await existingUser.save();
-
-            return NextResponse.json({
-                message: 'Admin user exists - PASSWORD RESET SUCCESSFUL!',
-                action: 'Go to /login and use admin@atlas.com / admin123',
-                note: 'Your password has been reset to admin123'
+            finalUser = await existingUser.save();
+        } else {
+            // Create
+            finalUser = await User.create({
+                email,
+                password: hashedPassword,
+                role: 'admin'
             });
         }
 
-        // Create
-        await User.create({
-            email,
-            password: hashedPassword,
-            role: 'admin'
-        });
+        // IMMEDIATE VERIFICATION
+        const isMatch = await bcrypt.compare(password, finalUser.password);
 
         return NextResponse.json({
-            message: 'SUCCESS! Admin Created.',
-            credentials: { email, password },
-            action: 'Go to /login now!'
+            status: 'Success',
+            message: 'Admin User Updated',
+            debug: {
+                userEmail: finalUser.email,
+                userRole: finalUser.role,
+                passwordReset: true,
+                verificationTest: isMatch ? "PASSED (Password matches hash)" : "FAILED (Hash mismatch!)"
+            },
+            action: 'Go to /login'
         });
 
     } catch (error: any) {
