@@ -17,23 +17,35 @@ interface Product {
 
 export default function Products() {
     const [products, setProducts] = useState<Product[]>([]);
+    const [categories, setCategories] = useState<{ _id: string, name: string }[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState("All");
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchProducts = async () => {
+        const fetchData = async () => {
             try {
-                const res = await fetch("/api/products");
-                if (res.ok) {
-                    const data = await res.json();
-                    setProducts(data);
+                // Fetch Products
+                const prodRes = await fetch("/api/products");
+                if (prodRes.ok) {
+                    setProducts(await prodRes.json());
+                }
+
+                // Fetch Categories
+                const catRes = await fetch("/api/categories");
+                if (catRes.ok) {
+                    setCategories(await catRes.json());
                 }
             } catch (error) {
-                console.error("Failed to fetch products:", error);
+                console.error("Failed to fetch data:", error);
             }
             setLoading(false);
         };
-        fetchProducts();
+        fetchData();
     }, []);
+
+    const filteredProducts = selectedCategory === "All"
+        ? products
+        : products.filter(p => p.category === selectedCategory);
 
     return (
         <div className="bg-white min-h-screen">
@@ -71,6 +83,35 @@ export default function Products() {
                 </div>
             </section>
 
+            {/* Category Filter */}
+            <section className="py-8 bg-white border-b">
+                <div className="container mx-auto px-4">
+                    <div className="flex flex-wrap justify-center gap-4">
+                        <button
+                            onClick={() => setSelectedCategory("All")}
+                            className={`px-6 py-2 rounded-full font-bold text-sm uppercase tracking-wider transition-all ${selectedCategory === "All"
+                                    ? "bg-brand-orange text-white shadow-lg scale-105"
+                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                }`}
+                        >
+                            All
+                        </button>
+                        {categories.map((cat) => (
+                            <button
+                                key={cat._id}
+                                onClick={() => setSelectedCategory(cat.name)}
+                                className={`px-6 py-2 rounded-full font-bold text-sm uppercase tracking-wider transition-all ${selectedCategory === cat.name
+                                        ? "bg-brand-orange text-white shadow-lg scale-105"
+                                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                    }`}
+                            >
+                                {cat.name}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
             {/* Product Grid */}
             <section className="py-12 bg-brand-light">
                 <div className="container mx-auto px-4">
@@ -78,13 +119,13 @@ export default function Products() {
                         <div className="flex justify-center items-center min-h-[400px]">
                             <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-brand-orange"></div>
                         </div>
-                    ) : products.length === 0 ? (
+                    ) : filteredProducts.length === 0 ? (
                         <div className="text-center py-20">
-                            <h3 className="text-xl text-gray-500">No products found. Add some in the Admin Panel!</h3>
+                            <h3 className="text-xl text-gray-500">No products found in this category.</h3>
                         </div>
                     ) : (
                         <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {products.map((product) => (
+                            {filteredProducts.map((product) => (
                                 <FadeInItem key={product._id}>
                                     <ScaleOnHover className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 group h-full flex flex-col">
                                         <Link href={`/products/${product.slug}`} className="flex-1 flex flex-col">

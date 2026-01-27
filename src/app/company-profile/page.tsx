@@ -51,25 +51,39 @@ export default function CompanyProfile() {
 
     if (!content) return null;
 
-    const handlePrint = () => {
-        window.print();
+    const handleDownloadPDF = async () => {
+        const element = document.getElementById('profile-content');
+        if (!element) return;
+
+        // Dynamic import to avoid SSR issues
+        const html2pdf = (await import('html2pdf.js')).default;
+
+        const opt = {
+            margin: 0,
+            filename: `Atlas_Foundries_Profile_${new Date().getFullYear()}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(element).save();
     };
 
     return (
         <div className="bg-white min-h-screen text-slate-900">
-            {/* Print Button (Hidden when printing) */}
-            <div className="fixed top-4 right-4 z-50 print:hidden">
+            {/* Download Button */}
+            <div className="fixed top-4 right-4 z-50">
                 <button
-                    onClick={handlePrint}
+                    onClick={handleDownloadPDF}
                     className="flex items-center gap-2 bg-brand-blue text-white px-6 py-3 rounded-full shadow-lg hover:bg-brand-orange transition-all font-bold"
                 >
                     <Printer className="w-5 h-5" />
-                    Print / Save as PDF
+                    Download PDF File
                 </button>
             </div>
 
             {/* A4 Page Container */}
-            <div className="max-w-[210mm] mx-auto bg-white shadow-2xl print:shadow-none print:w-[210mm]">
+            <div id="profile-content" className="max-w-[210mm] mx-auto bg-white shadow-2xl">
 
                 {/* --- PAGE 1: COVER --- */}
                 <div className="h-[297mm] relative flex flex-col print:break-after-page overflow-hidden">
@@ -198,12 +212,7 @@ export default function CompanyProfile() {
 
             </div>
 
-            <style jsx global>{`
-                @media print {
-                    @page { margin: 0; size: A4; }
-                    body { background: white; -webkit-print-color-adjust: exact; }
-                }
-            `}</style>
         </div>
+        </div >
     );
 }
