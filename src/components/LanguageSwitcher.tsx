@@ -63,16 +63,41 @@ export default function LanguageSwitcher() {
         }
         
         /* HIDE THE TOP BANNER/FRAME */
-        .goog-te-banner-frame.skiptranslate {
+        .goog-te-banner-frame, 
+        .goog-te-banner-frame.skiptranslate,
+        .goog-te-banner, 
+        #goog-gt-tt, 
+        #goog-gt-m, 
+        #goog-gt-s, 
+        .goog-te-balloon-frame {
             display: none !important;
+            visibility: hidden !important;
         }
         body {
             top: 0px !important; 
+        }
+        .skiptranslate {
+            display: none !important;
+        }
+        /* Ensure the body doesn't get pushed down */
+        html, body {
+            height: 100% !important;
+            margin-top: 0px !important;
+            top: 0px !important;
         }
         /* Hide the google disclaimer tooltips */
         #goog-gt-tt {
             display: none !important;
             visibility: hidden !important;
+        }
+        /* Remove the 'Show Original' button tooltip area */
+        .goog-tooltip, .goog-tooltip:hover {
+            display: none !important;
+        }
+        .goog-text-highlight {
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
         }
       `}</style>
     </div>
