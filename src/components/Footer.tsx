@@ -124,7 +124,7 @@ export default async function Footer() {
                 <div className="border-t border-white/10 pt-8 mt-8 flex flex-col md:flex-row justify-between items-center text-sm text-slate-400">
                     <p>&copy; {new Date().getFullYear()} Atlas Foundries. All Rights Reserved.</p>
                     <p className="mt-2 md:mt-0">
-                        Designed by <a href="https://dreamlineproduction.com" target="_blank" rel="noopener noreferrer" className="hover:text-brand-orange transition-colors">Dreamline Production</a>
+                        Designed by <a href="https://dreamlineproduction.com" target="_blank" rel="noopener noreferrer" className="text-white hover:text-brand-orange transition-colors underline underline-offset-4 cursor-pointer relative z-10">Dreamline Production</a>
                         <span className="mx-2">|</span>
                         <Link href="/login" className="hover:text-white transition-colors">Admin</Link>
                     </p>
