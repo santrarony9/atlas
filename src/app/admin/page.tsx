@@ -9,7 +9,7 @@ interface Product {
     slug: string;
     imageUrl: string;
     description: string;
-    category: string;
+    category?: string;
     tags?: Tag[];
 }
 
@@ -48,7 +48,7 @@ export default function AdminDashboard() {
         slug: "",
         imageUrl: "",
         description: "",
-        category: "Industrial",
+        category: "",
         tags: [] as string[]
     });
     const [isEditing, setIsEditing] = useState<string | null>(null);
@@ -179,11 +179,15 @@ export default function AdminDashboard() {
         });
         if (res.ok) {
             alert("Product saved successfully!");
-            setFormData({ title: "", slug: "", imageUrl: "", description: "", category: "Industrial", tags: [] });
+            setFormData({ title: "", slug: "", imageUrl: "", description: "", category: "", tags: [] });
             setIsEditing(null);
             fetchProducts();
         } else {
-            alert("Error saving product");
+            const errorData = await res.json();
+            const message = errorData.details 
+                ? `Error: ${errorData.error}\nDetails: ${errorData.details}`
+                : errorData.error || "Error saving product";
+            alert(message);
         }
         setLoading(false);
     };
@@ -200,7 +204,7 @@ export default function AdminDashboard() {
             slug: product.slug,
             imageUrl: product.imageUrl,
             description: product.description,
-            category: product.category || "Industrial",
+            category: product.category || "",
             tags: product.tags ? product.tags.map(t => t._id) : []
         });
         setIsEditing(product._id);
@@ -228,6 +232,24 @@ export default function AdminDashboard() {
         } else {
             const data = await res.json();
             alert(data.error || "Error creating user");
+        }
+        setLoading(false);
+    };
+
+    const handleDeleteUser = async (id: string) => {
+        if (!confirm("Delete this admin user?")) return;
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
+            if (res.ok) {
+                alert("User deleted successfully!");
+                fetchUsers();
+            } else {
+                const data = await res.json();
+                alert(data.error || "Error deleting user");
+            }
+        } catch (error) {
+            alert("An error occurred while deleting the user");
         }
         setLoading(false);
     };
@@ -266,9 +288,9 @@ export default function AdminDashboard() {
     const handleContentImageUpload = (e: ChangeEvent<HTMLInputElement>, section: 'hero' | 'about' | 'features' | 'companyProfile' | 'infrastructure', index?: number, arrayField?: 'companyImages' | 'certificates') => {
         const file = e.target.files?.[0];
         if (file) {
-            // Basic size check (10MB)
-            if (file.size > 10 * 1024 * 1024) {
-                alert("File too large. Max 10MB.");
+            // Basic size check (4.5MB Vercel limit)
+            if (file.size > 4.5 * 1024 * 1024) {
+                alert("File too large. Max 4.5MB for Vercel.");
                 return;
             }
 
@@ -295,6 +317,18 @@ export default function AdminDashboard() {
         const currentArray = siteContent.infrastructure[arrayField] || [];
         const newArray = currentArray.filter((_, i) => i !== imgIndex);
         handleContentChange('infrastructure', arrayField, newArray);
+    };
+
+    const removeFeature = (index: number) => {
+        if (!siteContent) return;
+        const newFeatures = siteContent.features.filter((_, i) => i !== index);
+        setSiteContent({ ...siteContent, features: newFeatures });
+    };
+
+    const addFeature = () => {
+        if (!siteContent) return;
+        const newFeature = { title: "New Service", description: "Description", imageUrl: "", linkUrl: "/products" };
+        setSiteContent({ ...siteContent, features: [...siteContent.features, newFeature] });
     };
 
     const handleContentSubmit = async (e: React.FormEvent) => {
@@ -392,8 +426,8 @@ export default function AdminDashboard() {
                                 </div>
                                 <div>
                                     <label className={labelClass}>Category</label>
-                                    <select name="category" value={formData.category} onChange={handleChange} className={inputClass} required>
-                                        <option value="" disabled>Select Category</option>
+                                    <select name="category" value={formData.category} onChange={handleChange} className={inputClass}>
+                                        <option value="">No Category</option>
                                         {categories.map(cat => (
                                             <option key={cat._id} value={cat.name}>{cat.name}</option>
                                         ))}
@@ -425,7 +459,28 @@ export default function AdminDashboard() {
                                 </div>
                                 <div>
                                     <label className={labelClass}>Image</label>
-                                    <input type="file" accept="image/*" onChange={handleImageUpload} className="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-700 file:text-white hover:file:bg-slate-600 transition-all" />
+                                    <div className="flex flex-col gap-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className="h-24 w-24 relative bg-slate-900 rounded-lg overflow-hidden border border-slate-700 shrink-0">
+                                                {formData.imageUrl ? (
+                                                    <Image src={formData.imageUrl} alt="Preview" fill className="object-cover" />
+                                                ) : (
+                                                    <div className="flex items-center justify-center h-full text-slate-600 text-xs">No Preview</div>
+                                                )}
+                                            </div>
+                                            <input type="file" accept="image/*" onChange={handleImageUpload} className="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-700 file:text-white hover:file:bg-slate-600 transition-all" />
+                                        </div>
+                                        <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-700/50">
+                                            <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1 flex items-center gap-1">
+                                                <span className="text-brand-orange">⚠️</span> Image Guide
+                                            </p>
+                                            <ul className="text-[10px] text-slate-500 space-y-0.5 list-disc pl-4 font-medium">
+                                                <li>Max File Size: <span className="text-slate-300">4.5 MB</span> (Vercel limit)</li>
+                                                <li>Recommended: <span className="text-slate-300">800×800px</span> or <span className="text-slate-300">1:1</span> Aspect Ratio</li>
+                                                <li>Formats: <span className="text-slate-300">WEBP</span>, <span className="text-slate-300">JPG</span>, or <span className="text-slate-300">PNG</span></li>
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div>
@@ -436,7 +491,7 @@ export default function AdminDashboard() {
                                 <button type="submit" disabled={loading} className={buttonClass}>
                                     {loading ? "Saving..." : isEditing ? "Update Product" : "Create Product"}
                                 </button>
-                                {isEditing && <button type="button" onClick={() => { setIsEditing(null); setFormData({ title: "", slug: "", imageUrl: "", description: "", category: "Industrial", tags: [] }); }} className="text-slate-400 hover:text-white font-bold px-4">Cancel</button>}
+                                {isEditing && <button type="button" onClick={() => { setIsEditing(null); setFormData({ title: "", slug: "", imageUrl: "", description: "", category: "", tags: [] }); }} className="text-slate-400 hover:text-white font-bold px-4">Cancel</button>}
                             </div>
                         </form>
                     </div>
@@ -569,9 +624,25 @@ export default function AdminDashboard() {
                     </div>
                     <div className="grid gap-4">
                         {users.map((user) => (
-                            <div key={user._id} className="bg-slate-800 p-4 rounded-xl shadow border border-slate-700 flex items-center justify-between">
-                                <div><h3 className="font-bold text-lg text-white">{user.email}</h3><p className="text-sm text-slate-500 capitalize">{user.role}</p></div>
-                                <div className="text-sm text-slate-600 font-mono">ID: {user._id}</div>
+                            <div key={user._id} className="bg-slate-800 p-4 rounded-xl shadow border border-slate-700 flex items-center justify-between group">
+                                <div className="flex items-center gap-4">
+                                    <div className="h-10 w-10 rounded-full bg-brand-blue/20 flex items-center justify-center text-brand-blue font-bold uppercase">
+                                        {user.email.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-lg text-white">{user.email}</h3>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs bg-slate-900 text-slate-400 px-2 py-0.5 rounded uppercase tracking-tighter font-bold">{user.role}</span>
+                                            <span className="text-[10px] text-slate-600 font-mono">ID: {user._id}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button 
+                                    onClick={() => handleDeleteUser(user._id)} 
+                                    className="px-4 py-2 bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white rounded-lg text-xs font-bold transition-all opacity-0 group-hover:opacity-100 border border-red-600/30"
+                                >
+                                    Delete User
+                                </button>
                             </div>
                         ))}
                     </div>
@@ -757,7 +828,14 @@ export default function AdminDashboard() {
                         </h3>
                         <div className="grid gap-8">
                             {siteContent.features.map((feature, index) => (
-                                <div key={index} className="border border-slate-700 p-6 rounded-lg bg-slate-800/50 relative">
+                                <div key={index} className="border border-slate-700 p-6 rounded-lg bg-slate-800/50 relative group">
+                                    <button 
+                                        onClick={() => removeFeature(index)}
+                                        className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1.5 shadow-lg opacity-0 group-hover:opacity-100 transition-all transform hover:scale-110 z-10"
+                                        title="Delete Card"
+                                    >
+                                        ✕
+                                    </button>
                                     <span className="absolute top-0 right-0 bg-slate-700 px-3 py-1 rounded-bl-lg font-bold text-xs text-slate-300 border-l border-b border-slate-600">
                                         Card #{index + 1}
                                     </span>
@@ -787,6 +865,12 @@ export default function AdminDashboard() {
                                 </div>
                             ))}
                         </div>
+                        <button 
+                            onClick={addFeature}
+                            className="w-full mt-6 py-4 border-2 border-dashed border-slate-700 rounded-lg text-slate-500 font-bold hover:border-brand-orange hover:text-brand-orange transition-all uppercase tracking-widest text-sm"
+                        >
+                            + Add New Service Card
+                        </button>
                     </section>
                 </div>
             )}

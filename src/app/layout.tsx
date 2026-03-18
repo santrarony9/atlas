@@ -9,6 +9,9 @@ const montserrat = Montserrat({ subsets: ["latin"], weight: ["400", "600", "700"
 export const metadata: Metadata = {
     title: "Atlas Foundries",
     description: "Atlas Foundries Website",
+    icons: {
+        icon: "/favicon.svg",
+    },
 };
 
 import TopBar from "@/components/TopBar";

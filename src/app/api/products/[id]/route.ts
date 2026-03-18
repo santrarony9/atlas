@@ -16,8 +16,12 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         }
 
         return NextResponse.json(product);
-    } catch (error) {
-        return NextResponse.json({ error: 'Failed to update product' }, { status: 500 });
+    } catch (error: any) {
+        console.error('Error updating product:', error);
+        return NextResponse.json({ 
+            error: 'Failed to update product', 
+            details: error.message || 'Unknown error' 
+        }, { status: 500 });
     }
 }
 

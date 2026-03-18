@@ -29,7 +29,11 @@ export async function POST(request: Request) {
         const body = await request.json();
         const product = await Product.create(body);
         return NextResponse.json(product, { status: 201 });
-    } catch (error) {
-        return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
+    } catch (error: any) {
+        console.error('Error creating product:', error);
+        return NextResponse.json({ 
+            error: 'Failed to create product', 
+            details: error.message || 'Unknown error' 
+        }, { status: 500 });
     }
 }

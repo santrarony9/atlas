@@ -5,7 +5,7 @@ export interface IProduct extends Document {
     slug: string;
     imageUrl: string;
     description: string;
-    category: string;
+    category?: string;
     tags?: string[];
     createdAt: Date;
     updatedAt: Date;
