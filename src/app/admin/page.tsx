@@ -233,6 +233,7 @@ export default function AdminDashboard() {
             if (!data.socialLinks) data.socialLinks = { facebook: "", twitter: "", linkedin: "", instagram: "", youtube: "" };
             if (!data.companyProfileUrl) data.companyProfileUrl = "";
             if (!data.infrastructure) data.infrastructure = { videoUrl: "", companyImages: [], certificates: [] };
+            if (!data.hero) data.hero = { title: "", subtitle: "", bgImage: "" };
             if (!data.about) data.about = { title: "", heading: "", description: "", imageUrl: "", bulletPoints: [] };
             if (!data.about.bulletPoints) data.about.bulletPoints = [];
             if (!data.homeCTA) data.homeCTA = { title: "", subtitle: "", buttonText: "", buttonLink: "", bgImage: "" };
@@ -353,15 +354,27 @@ export default function AdminDashboard() {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // Vercel limit is 4.5MB, checking for 4MB
+        if (file.size > 4 * 1024 * 1024) {
+            showToast("File size too large. Max 4MB allowed.", "error");
+            return;
+        }
+
         const formData = new FormData();
         formData.append("file", file);
 
         try {
             const res = await fetch("/api/upload", { method: "POST", body: formData });
             const data = await res.json();
-            setFormData((prev: ProductFormData) => ({ ...prev, imageUrl: data.url }));
+            if (res.ok) {
+                setFormData((prev: ProductFormData) => ({ ...prev, imageUrl: data.url }));
+                showToast("Image uploaded!", "success");
+            } else {
+                showToast(data.error || "Upload failed", "error");
+            }
         } catch (error) {
             console.error("Error uploading image:", error);
+            showToast("Network error during upload", "error");
         }
     };
 
@@ -500,13 +513,26 @@ export default function AdminDashboard() {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // Vercel limit is 4.5MB, checking for 4MB
+        if (file.size > 4 * 1024 * 1024) {
+            showToast("File size too large. Max 4MB allowed.", "error");
+            return;
+        }
+
         const formData = new FormData();
         formData.append("file", file);
 
         try {
             const res = await fetch("/api/upload", { method: "POST", body: formData });
             const data = await res.json();
+            
+            if (!res.ok) {
+                showToast(data.error || "Upload failed", "error");
+                return;
+            }
+
             const result = data.url;
+            showToast("Image uploaded!", "success");
 
             if (section === 'companyProfile') {
                 handleRootContentChange('companyProfileUrl', result);
@@ -533,6 +559,7 @@ export default function AdminDashboard() {
             }
         } catch (error) {
             console.error("Error uploading content image:", error);
+            showToast("Network error during upload", "error");
         }
     };
 
@@ -640,15 +667,27 @@ export default function AdminDashboard() {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // Vercel limit is 4.5MB, checking for 4MB
+        if (file.size > 4 * 1024 * 1024) {
+            showToast("File size too large. Max 4MB allowed.", "error");
+            return;
+        }
+
         const formData = new FormData();
         formData.append("file", file);
 
         try {
             const res = await fetch("/api/upload", { method: "POST", body: formData });
             const data = await res.json();
-            setArticleForm((prev: ArticleFormData) => ({ ...prev, imageUrl: data.url }));
+            if (res.ok) {
+                setArticleForm((prev: ArticleFormData) => ({ ...prev, imageUrl: data.url }));
+                showToast("Image uploaded!", "success");
+            } else {
+                showToast(data.error || "Upload failed", "error");
+            }
         } catch (error) {
             console.error("Error uploading image:", error);
+            showToast("Network error during upload", "error");
         }
     };
 
