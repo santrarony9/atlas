@@ -90,7 +90,7 @@ const SiteContentSchema: Schema = new Schema(
             title: { type: String, default: 'About Atlas Foundries' },
             heading: { type: String, default: 'World-Class Manufacturing in the Heart of India' },
             description: { type: String, default: 'Atlas Foundries is a pioneering force in the metal casting industry...' },
-            imageUrl: { type: String, default: '/images2/about1.png' },
+            imageUrl: { type: String, default: '/images2/Step 2.png' },
             bulletPoints: [{ type: String, default: ['ISO 9001:2015 Certified', 'Specialized in Complex Geometries', 'Exporting to 15+ Countries'] }]
         },
         features: [FeatureCardSchema],

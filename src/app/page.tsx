@@ -30,7 +30,7 @@ const defaultContent: SiteContentData = {
         title: "About Atlas Foundries",
         heading: "World-Class Manufacturing in the Heart of India",
         description: "Atlas Foundries is a pioneering force in the metal casting industry. We combine traditional craftsmanship with modern Lost Foam technology to produce complex, high-precision components that traditional sand casting cannot achieve.",
-        imageUrl: "/images2/about1.png",
+        imageUrl: "/images2/Step 2.png",
         bulletPoints: [
             "ISO 9001:2015 Certified",
             "Specialized in Complex Geometries",
