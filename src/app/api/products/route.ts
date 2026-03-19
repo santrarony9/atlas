@@ -21,7 +21,7 @@ export async function GET(request: Request) {
             return NextResponse.json(product);
         }
 
-        const products = await Product.find({}).sort({ createdAt: -1 }).populate('tags');
+        const products = await Product.find({}).sort({ createdAt: -1 });
         return NextResponse.json(products);
     } catch (error) {
         return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
