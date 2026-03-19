@@ -17,6 +17,12 @@ export async function DELETE(
         await dbConnect();
         const { id } = params;
 
+        // Protection for super admin
+        const userToDelete = await User.findById(id);
+        if (userToDelete?.email === "santrarony9@gmail.com") {
+            return NextResponse.json({ error: "Super admin cannot be deleted" }, { status: 403 });
+        }
+
         const deletedUser = await User.findByIdAndDelete(id);
 
         if (!deletedUser) {

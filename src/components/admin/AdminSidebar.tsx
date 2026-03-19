@@ -8,7 +8,8 @@ import {
     Users, 
     LogOut,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    ShieldCheck
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -33,6 +34,7 @@ const AdminSidebar: React.FC<SidebarProps> = ({
         { id: 'journal', label: 'Journal', icon: BookOpen },
         { id: 'categories', label: 'Categories & Tags', icon: Tags },
         { id: 'content', label: 'Site Content', icon: Settings },
+        { id: 'subscription', label: 'Digital Asset Status', icon: ShieldCheck },
         { id: 'users', label: 'Manage Users', icon: Users },
     ];
 

@@ -30,6 +30,7 @@ export interface ISiteContent extends Document {
         youtube: string;
     };
     companyProfileUrl: string;
+    faviconUrl: string;
     homeCTA: {
         title: string;
         subtitle: string;
@@ -50,6 +51,12 @@ export interface ISiteContent extends Document {
         videoUrl: string;
         companyImages: string[];
         certificates: string[];
+    };
+    subscription: {
+        domainName: string;
+        domainRenewalDate: string;
+        hostName: string;
+        hostRenewalDate: string;
     };
     createdAt: Date;
     updatedAt: Date;
@@ -86,6 +93,7 @@ const SiteContentSchema: Schema = new Schema(
             youtube: { type: String, default: "" },
         },
         companyProfileUrl: { type: String, default: "" },
+        faviconUrl: { type: String, default: "/favicon.svg" },
         homeCTA: {
             title: { type: String, default: 'Ready to upgrade your supply chain?' },
             subtitle: { type: String, default: 'Contact us today to discuss your casting requirements and experience the Atlas advantage.' },
@@ -110,6 +118,12 @@ const SiteContentSchema: Schema = new Schema(
             videoUrl: { type: String, default: "" },
             companyImages: [{ type: String }],
             certificates: [{ type: String }],
+        },
+        subscription: {
+            domainName: { type: String, default: "atlasfoundries.com" },
+            domainRenewalDate: { type: String, default: "2025-03-31" },
+            hostName: { type: String, default: "Dreamline Cloud" },
+            hostRenewalDate: { type: String, default: "2025-03-31" },
         }
     },
     {

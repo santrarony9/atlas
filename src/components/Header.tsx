@@ -3,8 +3,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react"; // Added useEffect
 import { motion, AnimatePresence } from "framer-motion";
+import { useSession } from 'next-auth/react';
 
 export default function Header() {
+    const { data: session } = useSession();
     const pathname = usePathname();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -69,6 +71,16 @@ export default function Header() {
                                     </Link>
                                 </li>
                             ))}
+                            {session && (
+                                <li>
+                                    <Link
+                                        href="/admin"
+                                        className="px-5 py-2.5 bg-brand-blue text-white rounded hover:bg-brand-orange transition-colors"
+                                    >
+                                        Dashboard
+                                    </Link>
+                                </li>
+                            )}
                         </ul>
                     </nav>
 
@@ -122,6 +134,22 @@ export default function Header() {
                                         </Link>
                                     </motion.li>
                                 ))}
+                                {session && (
+                                    <motion.li
+                                        key="/admin"
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.1 + navLinks.length * 0.05 }}
+                                    >
+                                        <Link
+                                            href="/admin"
+                                            onClick={() => setIsMenuOpen(false)}
+                                            className="inline-block px-8 py-3 bg-brand-blue text-white rounded hover:bg-brand-orange transition-colors mt-4"
+                                        >
+                                            Dashboard
+                                        </Link>
+                                    </motion.li>
+                                )}
                             </ul>
                         </nav>
 

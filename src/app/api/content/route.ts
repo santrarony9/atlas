@@ -29,7 +29,13 @@ export async function GET() {
                     { title: "Railway", description: "Couplers, draft gears, and bogie components engineered for durability.", imageUrl: "/images2/2.jpg", linkUrl: "/products" },
                     { title: "Marine", description: "Corrosion-resistant castings for ship building and offshore platforms.", imageUrl: "/images2/3.jpg", linkUrl: "/products" },
                     { title: "Industrial", description: "Valves, pumps, and heavy machinery parts made with Lost Foam precision.", imageUrl: "/images2/73.png", linkUrl: "/products" }
-                ]
+                ],
+                subscription: {
+                    domainName: "atlasfoundries.com",
+                    domainRenewalDate: "2025-03-31",
+                    hostName: "Dreamline Cloud",
+                    hostRenewalDate: "2025-03-31",
+                }
             });
         }
 

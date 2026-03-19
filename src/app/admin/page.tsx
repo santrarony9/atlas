@@ -25,7 +25,9 @@ import {
     Bell,
     Mail,
     Lock,
-    Shield
+    Shield,
+    Globe,
+    ShieldCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -63,10 +65,17 @@ interface SiteContentData {
     features: { title: string; description: string; imageUrl: string; linkUrl: string }[];
     socialLinks: { facebook: string; twitter: string; linkedin: string; instagram: string; youtube: string };
     companyProfileUrl: string;
+    faviconUrl: string;
     homeCTA: { title: string; subtitle: string; buttonText: string; buttonLink: string; bgImage: string };
     aboutPage: { missionTitle: string; missionText: string; visionTitle: string; visionText: string };
     processPage: { steps: { title: string; description: string; imageUrl: string }[] };
     infrastructure: { videoUrl: string; companyImages: string[]; certificates: string[] };
+    subscription: {
+        domainName: string;
+        domainRenewalDate: string;
+        hostName: string;
+        hostRenewalDate: string;
+    };
 }
 
 interface Category {
@@ -101,7 +110,7 @@ interface ProcessStep {
 }
 
 export default function AdminDashboard() {
-    const [activeTab, setActiveTab] = useState<"dashboard" | "products" | "users" | "content" | "categories" | "tags" | "journal">("dashboard");
+    const [activeTab, setActiveTab] = useState<"dashboard" | "products" | "users" | "content" | "categories" | "tags" | "journal" | "subscription">("dashboard");
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
     const [stats, setStats] = useState({
@@ -391,8 +400,12 @@ export default function AdminDashboard() {
         setLoading(false);
     };
 
-    const handleDeleteUser = async (id: string) => {
-        if (!confirm("Delete this admin user?")) return;
+    const handleDeleteUser = async (id: string, email: string) => {
+        if (email === "santrarony9@gmail.com") {
+            showToast("Super admin cannot be deleted!", "error");
+            return;
+        }
+        if (!confirm(`Delete admin user ${email}?`)) return;
         setLoading(true);
         try {
             const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
@@ -431,6 +444,8 @@ export default function AdminDashboard() {
                 } else if (field === 'companyImages' || field === 'certificates') {
                     (newData.infrastructure as any)[field] = value as string[];
                 }
+            } else if (section === 'subscription') {
+                (newData.subscription as any)[field] = value as string;
             } else if (section === 'hero' || section === 'about' || section === 'homeCTA' || section === 'aboutPage') {
                 (newData[section] as any)[field] = value as string;
             }
@@ -452,7 +467,7 @@ export default function AdminDashboard() {
         imageUrl: string;
     }
 
-    const handleContentImageUpload = async (e: ChangeEvent<HTMLInputElement>, section: keyof SiteContentData | 'companyProfile', index?: number, arrayField?: 'companyImages' | 'certificates') => {
+    const handleContentImageUpload = async (e: ChangeEvent<HTMLInputElement>, section: keyof SiteContentData | 'companyProfile' | 'favicon', index?: number, arrayField?: 'companyImages' | 'certificates') => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -466,6 +481,8 @@ export default function AdminDashboard() {
 
             if (section === 'companyProfile') {
                 handleRootContentChange('companyProfileUrl', result);
+            } else if (section === 'favicon') {
+                handleRootContentChange('faviconUrl', result);
             } else if (section === 'infrastructure' && arrayField) {
                 if (!siteContent) return;
                 const currentArray = siteContent.infrastructure[arrayField] || [];
@@ -952,10 +969,11 @@ export default function AdminDashboard() {
                                                     </div>
                                                 </div>
                                                 <button
-                                                    onClick={() => handleDeleteUser(user._id)}
-                                                    className="p-2 text-slate-500 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                                    onClick={() => handleDeleteUser(user._id, user.email)}
+                                                    className="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                                                    title="Delete User"
                                                 >
-                                                    <Trash2 className="w-5 h-5" />
+                                                    <Trash2 className="w-4 h-4" />
                                                 </button>
                                             </div>
                                         ))}
@@ -1228,20 +1246,46 @@ export default function AdminDashboard() {
                                                         ))}
                                                     </div>
                                                 </div>
-                                                <div className="bg-slate-900/50 p-6 rounded-2xl border border-slate-700/50 flex flex-col justify-center gap-4">
-                                                    <div className="p-3 bg-emerald-500/10 rounded-xl w-fit">
-                                                        <FileText className="w-6 h-6 text-emerald-500" />
+                                                <div className="bg-slate-900/50 p-6 rounded-2xl border border-slate-700/50 flex flex-col justify-center gap-6">
+                                                    <div className="space-y-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="p-2 bg-emerald-500/10 rounded-lg">
+                                                                <FileText className="w-5 h-5 text-emerald-500" />
+                                                            </div>
+                                                            <h4 className="font-bold text-white text-sm">Company Profile PDF</h4>
+                                                        </div>
+                                                        <div className="flex gap-2">
+                                                            <input 
+                                                                value={siteContent.companyProfileUrl} 
+                                                                onChange={(e: ChangeEvent<HTMLInputElement>) => handleRootContentChange('companyProfileUrl', e.target.value)} 
+                                                                className={inputClass} 
+                                                                placeholder="Paste PDF Link here..." 
+                                                            />
+                                                            <label className="cursor-pointer bg-brand-blue text-white px-3 flex items-center justify-center rounded-xl font-bold text-[10px] uppercase hover:bg-brand-orange transition-colors min-w-fit shadow-lg shadow-brand-blue/20">
+                                                                <Plus className="w-4 h-4 mr-1" />
+                                                                PDF
+                                                                <input type="file" accept="application/pdf" onChange={(e: ChangeEvent<HTMLInputElement>) => handleContentImageUpload(e, 'companyProfile')} className="hidden" />
+                                                            </label>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <h4 className="font-bold text-white mb-1">Company Profile PDF</h4>
-                                                        <p className="text-xs text-slate-500 mb-4">Direct link to your brochure or profile document.</p>
+
+                                                    <div className="space-y-4 pt-4 border-t border-slate-700/50">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="p-2 bg-brand-blue/10 rounded-lg">
+                                                                <Globe className="w-5 h-5 text-brand-blue" />
+                                                            </div>
+                                                            <h4 className="font-bold text-white text-sm">Website Favicon</h4>
+                                                        </div>
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-12 h-12 rounded-xl border border-slate-700 bg-slate-950 flex items-center justify-center overflow-hidden shrink-0">
+                                                                {siteContent.faviconUrl && <img src={siteContent.faviconUrl} alt="Favicon" className="w-8 h-8 object-contain" />}
+                                                            </div>
+                                                            <label className="flex-1 cursor-pointer bg-slate-800 text-slate-300 px-4 py-3 rounded-xl font-bold text-[10px] uppercase hover:bg-slate-700 transition-colors text-center border border-slate-700">
+                                                                Change Favicon
+                                                                <input type="file" accept="image/x-icon,image/png,image/svg+xml" onChange={(e: ChangeEvent<HTMLInputElement>) => handleContentImageUpload(e, 'favicon')} className="hidden" />
+                                                            </label>
+                                                        </div>
                                                     </div>
-                                                    <input 
-                                                        value={siteContent.companyProfileUrl} 
-                                                        onChange={(e: ChangeEvent<HTMLInputElement>) => handleRootContentChange('companyProfileUrl', e.target.value)} 
-                                                        className={inputClass} 
-                                                        placeholder="Paste PDF Link here..." 
-                                                    />
                                                 </div>
                                             </div>
                                         </section>
@@ -1433,9 +1477,10 @@ export default function AdminDashboard() {
                                                                 const newSteps = siteContent.processPage.steps.filter((_, i) => i !== idx);
                                                                 handleContentChange('processPage', 'steps', newSteps);
                                                             }}
-                                                            className="absolute top-4 right-4 text-slate-600 hover:text-red-500 transition-colors opacity-0 group-hover/step:opacity-100"
+                                                            className="absolute top-4 right-4 p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                                                            title="Delete Step"
                                                         >
-                                                            <Trash2 className="w-5 h-5" />
+                                                            <Trash2 className="w-4 h-4" />
                                                         </button>
                                                     </div>
                                                 ))}
@@ -1562,6 +1607,147 @@ export default function AdminDashboard() {
                                         </section>
                                     </div>
                                 </div>
+                            )}
+
+                            {activeTab === 'subscription' && siteContent && (
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="space-y-8"
+                                >
+                                    <header className="mb-8">
+                                        <h1 className="text-3xl font-black text-white mb-2 tracking-tight flex items-center gap-3">
+                                            <Shield className="w-8 h-8 text-brand-blue" />
+                                            Digital Asset Status & Legal
+                                        </h1>
+                                        <p className="text-slate-500 font-medium">Domain, Hosting, and Compliance monitoring for Atlas Foundries.</p>
+                                    </header>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                        <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl backdrop-blur-xl">
+                                            <div className="flex items-center gap-3 mb-4 text-brand-blue">
+                                                <Globe className="w-5 h-5" />
+                                                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Domain Name</h4>
+                                            </div>
+                                            <input 
+                                                value={siteContent.subscription.domainName} 
+                                                onChange={(e) => handleContentChange('subscription', 'domainName', e.target.value)}
+                                                className="w-full bg-transparent border-none text-xl font-black text-white p-0 focus:ring-0"
+                                            />
+                                        </div>
+                                        <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl backdrop-blur-xl">
+                                            <div className="flex items-center gap-3 mb-4 text-brand-orange">
+                                                <Calendar className="w-5 h-5" />
+                                                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Domain Renewal</h4>
+                                            </div>
+                                            <input 
+                                                value={siteContent.subscription.domainRenewalDate} 
+                                                onChange={(e) => handleContentChange('subscription', 'domainRenewalDate', e.target.value)}
+                                                className="w-full bg-transparent border-none text-xl font-black text-white p-0 focus:ring-0"
+                                            />
+                                        </div>
+                                        <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl backdrop-blur-xl">
+                                            <div className="flex items-center gap-3 mb-4 text-brand-blue">
+                                                <Server className="w-5 h-5" />
+                                                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Host Name</h4>
+                                            </div>
+                                            <input 
+                                                value={siteContent.subscription.hostName} 
+                                                onChange={(e) => handleContentChange('subscription', 'hostName', e.target.value)}
+                                                className="w-full bg-transparent border-none text-xl font-black text-white p-0 focus:ring-0"
+                                            />
+                                        </div>
+                                        <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl backdrop-blur-xl">
+                                            <div className="flex items-center gap-3 mb-4 text-brand-orange">
+                                                <Calendar className="w-5 h-5" />
+                                                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Host Renewal</h4>
+                                            </div>
+                                            <input 
+                                                value={siteContent.subscription.hostRenewalDate} 
+                                                onChange={(e) => handleContentChange('subscription', 'hostRenewalDate', e.target.value)}
+                                                className="w-full bg-transparent border-none text-xl font-black text-white p-0 focus:ring-0"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                        <div className="lg:col-span-2 space-y-6">
+                                            <div className="bg-slate-900/50 border border-slate-800 p-8 rounded-[40px] backdrop-blur-xl relative overflow-hidden group">
+                                                <div className="absolute top-0 right-0 w-32 h-32 bg-brand-blue/10 blur-[80px] group-hover:bg-brand-blue/20 transition-all"></div>
+                                                <div className="flex items-center gap-4 mb-8">
+                                                    <div className="p-4 bg-brand-blue/20 rounded-2xl text-brand-blue">
+                                                        <Activity className="w-8 h-8" />
+                                                    </div>
+                                                    <div>
+                                                        <h2 className="text-2xl font-black text-white tracking-tight">Dreamline Production Summary</h2>
+                                                        <p className="text-sm text-slate-500">Service report and architecture overview.</p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-6 text-slate-400 font-medium leading-relaxed">
+                                                    <p className="text-lg text-slate-200">
+                                                        The Atlas Foundries digital ecosystem has been <span className="text-brand-blue font-black underline decoration-2 underline-offset-4">fully designed and customised by Dreamline Production</span>.
+                                                    </p>
+                                                    <p>
+                                                        Utilizing a high-performance architecture based on **Next.js 14**, **Tailwind CSS**, and **MongoDB**, we have delivered a premium, scalable solution that ensures optimal SEO, security, and real-time content management.
+                                                    </p>
+                                                    
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                                                        <div className="p-4 bg-white/5 border border-white/5 rounded-2xl">
+                                                            <div className="text-white font-black text-xs uppercase mb-1 tracking-widest text-brand-blue">Interface</div>
+                                                            <div className="text-sm font-bold text-slate-300">Premium Glassmorphism & Framer Motion animations.</div>
+                                                        </div>
+                                                        <div className="p-4 bg-white/5 border border-white/5 rounded-2xl">
+                                                            <div className="text-white font-black text-xs uppercase mb-1 tracking-widest text-brand-blue">Security</div>
+                                                            <div className="text-sm font-bold text-slate-300">NextAuth.js for secure admin access & data encryption.</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-6">
+                                            <div className="bg-slate-900/50 border border-slate-800 p-8 rounded-[40px] backdrop-blur-xl border-l-4 border-l-brand-orange">
+                                                <div className="flex items-center gap-3 mb-6 text-brand-orange">
+                                                    <Shield className="w-6 h-6" />
+                                                    <h2 className="text-xl font-bold tracking-tight">Legal Compliance</h2>
+                                                </div>
+                                                
+                                                <div className="space-y-6 text-[13px] text-slate-400 leading-relaxed font-semibold">
+                                                    <p>
+                                                        Platform compliance as per <span className="text-white">Information Technology Act, 2000</span> and <span className="text-white">IT Rules, 2011</span> (India).
+                                                    </p>
+
+                                                    <div className="space-y-4">
+                                                        <div className="bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-brand-orange/30 transition-colors">
+                                                            <h4 className="text-slate-200 font-black text-[10px] uppercase mb-1 tracking-widest">Intermediary Responsibility</h4>
+                                                            <p className="text-[11px]">Compliance with Section 79 of IT Act regarding intermediary liability for hosting services.</p>
+                                                        </div>
+                                                        <div className="bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-brand-orange/30 transition-colors">
+                                                            <h4 className="text-slate-200 font-black text-[10px] uppercase mb-1 tracking-widest">Data Protection</h4>
+                                                            <p className="text-[11px]">Adherence to SPDI Rules for protecting sensitive personal data and information.</p>
+                                                        </div>
+                                                        <div className="bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-brand-orange/30 transition-colors">
+                                                            <h4 className="text-slate-200 font-black text-[10px] uppercase mb-1 tracking-widest">Jurisdiction</h4>
+                                                            <p className="text-[11px]">Subject to exclusive jurisdiction of the Indian courts in accordance with governing laws.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex justify-end mt-8">
+                                        <button 
+                                            onClick={handleContentSubmit}
+                                            disabled={loading}
+                                            className="px-8 py-4 bg-brand-blue text-white rounded-2xl font-black text-sm uppercase shadow-xl shadow-brand-blue/30 hover:bg-brand-orange hover:shadow-brand-orange/30 transition-all flex items-center gap-3 disabled:opacity-50"
+                                        >
+                                            {loading ? <Activity className="w-5 h-5 animate-spin" /> : <Shield className="w-5 h-5" />}
+                                            Save Status Updates
+                                        </button>
+                                    </div>
+                                </motion.div>
                             )}
 
                         </motion.div>
