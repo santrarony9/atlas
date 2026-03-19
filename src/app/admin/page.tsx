@@ -74,6 +74,10 @@ interface SiteContentData {
     aboutPage: { missionTitle: string; missionText: string; visionTitle: string; visionText: string };
     processPage: { steps: { title: string; description: string; imageUrl: string }[] };
     infrastructure: { videoUrl: string; companyImages: string[]; certificates: string[] };
+    subscription: {
+        domainName: string;
+        domainRenewalDate: string;
+        hostName: string;
         hostRenewalDate: string;
         supportPhoneNumber: string;
     };

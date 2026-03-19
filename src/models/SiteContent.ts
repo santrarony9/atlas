@@ -57,6 +57,7 @@ export interface ISiteContent extends Document {
         domainRenewalDate: string;
         hostName: string;
         hostRenewalDate: string;
+        supportPhoneNumber: string;
     };
     footer: {
         officeAddress: string;
@@ -131,6 +132,7 @@ const SiteContentSchema: Schema = new Schema(
             domainRenewalDate: { type: String, default: "28th May 2026" },
             hostName: { type: String, default: "Dreamline Cloud" },
             hostRenewalDate: { type: String, default: "28th May 2026" },
+            supportPhoneNumber: { type: String, default: "82400 54002" },
         },
         footer: {
             officeAddress: { type: String, default: "225/2 CIT Road, Scheme VII M, Kolkata - 700054, India" },
