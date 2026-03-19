@@ -34,6 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
 import TopBar from "@/components/TopBar";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { Providers } from "@/components/Providers";
 
 export default function RootLayout({
     children,
@@ -46,10 +47,12 @@ export default function RootLayout({
                 {/* Global metadata and fonts are handled by Next.js */}
             </head>
             <body className={`${inter.className} ${montserrat.variable} bg-brand-light antialiased`}>
-                <TopBar />
-                <Header />
-                <main>{children}</main>
-                <Footer />
+                <Providers>
+                    <TopBar />
+                    <Header />
+                    <main>{children}</main>
+                    <Footer />
+                </Providers>
             </body>
         </html>
     );
