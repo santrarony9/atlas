@@ -18,6 +18,7 @@ interface ProcessStep {
 interface ProcessContent {
     processPage: {
         steps: ProcessStep[];
+        mainImage?: string;
     };
 }
 
@@ -27,7 +28,7 @@ export default function LostFoam() {
 
     useEffect(() => {
         const fetchContent = async () => {
-            const res = await fetch("/api/content");
+            const res = await fetch("/api/content", { cache: 'no-store' });
             if (res.ok) {
                 const data = await res.json();
                 setContent(data);
@@ -79,7 +80,7 @@ export default function LostFoam() {
             <div className="relative h-[400px] flex items-center justify-center">
                 <div className="absolute inset-0">
                     <Image
-                        src="/images2/4.jpg"
+                        src={content?.processPage?.mainImage || "/images2/4.jpg"}
                         alt="Lost Foam Process"
                         fill
                         className="object-cover"

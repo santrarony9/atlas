@@ -31,7 +31,8 @@ import {
     Calendar,
     Server,
     CheckCircle2,
-    Phone
+    Phone,
+    ImagePlus
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -226,9 +227,9 @@ export default function AdminDashboard() {
     };
 
     const fetchContent = async () => {
-        const res = await fetch("/api/content");
-        if (res.ok) {
-            const data = await res.json();
+        const response = await fetch('/api/content', { cache: 'no-store' });
+        if (response.ok) {
+            const data = await response.json();
             // Initialize possibly missing fields for older documents
             if (!data.socialLinks) data.socialLinks = { facebook: "", twitter: "", linkedin: "", instagram: "", youtube: "" };
             if (!data.companyProfileUrl) data.companyProfileUrl = "";
@@ -470,32 +471,39 @@ export default function AdminDashboard() {
     };
 
     // --- Content Handlers ---
-    const handleContentChange = (section: keyof SiteContentData, field: string, value: string | string[] | Feature[] | ProcessStep[], index?: number) => {
+    const handleContentChange = (section: keyof SiteContentData, field: string, value: any, index?: number) => {
         setSiteContent((prev: SiteContentData | null) => {
             if (!prev) return null;
+            
+            // Deep-ish copy of the section being modified to ensure React triggers re-renders
             const newData = { ...prev };
-
+            
             if (section === 'features' && typeof index === 'number') {
-                const newFeatures = [...newData.features];
+                const newFeatures = [...prev.features];
                 newFeatures[index] = { ...newFeatures[index], [field as keyof Feature]: value as string };
                 newData.features = newFeatures;
-            } else if (section === 'processPage' && field === 'steps' && Array.isArray(value)) {
-                newData.processPage = { ...newData.processPage, steps: value as ProcessStep[] };
-            } else if (section === 'about' && field === 'bulletPoints' && Array.isArray(value)) {
-                newData.about = { ...newData.about, bulletPoints: value as string[] };
+            } else if (section === 'processPage') {
+                newData.processPage = { ...prev.processPage, [field]: value };
+            } else if (section === 'about') {
+                newData.about = { ...prev.about, [field]: value };
+            } else if (section === 'aboutPage') {
+                newData.aboutPage = { ...prev.aboutPage, [field]: value };
+            } else if (section === 'hero') {
+                newData.hero = { ...prev.hero, [field]: value };
+            } else if (section === 'homeCTA') {
+                newData.homeCTA = { ...prev.homeCTA, [field]: value };
             } else if (section === 'socialLinks') {
-                (newData.socialLinks as any)[field] = value as string;
+                newData.socialLinks = { ...prev.socialLinks, [field]: value };
             } else if (section === 'infrastructure') {
-                if (field === 'videoUrl') {
-                    newData.infrastructure.videoUrl = value as string;
-                } else if (field === 'companyImages' || field === 'certificates') {
-                    (newData.infrastructure as any)[field] = value as string[];
-                }
+                newData.infrastructure = { ...prev.infrastructure, [field]: value };
             } else if (section === 'footer') {
-                (newData.footer as any)[field] = value as string;
-            } else if (section === 'hero' || section === 'about' || section === 'homeCTA' || section === 'aboutPage') {
-                (newData[section] as any)[field] = value as string;
+                newData.footer = { ...prev.footer, [field]: value };
+            } else if (section === 'subscription') {
+                newData.subscription = { ...prev.subscription, [field]: value };
+            } else {
+                (newData[section] as any) = value;
             }
+            
             return newData;
         });
     };
@@ -553,7 +561,8 @@ export default function AdminDashboard() {
                     about: 'imageUrl',
                     features: 'imageUrl',
                     homeCTA: 'bgImage',
-                    aboutPage: 'imageUrl' 
+                    aboutPage: 'headerImage',
+                    processPage: 'mainImage'
                 };
                 handleContentChange(section as keyof SiteContentData, fieldMap[section] || 'imageUrl', result, index);
             }
@@ -1436,6 +1445,29 @@ export default function AdminDashboard() {
                                                 <Activity className="w-6 h-6 text-sky-500" />
                                                 About Us Page Strategy
                                             </h3>
+                                            <div className="mb-8 space-y-4 px-1">
+                                                <div className="flex items-center justify-between border-b border-slate-700/50 pb-2">
+                                                    <h4 className="font-bold text-slate-400 uppercase text-[10px] tracking-widest flex items-center gap-2">
+                                                        <ImagePlus className="w-3.5 h-3.5 text-sky-500" />
+                                                        About Page Header Image
+                                                    </h4>
+                                                </div>
+                                                <div className="relative aspect-[21/9] rounded-2xl overflow-hidden border border-slate-700/50 bg-slate-900/50 group/header">
+                                                    {siteContent.aboutPage.headerImage ? (
+                                                        <Image src={siteContent.aboutPage.headerImage} alt="About Header" fill className="object-cover" />
+                                                    ) : (
+                                                        <div className="absolute inset-0 flex items-center justify-center text-slate-600 text-xs font-bold uppercase">No header image set</div>
+                                                    )}
+                                                    <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover/header:opacity-100 flex items-center justify-center transition-all duration-300">
+                                                        <label className="cursor-pointer bg-white text-slate-900 px-6 py-3 rounded-full font-black text-xs uppercase shadow-2xl hover:scale-105 transition-transform flex items-center gap-2">
+                                                            <Plus className="w-4 h-4" />
+                                                            {siteContent.aboutPage.headerImage ? 'Change Image' : 'Upload Header'}
+                                                            <input type="file" accept="image/*" onChange={(e) => handleContentImageUpload(e, 'aboutPage')} className="hidden" />
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <p className="text-[10px] text-slate-500 italic">Recommended aspect ratio: 21:9 (e.g., 1920x820px)</p>
+                                            </div>
                                             <div className="grid lg:grid-cols-2 gap-8">
                                                 <div className="bg-slate-900/50 p-6 rounded-2xl border border-slate-700/50 space-y-4">
                                                     <div className="flex items-center gap-3 mb-2">
@@ -1484,6 +1516,29 @@ export default function AdminDashboard() {
                                                     <Activity className="w-6 h-6 text-yellow-500" />
                                                     Production Workflow Steps
                                                 </h3>
+                                                <div className="mb-10 space-y-6 px-1">
+                                                    <div className="flex items-center justify-between border-b border-slate-700/50 pb-2">
+                                                        <h4 className="font-bold text-slate-400 uppercase text-[10px] tracking-widest flex items-center gap-2">
+                                                            <ImagePlus className="w-3.5 h-3.5 text-yellow-500" />
+                                                            Process Page Main Image
+                                                        </h4>
+                                                    </div>
+                                                    <div className="relative aspect-video rounded-3xl overflow-hidden border border-slate-700/50 bg-slate-900/50 group/main">
+                                                        {siteContent.processPage.mainImage ? (
+                                                            <Image src={siteContent.processPage.mainImage} alt="Process Main" fill className="object-cover" />
+                                                        ) : (
+                                                            <div className="absolute inset-0 flex items-center justify-center text-slate-600 text-xs font-bold uppercase">No main image set</div>
+                                                        )}
+                                                        <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover/main:opacity-100 flex items-center justify-center transition-all duration-300">
+                                                            <label className="cursor-pointer bg-white text-slate-900 px-6 py-3 rounded-full font-black text-xs uppercase shadow-2xl hover:scale-105 transition-transform flex items-center gap-2">
+                                                                <Plus className="w-4 h-4" />
+                                                                {siteContent.processPage.mainImage ? 'Change Image' : 'Upload Image'}
+                                                                <input type="file" accept="image/*" onChange={(e) => handleContentImageUpload(e, 'processPage')} className="hidden" />
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-[10px] text-slate-500 italic">This image appears at the top of the manufacturing process page.</p>
+                                                </div>
                                                 <button 
                                                     onClick={() => {
                                                         const newSteps = [...siteContent.processPage.steps, { title: "New Step", description: "Step detail", imageUrl: "" }];

@@ -65,7 +65,7 @@ export default function Home() {
         // Fetch dynamic content on client mount
         const fetchContent = async () => {
             try {
-                const res = await fetch("/api/content");
+                const res = await fetch("/api/content", { cache: 'no-store' });
                 if (res.ok) {
                     const data = await res.json();
                     // Only update if we got valid data back (contains hero, etc)

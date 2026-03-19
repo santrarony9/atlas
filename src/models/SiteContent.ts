@@ -43,9 +43,11 @@ export interface ISiteContent extends Document {
         missionText: string;
         visionTitle: string;
         visionText: string;
+        headerImage: string;
     };
     processPage: {
         steps: { title: string; description: string; imageUrl: string }[];
+        mainImage: string;
     };
     infrastructure: {
         videoUrl: string;
@@ -113,14 +115,16 @@ const SiteContentSchema: Schema = new Schema(
             missionTitle: { type: String, default: 'Our Mission' },
             missionText: { type: String, default: '"To bring a change in the engineered castings market through better technology, improved quality, lower costs, and reduced impact on the environment by adoption of green technologies."' },
             visionTitle: { type: String, default: 'Our Vision' },
-            visionText: { type: String, default: '"To be a pioneer in the casting industry by sustainably and profitably establishing latest production methodologies through continuous research, development, and adoption of best practices."' }
+            visionText: { type: String, default: '"To be a pioneer in the casting industry by sustainably and profitably establishing latest production methodologies through continuous research, development, and adoption of best practices."' },
+            headerImage: { type: String, default: '/images2/about_1.jpg' }
         },
         processPage: {
             steps: [{
                 title: { type: String },
                 description: { type: String },
                 imageUrl: { type: String }
-            }]
+            }],
+            mainImage: { type: String, default: '/images2/4.jpg' }
         },
         infrastructure: {
             videoUrl: { type: String, default: "" },

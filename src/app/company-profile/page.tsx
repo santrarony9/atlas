@@ -18,7 +18,7 @@ export default function CompanyProfile() {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        fetch("/api/content")
+        fetch("/api/content", { cache: 'no-store' })
             .then(async (res) => {
                 if (!res.ok) throw new Error("Failed to load content: " + res.statusText);
                 return res.json();

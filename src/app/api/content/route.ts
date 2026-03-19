@@ -30,11 +30,16 @@ export async function GET() {
                     { title: "Marine", description: "Corrosion-resistant castings for ship building and offshore platforms.", imageUrl: "/images2/3.jpg", linkUrl: "/products" },
                     { title: "Industrial", description: "Valves, pumps, and heavy machinery parts made with Lost Foam precision.", imageUrl: "/images2/73.png", linkUrl: "/lost-foam-manufacturing" }
                 ],
-                subscription: {
-                    domainName: "atlasfoundries.com",
-                    domainRenewalDate: "28th May 2026",
-                    hostName: "Dreamline Cloud",
-                    hostRenewalDate: "28th May 2026",
+                aboutPage: {
+                    missionTitle: "Our Mission",
+                    missionText: "To bring a change in the engineered castings market through better technology...",
+                    visionTitle: "Our Vision",
+                    visionText: "To be a pioneer in the casting industry...",
+                    headerImage: "/images2/about_1.jpg"
+                },
+                processPage: {
+                    steps: [],
+                    mainImage: "/images2/4.jpg"
                 },
                 footer: {
                     officeAddress: "225/2 CIT Road, Scheme VII M, Kolkata - 700054, India",
