@@ -1656,9 +1656,9 @@ export default function AdminDashboard() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                         {[
                                             { label: 'Primary Domain', value: siteContent.subscription.domainName, icon: Globe, accent: 'brand-blue' },
-                                            { label: 'Domain Renewal', value: siteContent.subscription.domainRenewalDate, icon: Calendar, accent: 'brand-orange' },
+                                            { label: 'Domain Renewal', value: "28th May 2026", icon: Calendar, accent: 'brand-orange' },
                                             { label: 'Cloud Hosting', value: siteContent.subscription.hostName, icon: Server, accent: 'brand-blue' },
-                                            { label: 'Host Renewal', value: siteContent.subscription.hostRenewalDate, icon: Calendar, accent: 'brand-orange' }
+                                            { label: 'Host Renewal', value: "28th May 2026", icon: Calendar, accent: 'brand-orange' }
                                         ].map((asset, i) => (
                                             <motion.div 
                                                 key={asset.label}
