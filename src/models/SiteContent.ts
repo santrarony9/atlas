@@ -121,9 +121,9 @@ const SiteContentSchema: Schema = new Schema(
         },
         subscription: {
             domainName: { type: String, default: "atlasfoundries.com" },
-            domainRenewalDate: { type: String, default: "2025-03-31" },
+            domainRenewalDate: { type: String, default: "28th May 2026" },
             hostName: { type: String, default: "Dreamline Cloud" },
-            hostRenewalDate: { type: String, default: "2025-03-31" },
+            hostRenewalDate: { type: String, default: "28th May 2026" },
         }
     },
     {

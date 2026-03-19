@@ -29,7 +29,9 @@ import {
     Globe,
     ShieldCheck,
     Calendar,
-    Server
+    Server,
+    CheckCircle2,
+    Phone
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -77,6 +79,7 @@ interface SiteContentData {
         domainRenewalDate: string;
         hostName: string;
         hostRenewalDate: string;
+        supportPhoneNumber: string;
     };
 }
 
@@ -228,7 +231,7 @@ export default function AdminDashboard() {
             if (!data.homeCTA) data.homeCTA = { title: "", subtitle: "", buttonText: "", buttonLink: "", bgImage: "" };
             if (!data.aboutPage) data.aboutPage = { missionTitle: "", missionText: "", visionTitle: "", visionText: "" };
             if (!data.processPage) data.processPage = { steps: [] };
-            if (!data.subscription) data.subscription = { domainName: "atlasfoundries.com", domainRenewalDate: "2025-03-31", hostName: "Dreamline Cloud", hostRenewalDate: "2025-03-31" };
+            if (!data.subscription) data.subscription = { domainName: "atlasfoundries.com", domainRenewalDate: "28th May 2026", hostName: "Dreamline Cloud", hostRenewalDate: "28th May 2026" };
             if (!data.faviconUrl) data.faviconUrl = "/favicon.svg";
             setSiteContent(data);
         }
@@ -1614,72 +1617,69 @@ export default function AdminDashboard() {
                                     animate={{ opacity: 1, y: 0 }}
                                     className="space-y-8"
                                 >
-                                    <header className="mb-8">
-                                        <h1 className="text-3xl font-black text-white mb-2 tracking-tight flex items-center gap-3">
-                                            <Shield className="w-8 h-8 text-brand-blue" />
-                                            Digital Asset Status & Legal
-                                        </h1>
-                                        <p className="text-slate-500 font-medium">Domain, Hosting, and Compliance monitoring for Atlas Foundries.</p>
+                                    <header className="mb-12 relative">
+                                        <div className="absolute -top-20 -left-20 w-64 h-64 bg-brand-blue/10 blur-[100px] rounded-full"></div>
+                                        <div className="relative">
+                                            <h1 className="text-4xl font-black text-white mb-2 tracking-tighter flex items-center gap-4">
+                                                <div className="p-3 bg-brand-blue/20 rounded-2xl border border-brand-blue/30 shadow-[0_0_20px_rgba(0,113,255,0.2)]">
+                                                    <Shield className="w-8 h-8 text-brand-blue" />
+                                                </div>
+                                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Digital Asset Status & Legal</span>
+                                            </h1>
+                                            <p className="text-slate-500 font-bold ml-[72px]">Infrastructure oversight and compliance monitoring for Atlas Foundries.</p>
+                                        </div>
                                     </header>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                        <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl backdrop-blur-xl">
-                                            <div className="flex items-center gap-3 mb-4 text-brand-blue">
-                                                <Globe className="w-5 h-5" />
-                                                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Domain Name</h4>
-                                            </div>
-                                            <input 
-                                                value={siteContent.subscription.domainName} 
-                                                onChange={(e) => handleContentChange('subscription', 'domainName', e.target.value)}
-                                                className="w-full bg-transparent border-none text-xl font-black text-white p-0 focus:ring-0"
-                                            />
-                                        </div>
-                                        <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl backdrop-blur-xl">
-                                            <div className="flex items-center gap-3 mb-4 text-brand-orange">
-                                                <Calendar className="w-5 h-5" />
-                                                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Domain Renewal</h4>
-                                            </div>
-                                            <input 
-                                                value={siteContent.subscription.domainRenewalDate} 
-                                                onChange={(e) => handleContentChange('subscription', 'domainRenewalDate', e.target.value)}
-                                                className="w-full bg-transparent border-none text-xl font-black text-white p-0 focus:ring-0"
-                                            />
-                                        </div>
-                                        <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl backdrop-blur-xl">
-                                            <div className="flex items-center gap-3 mb-4 text-brand-blue">
-                                                <Server className="w-5 h-5" />
-                                                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Host Name</h4>
-                                            </div>
-                                            <input 
-                                                value={siteContent.subscription.hostName} 
-                                                onChange={(e) => handleContentChange('subscription', 'hostName', e.target.value)}
-                                                className="w-full bg-transparent border-none text-xl font-black text-white p-0 focus:ring-0"
-                                            />
-                                        </div>
-                                        <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl backdrop-blur-xl">
-                                            <div className="flex items-center gap-3 mb-4 text-brand-orange">
-                                                <Calendar className="w-5 h-5" />
-                                                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Host Renewal</h4>
-                                            </div>
-                                            <input 
-                                                value={siteContent.subscription.hostRenewalDate} 
-                                                onChange={(e) => handleContentChange('subscription', 'hostRenewalDate', e.target.value)}
-                                                className="w-full bg-transparent border-none text-xl font-black text-white p-0 focus:ring-0"
-                                            />
-                                        </div>
+                                        {[
+                                            { label: 'Domain Name', value: siteContent.subscription.domainName, icon: Globe, color: 'text-brand-blue', glow: 'shadow-[0_0_30px_rgba(0,113,255,0.1)]' },
+                                            { label: 'Domain Renewal', value: siteContent.subscription.domainRenewalDate, icon: Calendar, color: 'text-brand-orange', glow: 'shadow-[0_0_30px_rgba(255,145,0,0.15)]' },
+                                            { label: 'Host Name', value: siteContent.subscription.hostName, icon: Server, color: 'text-brand-blue', glow: 'shadow-[0_0_30px_rgba(0,113,255,0.1)]' },
+                                            { label: 'Host Renewal', value: siteContent.subscription.hostRenewalDate, icon: Calendar, color: 'text-brand-orange', glow: 'shadow-[0_0_30px_rgba(255,145,0,0.15)]' }
+                                        ].map((asset, i) => (
+                                            <motion.div 
+                                                key={asset.label}
+                                                initial={{ opacity: 0, y: 30 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ delay: i * 0.1 }}
+                                                className={`bg-white/[0.03] border border-white/10 p-7 rounded-[32px] backdrop-blur-3xl relative overflow-hidden group hover:border-white/20 transition-all cursor-default ${asset.glow}`}
+                                            >
+                                                <div className="flex items-center justify-between mb-5">
+                                                    <div className={`p-3 rounded-xl bg-slate-950/50 border border-white/5 ${asset.color}`}>
+                                                        <asset.icon className="w-5 h-5" />
+                                                    </div>
+                                                    <div className="px-3 py-1 bg-brand-blue/10 border border-brand-blue/20 rounded-full">
+                                                        <span className="text-[10px] font-black text-brand-blue uppercase tracking-tighter">Active</span>
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2">{asset.label}</h4>
+                                                    <div className="text-lg font-black text-white tracking-tight break-all">
+                                                        {asset.value}
+                                                    </div>
+                                                </div>
+                                                <div className="absolute -bottom-1 -right-1 w-24 h-24 bg-white/[0.02] rounded-full blur-2xl group-hover:bg-white/[0.05] transition-all"></div>
+                                            </motion.div>
+                                        ))}
                                     </div>
 
                                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                                         <div className="lg:col-span-2 space-y-6">
                                             <div className="bg-slate-900/50 border border-slate-800 p-8 rounded-[40px] backdrop-blur-xl relative overflow-hidden group">
-                                                <div className="absolute top-0 right-0 w-32 h-32 bg-brand-blue/10 blur-[80px] group-hover:bg-brand-blue/20 transition-all"></div>
-                                                <div className="flex items-center gap-4 mb-8">
-                                                    <div className="p-4 bg-brand-blue/20 rounded-2xl text-brand-blue">
-                                                        <Activity className="w-8 h-8" />
+                                                <div className="absolute top-0 right-0 w-64 h-64 bg-brand-blue/5 blur-[100px] group-hover:bg-brand-blue/10 transition-all"></div>
+                                                <div className="flex items-start justify-between mb-10">
+                                                    <div className="flex items-center gap-5">
+                                                        <div className="p-5 bg-brand-blue/20 rounded-[28px] text-brand-blue border border-brand-blue/20 shadow-[0_0_30px_rgba(0,113,255,0.1)]">
+                                                            <Activity className="w-10 h-10" />
+                                                        </div>
+                                                        <div>
+                                                            <h2 className="text-3xl font-black text-white tracking-tighter mb-1 uppercase">Infrastructure Summary</h2>
+                                                            <p className="text-sm text-slate-500 font-bold uppercase tracking-widest">Architected for Atlas Foundries</p>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <h2 className="text-2xl font-black text-white tracking-tight">Dreamline Production Summary</h2>
-                                                        <p className="text-sm text-slate-500">Service report and architecture overview.</p>
+                                                    <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-2">
+                                                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                                        <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Optimized</span>
                                                     </div>
                                                 </div>
 
@@ -1706,10 +1706,18 @@ export default function AdminDashboard() {
                                         </div>
 
                                         <div className="space-y-6">
-                                            <div className="bg-slate-900/50 border border-slate-800 p-8 rounded-[40px] backdrop-blur-xl border-l-4 border-l-brand-orange">
-                                                <div className="flex items-center gap-3 mb-6 text-brand-orange">
-                                                    <Shield className="w-6 h-6" />
-                                                    <h2 className="text-xl font-bold tracking-tight">Legal Compliance</h2>
+                                            <div className="bg-white/[0.03] border border-white/10 p-8 rounded-[40px] backdrop-blur-xl border-l-4 border-l-brand-orange relative overflow-hidden group">
+                                                <div className="absolute -top-10 -right-10 w-32 h-32 bg-brand-orange/5 blur-3xl rounded-full"></div>
+                                                <div className="flex items-center justify-between mb-10 relative">
+                                                    <div className="flex items-center gap-4 text-brand-orange">
+                                                        <div className="p-3 bg-brand-orange/10 rounded-xl">
+                                                            <Shield className="w-7 h-7" />
+                                                        </div>
+                                                        <h2 className="text-2xl font-black tracking-tighter uppercase text-white">Legal Advisory</h2>
+                                                    </div>
+                                                    <div className="p-2 bg-green-500/10 border border-green-500/20 rounded-lg">
+                                                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                                    </div>
                                                 </div>
                                                 
                                                 <div className="space-y-6 text-[13px] text-slate-400 leading-relaxed font-semibold">
@@ -1718,21 +1726,49 @@ export default function AdminDashboard() {
                                                     </p>
 
                                                     <div className="space-y-4">
-                                                        <div className="bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-brand-orange/30 transition-colors">
-                                                            <h4 className="text-slate-200 font-black text-[10px] uppercase mb-1 tracking-widest">Intermediary Responsibility</h4>
-                                                            <p className="text-[11px]">Compliance with Section 79 of IT Act regarding intermediary liability for hosting services.</p>
-                                                        </div>
-                                                        <div className="bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-brand-orange/30 transition-colors">
-                                                            <h4 className="text-slate-200 font-black text-[10px] uppercase mb-1 tracking-widest">Data Protection</h4>
-                                                            <p className="text-[11px]">Adherence to SPDI Rules for protecting sensitive personal data and information.</p>
-                                                        </div>
-                                                        <div className="bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-brand-orange/30 transition-colors">
-                                                            <h4 className="text-slate-200 font-black text-[10px] uppercase mb-1 tracking-widest">Jurisdiction</h4>
-                                                            <p className="text-[11px]">Subject to exclusive jurisdiction of the Indian courts in accordance with governing laws.</p>
-                                                        </div>
-                                                    </div>
+                                                         <div className="bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-brand-orange/30 transition-colors">
+                                                             <h4 className="text-slate-200 font-black text-[10px] uppercase mb-1 tracking-widest">Jurisdiction</h4>
+                                                             <p className="text-[11px]">Subject to exclusive jurisdiction of the Indian courts in accordance with governing laws.</p>
+                                                         </div>
+                                                         <div className="bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-brand-orange/30 transition-colors">
+                                                             <h4 className="text-slate-200 font-black text-[10px] uppercase mb-1 tracking-widest">Data Protection</h4>
+                                                             <p className="text-[11px]">Adherence to SPDI Rules for protecting sensitive personal data and information.</p>
+                                                         </div>
+                                                     </div>
                                                 </div>
                                             </div>
+
+                                            <motion.div 
+                                                initial={{ opacity: 0, x: 20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ delay: 0.3 }}
+                                                className="bg-brand-blue/10 border border-brand-blue/20 p-8 rounded-[40px] backdrop-blur-xl relative overflow-hidden group"
+                                            >
+                                                <div className="absolute top-0 right-0 w-32 h-32 bg-brand-blue/20 blur-3xl rounded-full"></div>
+                                                <div className="flex items-center gap-4 mb-6 text-brand-blue relative">
+                                                    <div className="p-3 bg-brand-blue/20 rounded-xl border border-brand-blue/30">
+                                                        <Phone className="w-6 h-6" />
+                                                    </div>
+                                                    <h2 className="text-xl font-black tracking-tighter uppercase text-white">Technical Support</h2>
+                                                </div>
+                                                
+                                                <div className="space-y-4 relative">
+                                                    <p className="text-sm text-slate-400 font-bold leading-relaxed">
+                                                        For any website-related issues or infrastructure queries, contact our dedicated support line:
+                                                    </p>
+                                                    <div className="bg-slate-950/50 border border-white/5 p-5 rounded-2xl flex items-center justify-between group-hover:border-brand-blue/30 transition-all">
+                                                        <div className="text-2xl font-black text-brand-blue tracking-tighter">
+                                                            82400 54002
+                                                        </div>
+                                                        <div className="p-2 bg-brand-blue/10 rounded-lg">
+                                                            <div className="w-2 h-2 bg-brand-blue rounded-full animate-ping"></div>
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest text-center">
+                                                        Available for Atlas Foundries
+                                                    </p>
+                                                </div>
+                                            </motion.div>
                                         </div>
                                     </div>
                                     
