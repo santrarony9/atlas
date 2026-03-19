@@ -103,26 +103,26 @@ export default async function Footer() {
                         <ul className="space-y-4 text-slate-300 text-sm">
                             <li className="flex gap-3">
                                 <Home className="w-5 h-5 text-brand-orange shrink-0" />
-                                <span>225/2 CIT Road, Scheme VII M,<br />Kolkata - 700054, India</span>
+                                <span>{content?.footer?.officeAddress || "225/2 CIT Road, Scheme VII M, Kolkata - 700054, India"}</span>
                             </li>
                             <li className="flex gap-3">
                                 <MapPin className="w-5 h-5 text-brand-orange shrink-0" />
-                                <span>Works: Howrah - 711410</span>
+                                <span>{content?.footer?.worksAddress || "Works: Howrah - 711410"}</span>
                             </li>
                             <li className="flex gap-3">
                                 <Phone className="w-5 h-5 text-brand-orange shrink-0" />
-                                <a href="tel:+919830735480" className="hover:text-white transition-colors">+91 98307 35480</a>
+                                <a href={`tel:${content?.footer?.contactPhone?.replace(/\s/g, '') || '+919830735480'}`} className="hover:text-white transition-colors">{content?.footer?.contactPhone || "+91 98307 35480"}</a>
                             </li>
                             <li className="flex gap-3">
                                 <Mail className="w-5 h-5 text-brand-orange shrink-0" />
-                                <a href="mailto:enquiry@atlasfoundries.com" className="hover:text-white transition-colors">enquiry@atlasfoundries.com</a>
+                                <a href={`mailto:${content?.footer?.contactEmail || 'enquiry@atlasfoundries.com'}`} className="hover:text-white transition-colors">{content?.footer?.contactEmail || "enquiry@atlasfoundries.com"}</a>
                             </li>
                         </ul>
                     </div>
                 </div>
 
                 <div className="border-t border-white/10 pt-8 mt-8 flex flex-col md:flex-row justify-between items-center text-sm text-slate-400">
-                    <p>&copy; {new Date().getFullYear()} Atlas Foundries. All Rights Reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} {content?.footer?.copyrightText || "Atlas Foundries. All Rights Reserved."}</p>
                     <p className="mt-2 md:mt-0">
                         Designed by <a href="https://dreamlineproduction.com" target="_blank" rel="noopener noreferrer" className="text-white hover:text-brand-orange transition-colors underline underline-offset-4 cursor-pointer relative z-10">Dreamline Production</a>
                         <span className="mx-2">|</span>

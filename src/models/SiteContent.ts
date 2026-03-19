@@ -58,6 +58,13 @@ export interface ISiteContent extends Document {
         hostName: string;
         hostRenewalDate: string;
     };
+    footer: {
+        officeAddress: string;
+        worksAddress: string;
+        contactPhone: string;
+        contactEmail: string;
+        copyrightText: string;
+    };
     createdAt: Date;
     updatedAt: Date;
 }
@@ -124,6 +131,13 @@ const SiteContentSchema: Schema = new Schema(
             domainRenewalDate: { type: String, default: "28th May 2026" },
             hostName: { type: String, default: "Dreamline Cloud" },
             hostRenewalDate: { type: String, default: "28th May 2026" },
+        },
+        footer: {
+            officeAddress: { type: String, default: "225/2 CIT Road, Scheme VII M, Kolkata - 700054, India" },
+            worksAddress: { type: String, default: "Works: Howrah - 711410" },
+            contactPhone: { type: String, default: "+91 98307 35480" },
+            contactEmail: { type: String, default: "enquiry@atlasfoundries.com" },
+            copyrightText: { type: String, default: "Atlas Foundries. All Rights Reserved." }
         }
     },
     {

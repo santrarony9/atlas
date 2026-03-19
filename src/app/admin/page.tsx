@@ -74,12 +74,15 @@ interface SiteContentData {
     aboutPage: { missionTitle: string; missionText: string; visionTitle: string; visionText: string };
     processPage: { steps: { title: string; description: string; imageUrl: string }[] };
     infrastructure: { videoUrl: string; companyImages: string[]; certificates: string[] };
-    subscription: {
-        domainName: string;
-        domainRenewalDate: string;
-        hostName: string;
         hostRenewalDate: string;
         supportPhoneNumber: string;
+    };
+    footer: {
+        officeAddress: string;
+        worksAddress: string;
+        contactPhone: string;
+        contactEmail: string;
+        copyrightText: string;
     };
 }
 
@@ -231,7 +234,14 @@ export default function AdminDashboard() {
             if (!data.homeCTA) data.homeCTA = { title: "", subtitle: "", buttonText: "", buttonLink: "", bgImage: "" };
             if (!data.aboutPage) data.aboutPage = { missionTitle: "", missionText: "", visionTitle: "", visionText: "" };
             if (!data.processPage) data.processPage = { steps: [] };
-            if (!data.subscription) data.subscription = { domainName: "atlasfoundries.com", domainRenewalDate: "28th May 2026", hostName: "Dreamline Cloud", hostRenewalDate: "28th May 2026" };
+            if (!data.subscription) data.subscription = { domainName: "atlasfoundries.com", domainRenewalDate: "28th May 2026", hostName: "Dreamline Cloud", hostRenewalDate: "28th May 2026", supportPhoneNumber: "82400 54002" };
+            if (!data.footer) data.footer = { 
+                officeAddress: "225/2 CIT Road, Scheme VII M, Kolkata - 700054, India",
+                worksAddress: "Works: Howrah - 711410",
+                contactPhone: "+91 98307 35480",
+                contactEmail: "enquiry@atlasfoundries.com",
+                copyrightText: "Atlas Foundries. All Rights Reserved."
+            };
             if (!data.faviconUrl) data.faviconUrl = "/favicon.svg";
             setSiteContent(data);
         }
@@ -247,15 +257,18 @@ export default function AdminDashboard() {
 
     const fetchStats = async () => {
         try {
-            const [p, a, u, c] = await Promise.all([
+            const [pRes, aRes, uRes, cRes] = await Promise.all([
                 fetch("/api/products"),
                 fetch("/api/articles"),
                 fetch("/api/users"),
                 fetch("/api/categories")
             ]);
-            const [products, articles, users, categories] = await Promise.all([
-                p.json(), a.json(), u.json(), c.json()
-            ]);
+
+            const products = pRes.ok ? await pRes.json() : [];
+            const articles = aRes.ok ? await aRes.json() : [];
+            const users = uRes.ok ? await uRes.json() : [];
+            const categories = cRes.ok ? await cRes.json() : [];
+
             setStats({
                 products: Array.isArray(products) ? products.length : 0,
                 articles: Array.isArray(articles) ? articles.length : 0,
@@ -451,8 +464,8 @@ export default function AdminDashboard() {
                 } else if (field === 'companyImages' || field === 'certificates') {
                     (newData.infrastructure as any)[field] = value as string[];
                 }
-            } else if (section === 'subscription') {
-                (newData.subscription as any)[field] = value as string;
+            } else if (section === 'footer') {
+                (newData.footer as any)[field] = value as string;
             } else if (section === 'hero' || section === 'about' || section === 'homeCTA' || section === 'aboutPage') {
                 (newData[section] as any)[field] = value as string;
             }
@@ -1561,6 +1574,68 @@ export default function AdminDashboard() {
                                                         </button>
                                                     </div>
                                                 ))}
+                                            </div>
+                                        </section>
+
+                                        {/* FOOTER SETTINGS */}
+                                        <section className={`${cardClass} relative overflow-hidden group hover:border-brand-orange/30 transition-all duration-500 mb-10`}>
+                                            <div className="absolute top-0 left-0 w-1.5 h-full bg-brand-orange shadow-[0_0_15px_rgba(255,102,0,0.5)]"></div>
+                                            <h3 className="text-2xl font-black mb-8 flex items-center gap-3 text-white">
+                                                <LayoutDashboard className="w-6 h-6 text-brand-orange" />
+                                                Footer Configuration
+                                            </h3>
+                                            <div className="grid lg:grid-cols-2 gap-8">
+                                                <div className="space-y-6">
+                                                    <div className="space-y-2">
+                                                        <label className={labelClass}>Office Address (Headquarters)</label>
+                                                        <textarea 
+                                                            value={siteContent.footer.officeAddress} 
+                                                            onChange={(e) => handleContentChange('footer', 'officeAddress', e.target.value)} 
+                                                            className={inputClass} 
+                                                            rows={2}
+                                                            placeholder="225/2 CIT Road, Scheme VII M, Kolkata - 700054, India" 
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className={labelClass}>Works Address (Factory/Warehouse)</label>
+                                                        <textarea 
+                                                            value={siteContent.footer.worksAddress} 
+                                                            onChange={(e) => handleContentChange('footer', 'worksAddress', e.target.value)} 
+                                                            className={inputClass} 
+                                                            rows={2}
+                                                            placeholder="Works: Howrah - 711410" 
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className={labelClass}>Copyright Text</label>
+                                                        <input 
+                                                            value={siteContent.footer.copyrightText} 
+                                                            onChange={(e) => handleContentChange('footer', 'copyrightText', e.target.value)} 
+                                                            className={inputClass} 
+                                                            placeholder="Atlas Foundries. All Rights Reserved." 
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-6">
+                                                    <div className="space-y-2">
+                                                        <label className={labelClass}>Contact Phone (Footer)</label>
+                                                        <input 
+                                                            value={siteContent.footer.contactPhone} 
+                                                            onChange={(e) => handleContentChange('footer', 'contactPhone', e.target.value)} 
+                                                            className={inputClass} 
+                                                            placeholder="+91 98307 35480" 
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className={labelClass}>Contact Email (Footer)</label>
+                                                        <input 
+                                                            value={siteContent.footer.contactEmail} 
+                                                            onChange={(e) => handleContentChange('footer', 'contactEmail', e.target.value)} 
+                                                            className={inputClass} 
+                                                            placeholder="enquiry@atlasfoundries.com" 
+                                                        />
+                                                    </div>
+                                                </div>
                                             </div>
                                         </section>
 

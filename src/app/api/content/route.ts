@@ -32,9 +32,16 @@ export async function GET() {
                 ],
                 subscription: {
                     domainName: "atlasfoundries.com",
-                    domainRenewalDate: "2025-03-31",
+                    domainRenewalDate: "28th May 2026",
                     hostName: "Dreamline Cloud",
-                    hostRenewalDate: "2025-03-31",
+                    hostRenewalDate: "28th May 2026",
+                },
+                footer: {
+                    officeAddress: "225/2 CIT Road, Scheme VII M, Kolkata - 700054, India",
+                    worksAddress: "Works: Howrah - 711410",
+                    contactPhone: "+91 98307 35480",
+                    contactEmail: "enquiry@atlasfoundries.com",
+                    copyrightText: "Atlas Foundries. All Rights Reserved."
                 }
             });
         }
