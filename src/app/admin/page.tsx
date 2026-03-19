@@ -1613,174 +1613,187 @@ export default function AdminDashboard() {
 
                             {activeTab === 'subscription' && siteContent && (
                                 <motion.div 
-                                    initial={{ opacity: 0, y: 20 }}
+                                    initial={{ opacity: 0, y: 30 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    className="space-y-8"
+                                    className="space-y-10 pb-20"
                                 >
-                                    <header className="mb-12 relative">
-                                        <div className="absolute -top-20 -left-20 w-64 h-64 bg-brand-blue/10 blur-[100px] rounded-full"></div>
-                                        <div className="relative">
-                                            <h1 className="text-4xl font-black text-white mb-2 tracking-tighter flex items-center gap-4">
-                                                <div className="p-3 bg-brand-blue/20 rounded-2xl border border-brand-blue/30 shadow-[0_0_20px_rgba(0,113,255,0.2)]">
-                                                    <Shield className="w-8 h-8 text-brand-blue" />
+                                    {/* Epic Header Section */}
+                                    <header className="relative p-12 rounded-[50px] overflow-hidden border border-white/10 bg-slate-900/40 backdrop-blur-xl group">
+                                        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-blue/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-brand-blue/10 transition-all duration-700"></div>
+                                        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-brand-orange/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/2"></div>
+                                        
+                                        <div className="relative flex flex-col md:flex-row md:items-end justify-between gap-8">
+                                            <div className="space-y-4">
+                                                <div className="flex items-center gap-3 px-4 py-2 bg-brand-blue/10 border border-brand-blue/20 rounded-2xl w-fit">
+                                                    <ShieldCheck className="w-5 h-5 text-brand-blue" />
+                                                    <span className="text-[11px] font-black text-brand-blue uppercase tracking-[0.2em]">Secure Infrastructure</span>
                                                 </div>
-                                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Digital Asset Status & Legal</span>
-                                            </h1>
-                                            <p className="text-slate-500 font-bold ml-[72px]">Infrastructure oversight and compliance monitoring for Atlas Foundries.</p>
+                                                <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter leading-none">
+                                                    Digital Asset <br />
+                                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue to-brand-orange">Status & Legal</span>
+                                                </h1>
+                                                <p className="text-slate-400 font-bold max-w-xl text-lg leading-relaxed">
+                                                    Comprehensive oversight of Atlas Foundries' digital footprint, renewal monitoring, and legal compliance.
+                                                </p>
+                                            </div>
+                                            
+                                            <div className="bg-slate-950/50 backdrop-blur-3xl border border-white/10 p-6 rounded-[32px] flex items-center gap-6 shadow-2xl">
+                                                <div className="relative">
+                                                    <div className="w-16 h-16 bg-brand-blue/20 rounded-2xl border border-brand-blue/30 flex items-center justify-center">
+                                                        <Activity className="w-8 h-8 text-brand-blue animate-pulse" />
+                                                    </div>
+                                                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-4 border-slate-950"></div>
+                                                </div>
+                                                <div>
+                                                    <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">System Health</div>
+                                                    <div className="text-xl font-black text-white tracking-tighter uppercase">All Systems Normal</div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </header>
 
+                                    {/* Asset Intelligence Grid */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                         {[
-                                            { label: 'Domain Name', value: siteContent.subscription.domainName, icon: Globe, color: 'text-brand-blue', glow: 'shadow-[0_0_30px_rgba(0,113,255,0.1)]' },
-                                            { label: 'Domain Renewal', value: siteContent.subscription.domainRenewalDate, icon: Calendar, color: 'text-brand-orange', glow: 'shadow-[0_0_30px_rgba(255,145,0,0.15)]' },
-                                            { label: 'Host Name', value: siteContent.subscription.hostName, icon: Server, color: 'text-brand-blue', glow: 'shadow-[0_0_30px_rgba(0,113,255,0.1)]' },
-                                            { label: 'Host Renewal', value: siteContent.subscription.hostRenewalDate, icon: Calendar, color: 'text-brand-orange', glow: 'shadow-[0_0_30px_rgba(255,145,0,0.15)]' }
+                                            { label: 'Primary Domain', value: siteContent.subscription.domainName, icon: Globe, accent: 'brand-blue' },
+                                            { label: 'Domain Renewal', value: siteContent.subscription.domainRenewalDate, icon: Calendar, accent: 'brand-orange' },
+                                            { label: 'Cloud Hosting', value: siteContent.subscription.hostName, icon: Server, accent: 'brand-blue' },
+                                            { label: 'Host Renewal', value: siteContent.subscription.hostRenewalDate, icon: Calendar, accent: 'brand-orange' }
                                         ].map((asset, i) => (
                                             <motion.div 
                                                 key={asset.label}
-                                                initial={{ opacity: 0, y: 30 }}
-                                                animate={{ opacity: 1, y: 0 }}
+                                                initial={{ opacity: 0, scale: 0.95 }}
+                                                animate={{ opacity: 1, scale: 1 }}
                                                 transition={{ delay: i * 0.1 }}
-                                                className={`bg-white/[0.03] border border-white/10 p-7 rounded-[32px] backdrop-blur-3xl relative overflow-hidden group hover:border-white/20 transition-all cursor-default ${asset.glow}`}
+                                                className="bg-slate-900/30 border border-white/10 p-8 rounded-[40px] backdrop-blur-2xl relative overflow-hidden group hover:border-brand-blue/30 transition-all duration-500 cursor-default shadow-xl"
                                             >
-                                                <div className="flex items-center justify-between mb-5">
-                                                    <div className={`p-3 rounded-xl bg-slate-950/50 border border-white/5 ${asset.color}`}>
-                                                        <asset.icon className="w-5 h-5" />
+                                                <div className="relative z-10">
+                                                    <div className={`w-12 h-12 rounded-2xl bg-${asset.accent}/10 border border-${asset.accent}/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                                                        <asset.icon className={`w-6 h-6 text-${asset.accent}`} />
                                                     </div>
-                                                    <div className="px-3 py-1 bg-brand-blue/10 border border-brand-blue/20 rounded-full">
-                                                        <span className="text-[10px] font-black text-brand-blue uppercase tracking-tighter">Active</span>
-                                                    </div>
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2">{asset.label}</h4>
-                                                    <div className="text-lg font-black text-white tracking-tight break-all">
+                                                    <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500 mb-2">{asset.label}</h4>
+                                                    <div className="text-xl font-black text-white tracking-tight leading-tight">
                                                         {asset.value}
                                                     </div>
                                                 </div>
-                                                <div className="absolute -bottom-1 -right-1 w-24 h-24 bg-white/[0.02] rounded-full blur-2xl group-hover:bg-white/[0.05] transition-all"></div>
+                                                <div className={`absolute top-0 right-0 w-24 h-24 bg-${asset.accent}/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-${asset.accent}/10 transition-all`}></div>
                                             </motion.div>
                                         ))}
                                     </div>
 
-                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                        <div className="lg:col-span-2 space-y-6">
-                                            <div className="bg-slate-900/50 border border-slate-800 p-8 rounded-[40px] backdrop-blur-xl relative overflow-hidden group">
-                                                <div className="absolute top-0 right-0 w-64 h-64 bg-brand-blue/5 blur-[100px] group-hover:bg-brand-blue/10 transition-all"></div>
-                                                <div className="flex items-start justify-between mb-10">
-                                                    <div className="flex items-center gap-5">
-                                                        <div className="p-5 bg-brand-blue/20 rounded-[28px] text-brand-blue border border-brand-blue/20 shadow-[0_0_30px_rgba(0,113,255,0.1)]">
-                                                            <Activity className="w-10 h-10" />
+                                    {/* Main Content Blueprint */}
+                                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                                        {/* Infrastructure Blueprint Section */}
+                                        <div className="lg:col-span-8">
+                                            <div className="bg-slate-900/50 border border-white/10 rounded-[60px] p-10 relative overflow-hidden h-full">
+                                                <div className="absolute top-0 right-0 p-8">
+                                                    <div className="w-48 h-48 bg-brand-blue/5 blur-[80px] rounded-full"></div>
+                                                </div>
+                                                
+                                                <div className="relative">
+                                                    <div className="flex items-center gap-6 mb-12">
+                                                        <div className="p-6 bg-slate-950 border border-white/10 rounded-3xl shadow-inner">
+                                                            <Activity className="w-12 h-12 text-brand-blue" />
                                                         </div>
                                                         <div>
-                                                            <h2 className="text-3xl font-black text-white tracking-tighter mb-1 uppercase">Infrastructure Summary</h2>
-                                                            <p className="text-sm text-slate-500 font-bold uppercase tracking-widest">Architected for Atlas Foundries</p>
+                                                            <h2 className="text-4xl font-black text-white tracking-tighter uppercase mb-1">Architecture Blueprint</h2>
+                                                            <p className="text-brand-blue font-black tracking-widest text-[11px] uppercase opacity-70">Custom Tailored by Dreamline Production</p>
                                                         </div>
                                                     </div>
-                                                    <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-2">
-                                                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                                        <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Optimized</span>
-                                                    </div>
-                                                </div>
 
-                                                <div className="space-y-6 text-slate-400 font-medium leading-relaxed">
-                                                    <p className="text-lg text-slate-200">
-                                                        The Atlas Foundries digital ecosystem has been <span className="text-brand-blue font-black underline decoration-2 underline-offset-4">fully designed and customised by Dreamline Production</span>.
-                                                    </p>
-                                                    <p>
-                                                        Utilizing a high-performance architecture based on **Next.js 14**, **Tailwind CSS**, and **MongoDB**, we have delivered a premium, scalable solution that ensures optimal SEO, security, and real-time content management.
-                                                    </p>
-                                                    
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-                                                        <div className="p-4 bg-white/5 border border-white/5 rounded-2xl">
-                                                            <div className="text-white font-black text-xs uppercase mb-1 tracking-widest text-brand-blue">Interface</div>
-                                                            <div className="text-sm font-bold text-slate-300">Premium Glassmorphism & Framer Motion animations.</div>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                                        <div className="space-y-6">
+                                                            <h3 className="text-xl font-black text-white uppercase tracking-tight">Ecosystem Summary</h3>
+                                                            <p className="text-slate-400 font-bold leading-relaxed text-lg">
+                                                                The Atlas Foundries digital infrastructure is built on a <span className="text-white italic underline decoration-brand-blue decoration-2">cutting-edge reactive framework</span> designed for extreme scalability and real-time content management.
+                                                            </p>
+                                                            <div className="p-6 bg-brand-blue/10 border border-brand-blue/20 rounded-[32px] space-y-3">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="w-1.5 h-1.5 bg-brand-blue rounded-full"></div>
+                                                                    <span className="text-[10px] font-black text-white uppercase tracking-widest">Core Engine</span>
+                                                                </div>
+                                                                <p className="text-sm font-bold text-slate-300 leading-relaxed">
+                                                                    Next.js 14 utilizing App Router and Server Components for optimal SEO performance and instantaneous load times.
+                                                                </p>
+                                                            </div>
                                                         </div>
-                                                        <div className="p-4 bg-white/5 border border-white/5 rounded-2xl">
-                                                            <div className="text-white font-black text-xs uppercase mb-1 tracking-widest text-brand-blue">Security</div>
-                                                            <div className="text-sm font-bold text-slate-300">NextAuth.js for secure admin access & data encryption.</div>
+
+                                                        <div className="space-y-8">
+                                                            <div className="space-y-6">
+                                                                {[
+                                                                    { title: 'Data Layer', desc: 'Secure MongoDB aggregation with Mongoose ORM for structured industrial data.', icon: Server },
+                                                                    { title: 'Visual System', desc: 'Tailwind CSS v3 for ultra-responsive layouts and high-fidelity aesthetics.', icon: LayoutGrid },
+                                                                    { title: 'Security Matrix', desc: 'NextAuth.js authentication with military-grade JWT encryption.', icon: Lock }
+                                                                ].map((feat, i) => (
+                                                                    <div key={feat.title} className="flex gap-5 group/item">
+                                                                        <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-slate-950 border border-white/5 flex items-center justify-center group-hover/item:border-brand-blue/30 transition-all">
+                                                                            <feat.icon className="w-5 h-5 text-brand-blue" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h4 className="text-sm font-black text-white uppercase tracking-tight mb-1">{feat.title}</h4>
+                                                                            <p className="text-xs text-slate-500 font-bold leading-relaxed">{feat.desc}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="space-y-6">
-                                            <div className="bg-white/[0.03] border border-white/10 p-8 rounded-[40px] backdrop-blur-xl border-l-4 border-l-brand-orange relative overflow-hidden group">
-                                                <div className="absolute -top-10 -right-10 w-32 h-32 bg-brand-orange/5 blur-3xl rounded-full"></div>
-                                                <div className="flex items-center justify-between mb-10 relative">
-                                                    <div className="flex items-center gap-4 text-brand-orange">
-                                                        <div className="p-3 bg-brand-orange/10 rounded-xl">
-                                                            <Shield className="w-7 h-7" />
-                                                        </div>
-                                                        <h2 className="text-2xl font-black tracking-tighter uppercase text-white">Legal Advisory</h2>
+                                        {/* Compliance & Support Column */}
+                                        <div className="lg:col-span-4 space-y-8">
+                                            {/* Legal Compliance Exhibit */}
+                                            <div className="bg-slate-900/50 border border-white/10 p-10 rounded-[50px] relative overflow-hidden group border-t-brand-orange border-t-4 shadow-2xl">
+                                                <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-orange to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
+                                                
+                                                <div className="flex items-center gap-5 mb-10">
+                                                    <div className="p-4 bg-brand-orange/10 rounded-2xl border border-brand-orange/20">
+                                                        <Shield className="w-8 h-8 text-brand-orange" />
                                                     </div>
-                                                    <div className="p-2 bg-green-500/10 border border-green-500/20 rounded-lg">
-                                                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                                    <div>
+                                                        <h2 className="text-2xl font-black text-white tracking-tighter uppercase mb-1">Compliance</h2>
+                                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Legal Status: Certified</p>
                                                     </div>
                                                 </div>
-                                                
-                                                <div className="space-y-6 text-[13px] text-slate-400 leading-relaxed font-semibold">
-                                                    <p>
-                                                        Platform compliance as per <span className="text-white">Information Technology Act, 2000</span> and <span className="text-white">IT Rules, 2011</span> (India).
-                                                    </p>
 
-                                                    <div className="space-y-4">
-                                                         <div className="bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-brand-orange/30 transition-colors">
-                                                             <h4 className="text-slate-200 font-black text-[10px] uppercase mb-1 tracking-widest">Jurisdiction</h4>
-                                                             <p className="text-[11px]">Subject to exclusive jurisdiction of the Indian courts in accordance with governing laws.</p>
-                                                         </div>
-                                                         <div className="bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-brand-orange/30 transition-colors">
-                                                             <h4 className="text-slate-200 font-black text-[10px] uppercase mb-1 tracking-widest">Data Protection</h4>
-                                                             <p className="text-[11px]">Adherence to SPDI Rules for protecting sensitive personal data and information.</p>
-                                                         </div>
-                                                     </div>
+                                                <div className="space-y-5">
+                                                    {[
+                                                        { title: 'Jurisdiction Monitoring', desc: 'Subject to exclusive jurisdiction of Indian courts in compliance with IT Act 2000.' },
+                                                        { title: 'Digital Data Protocols', desc: 'Adherence to SPDI Rules (2011) for high-tier data protection and encryption.' },
+                                                        { title: 'Intermediary Terms', desc: 'Strict compliance with Section 79 of IT Act regarding industrial platform liability.' }
+                                                    ].map((item, idx) => (
+                                                        <div key={idx} className="p-5 bg-white/[0.03] border border-white/5 rounded-3xl hover:bg-white/[0.05] transition-all">
+                                                            <h4 className="text-xs font-black text-slate-300 uppercase tracking-tighter mb-2">{item.title}</h4>
+                                                            <p className="text-[11px] text-slate-500 font-bold leading-relaxed">{item.desc}</p>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             </div>
 
-                                            <motion.div 
-                                                initial={{ opacity: 0, x: 20 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: 0.3 }}
-                                                className="bg-brand-blue/10 border border-brand-blue/20 p-8 rounded-[40px] backdrop-blur-xl relative overflow-hidden group"
-                                            >
-                                                <div className="absolute top-0 right-0 w-32 h-32 bg-brand-blue/20 blur-3xl rounded-full"></div>
-                                                <div className="flex items-center gap-4 mb-6 text-brand-blue relative">
-                                                    <div className="p-3 bg-brand-blue/20 rounded-xl border border-brand-blue/30">
-                                                        <Phone className="w-6 h-6" />
+                                            {/* Technical Helpdesk Section */}
+                                            <div className="bg-brand-blue/10 border border-brand-blue/30 p-10 rounded-[50px] relative overflow-hidden group shadow-2xl">
+                                                <div className="absolute -top-10 -right-10 w-40 h-40 bg-brand-blue/20 blur-3xl rounded-full"></div>
+                                                <div className="relative">
+                                                    <div className="flex items-center gap-5 mb-8">
+                                                        <div className="p-4 bg-slate-950 border border-brand-blue/20 rounded-2xl shadow-xl">
+                                                            <Phone className="w-8 h-8 text-brand-blue animate-pulse" />
+                                                        </div>
+                                                        <h3 className="text-2xl font-black text-white tracking-tighter uppercase leading-tight">Technical <br /> Support</h3>
                                                     </div>
-                                                    <h2 className="text-xl font-black tracking-tighter uppercase text-white">Technical Support</h2>
-                                                </div>
-                                                
-                                                <div className="space-y-4 relative">
-                                                    <p className="text-sm text-slate-400 font-bold leading-relaxed">
-                                                        For any website-related issues or infrastructure queries, contact our dedicated support line:
+                                                    <p className="text-slate-400 text-sm font-bold leading-relaxed mb-8">
+                                                        Direct access to industrial infrastructure support for Atlas Foundries mission-critical systems.
                                                     </p>
-                                                    <div className="bg-slate-950/50 border border-white/5 p-5 rounded-2xl flex items-center justify-between group-hover:border-brand-blue/30 transition-all">
-                                                        <div className="text-2xl font-black text-brand-blue tracking-tighter">
+                                                    <div className="bg-slate-950/80 border border-white/10 p-6 rounded-[32px] text-center group-hover:border-brand-blue/50 transition-all shadow-inner">
+                                                        <div className="text-[10px] font-black text-brand-blue uppercase tracking-widest mb-2">Priority Helpline</div>
+                                                        <div className="text-3xl font-black text-white tracking-tighter hover:text-brand-blue transition-colors cursor-pointer">
                                                             82400 54002
                                                         </div>
-                                                        <div className="p-2 bg-brand-blue/10 rounded-lg">
-                                                            <div className="w-2 h-2 bg-brand-blue rounded-full animate-ping"></div>
-                                                        </div>
                                                     </div>
-                                                    <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest text-center">
-                                                        Available for Atlas Foundries
-                                                    </p>
                                                 </div>
-                                            </motion.div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    
-                                    <div className="flex justify-end mt-8">
-                                        <button 
-                                            onClick={handleContentSubmit}
-                                            disabled={loading}
-                                            className="px-8 py-4 bg-brand-blue text-white rounded-2xl font-black text-sm uppercase shadow-xl shadow-brand-blue/30 hover:bg-brand-orange hover:shadow-brand-orange/30 transition-all flex items-center gap-3 disabled:opacity-50"
-                                        >
-                                            {loading ? <Activity className="w-5 h-5 animate-spin" /> : <Shield className="w-5 h-5" />}
-                                            Save Status Updates
-                                        </button>
                                     </div>
                                 </motion.div>
                             )}
