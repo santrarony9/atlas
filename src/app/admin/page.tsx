@@ -228,6 +228,8 @@ export default function AdminDashboard() {
             if (!data.homeCTA) data.homeCTA = { title: "", subtitle: "", buttonText: "", buttonLink: "", bgImage: "" };
             if (!data.aboutPage) data.aboutPage = { missionTitle: "", missionText: "", visionTitle: "", visionText: "" };
             if (!data.processPage) data.processPage = { steps: [] };
+            if (!data.subscription) data.subscription = { domainName: "atlasfoundries.com", domainRenewalDate: "2025-03-31", hostName: "Dreamline Cloud", hostRenewalDate: "2025-03-31" };
+            if (!data.faviconUrl) data.faviconUrl = "/favicon.svg";
             setSiteContent(data);
         }
     };
@@ -463,11 +465,6 @@ export default function AdminDashboard() {
         });
     };
 
-    interface ProcessStep {
-        title: string;
-        description: string;
-        imageUrl: string;
-    }
 
     const handleContentImageUpload = async (e: ChangeEvent<HTMLInputElement>, section: keyof SiteContentData | 'companyProfile' | 'favicon', index?: number, arrayField?: 'companyImages' | 'certificates') => {
         const file = e.target.files?.[0];
