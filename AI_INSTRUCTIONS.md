@@ -1,5 +1,9 @@
 # AI Memory & Business Rules for Atlas Foundries Dashboard
 
+**Repository**: `https://github.com/santrarony9/atlas.git`  
+**Build Platform**: Vercel (Production)  
+**Build Command**: `npm run build`
+
 These instructions MUST be followed by any AI agent working on this codebase to maintain project integrity and follow specific client requirements.
 
 ## 1. Digital Asset Status & Renewal Dates
