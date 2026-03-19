@@ -27,7 +27,9 @@ import {
     Lock,
     Shield,
     Globe,
-    ShieldCheck
+    ShieldCheck,
+    Calendar,
+    Server
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
