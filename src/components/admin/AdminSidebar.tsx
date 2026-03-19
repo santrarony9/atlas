@@ -31,7 +31,6 @@ const AdminSidebar: React.FC<SidebarProps> = ({
     const menuItems = [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { id: 'products', label: 'Products', icon: Package },
-        { id: 'journal', label: 'Journal', icon: BookOpen },
         { id: 'categories', label: 'Categories & Tags', icon: Tags },
         { id: 'content', label: 'Site Content', icon: Settings },
         { id: 'subscription', label: 'Digital Asset Status', icon: ShieldCheck },

@@ -14,6 +14,9 @@ interface SiteContentData {
     about: { title: string; heading: string; description: string; imageUrl: string; bulletPoints: string[] };
     features: { title: string; description: string; imageUrl: string; linkUrl: string }[];
     homeCTA: { title: string; subtitle: string; buttonText: string; buttonLink: string; bgImage: string };
+    processPage?: {
+        steps: { title: string; description: string; imageUrl: string }[];
+    };
 }
 
 // Default content (Initial State / Fallback)
@@ -37,7 +40,7 @@ const defaultContent: SiteContentData = {
     features: [
         { title: "Railway", description: "Couplers, draft gears, and bogie components engineered for durability.", imageUrl: "/images2/2.jpg", linkUrl: "/products" },
         { title: "Marine", description: "Corrosion-resistant castings for ship building and offshore platforms.", imageUrl: "/images2/3.jpg", linkUrl: "/products" },
-        { title: "Industrial", description: "Valves, pumps, and heavy machinery parts made with Lost Foam precision.", imageUrl: "/images2/73.png", linkUrl: "/products" }
+        { title: "Industrial", description: "Valves, pumps, and heavy machinery parts made with Lost Foam precision.", imageUrl: "/images2/73.png", linkUrl: "/lost-foam-manufacturing" }
     ],
     homeCTA: {
         title: "Ready to upgrade your supply chain?",
@@ -45,6 +48,13 @@ const defaultContent: SiteContentData = {
         buttonText: "Contact Us Now",
         buttonLink: "/contact-us",
         bgImage: "/images2/Cover.jpg"
+    },
+    processPage: {
+        steps: [
+            { title: "Pattern Production", description: "High-density polystyrene patterns are molded with precision.", imageUrl: "/images2/73.png" },
+            { title: "Coating & Assembly", description: "Patterns are coated with refractory material and assembled.", imageUrl: "/images2/2.jpg" },
+            { title: "Casting & Finishing", description: "Molten metal replaces the foam pattern, creating the final part.", imageUrl: "/images2/3.jpg" }
+        ]
     }
 };
 
@@ -193,6 +203,52 @@ export default function Home() {
                             </FadeInItem>
                         ))}
                     </StaggerContainer>
+                </div>
+            </section>
+
+            {/* Lost Foam Process Section */}
+            <section className="py-20 bg-white">
+                <div className="container mx-auto px-4">
+                    <div className="flex flex-col md:flex-row items-center gap-12">
+                        <div className="md:w-1/2">
+                            <FadeIn direction="right">
+                                <h4 className="text-brand-orange font-bold uppercase tracking-wider mb-2">Our Core Technology</h4>
+                                <h2 className="text-4xl font-bold text-brand-blue mb-6">Lost Foam Manufacturing Process</h2>
+                                <p className="text-gray-600 mb-8 leading-relaxed">
+                                    Our state-of-the-art Lost Foam process allows for the creation of complex, high-precision castings with exceptional surface finish and dimensional accuracy. This zero-draft technology eliminates the need for cores and reduces machining requirements.
+                                </p>
+                                <div className="space-y-6 mb-8">
+                                    {content.processPage?.steps.slice(0, 3).map((step, idx) => (
+                                        <div key={idx} className="flex gap-4">
+                                            <div className="flex-shrink-0 w-12 h-12 rounded-full bg-brand-orange/10 flex items-center justify-center text-brand-orange font-bold">
+                                                0{idx + 1}
+                                            </div>
+                                            <div>
+                                                <h5 className="font-bold text-brand-blue mb-1">{step.title}</h5>
+                                                <p className="text-sm text-gray-500">{step.description}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <Link href="/lost-foam-manufacturing" className="px-8 py-3 bg-brand-blue text-white font-bold rounded hover:bg-brand-orange transition-colors inline-block">
+                                    Explore the Process
+                                </Link>
+                            </FadeIn>
+                        </div>
+                        <div className="md:w-1/2 relative h-[500px] rounded-2xl overflow-hidden shadow-2xl">
+                            <FadeIn direction="left">
+                                <Image
+                                    src="/images2/73.png"
+                                    alt="Lost Foam Process"
+                                    fill
+                                    className="object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-brand-blue/60 to-transparent flex items-end p-8">
+                                    <p className="text-white font-medium italic">"Precision engineered to perfection using advanced foam evaporation technology."</p>
+                                </div>
+                            </FadeIn>
+                        </div>
+                    </div>
                 </div>
             </section>
 

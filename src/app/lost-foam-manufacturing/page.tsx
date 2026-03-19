@@ -69,7 +69,9 @@ export default function LostFoam() {
         }
     ];
 
-    const steps = content?.processPage?.steps || defaultSteps;
+    const steps = (content?.processPage?.steps && content.processPage.steps.length > 0) 
+        ? content.processPage.steps 
+        : defaultSteps;
 
     return (
         <div className="bg-white min-h-screen">

@@ -35,7 +35,6 @@ export default function Header() {
         { href: "/lost-foam-manufacturing", label: "Lost Foam" },
         { href: "/infrastructure", label: "Infrastructure" },
         { href: "/products", label: "Products" },
-        { href: "/journal", label: "Journal" },
         { href: "/quality", label: "Quality" },
         { href: "/contact-us", label: "Contact Us", isButton: true },
     ];
