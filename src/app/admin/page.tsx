@@ -262,10 +262,10 @@ export default function AdminDashboard() {
     const fetchStats = async () => {
         try {
             const [pRes, aRes, uRes, cRes] = await Promise.all([
-                fetch("/api/products"),
-                fetch("/api/articles"),
-                fetch("/api/users"),
-                fetch("/api/categories")
+                fetch("/api/products", { cache: 'no-store' }),
+                fetch("/api/articles", { cache: 'no-store' }),
+                fetch("/api/users", { cache: 'no-store' }),
+                fetch("/api/categories", { cache: 'no-store' })
             ]);
 
             const getSafeData = async (res: Response) => {
