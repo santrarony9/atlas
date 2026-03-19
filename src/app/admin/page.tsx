@@ -72,8 +72,8 @@ interface SiteContentData {
     companyProfileUrl: string;
     faviconUrl: string;
     homeCTA: { title: string; subtitle: string; buttonText: string; buttonLink: string; bgImage: string };
-    aboutPage: { missionTitle: string; missionText: string; visionTitle: string; visionText: string };
-    processPage: { steps: { title: string; description: string; imageUrl: string }[] };
+    aboutPage: { missionTitle: string; missionText: string; visionTitle: string; visionText: string; headerImage?: string };
+    processPage: { steps: { title: string; description: string; imageUrl: string }[]; mainImage?: string };
     infrastructure: { videoUrl: string; companyImages: string[]; certificates: string[] };
     subscription: {
         domainName: string;
