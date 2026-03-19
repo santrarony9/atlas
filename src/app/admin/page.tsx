@@ -268,10 +268,20 @@ export default function AdminDashboard() {
                 fetch("/api/categories")
             ]);
 
-            const products = pRes.ok ? await pRes.json() : [];
-            const articles = aRes.ok ? await aRes.json() : [];
-            const users = uRes.ok ? await uRes.json() : [];
-            const categories = cRes.ok ? await cRes.json() : [];
+            const getSafeData = async (res: Response) => {
+                try {
+                    if (!res.ok) return [];
+                    const data = await res.json();
+                    return Array.isArray(data) ? data : (data.products || data.articles || data.users || data.categories || []);
+                } catch {
+                    return [];
+                }
+            };
+
+            const products = await getSafeData(pRes);
+            const articles = await getSafeData(aRes);
+            const users = await getSafeData(uRes);
+            const categories = await getSafeData(cRes);
 
             setStats({
                 products: Array.isArray(products) ? products.length : 0,
