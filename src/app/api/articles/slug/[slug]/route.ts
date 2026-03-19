@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
+import dbConnect from "@/lib/db";
 import Article from "@/models/Article";
 
 export async function GET(
@@ -7,7 +7,7 @@ export async function GET(
     { params }: { params: { slug: string } }
 ) {
     try {
-        await connectDB();
+        await dbConnect();
         const slug = params.slug;
 
         const article = await Article.findOne({ slug });
