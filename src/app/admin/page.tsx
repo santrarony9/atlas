@@ -126,10 +126,10 @@ export default function AdminDashboard() {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
     const [stats, setStats] = useState({
-        products: 0,
-        articles: 0,
-        users: 0,
-        categories: 0
+        products: -1,
+        articles: -1,
+        users: -1,
+        categories: -1
     });
     
     const [products, setProducts] = useState<Product[]>([]);
@@ -725,10 +725,10 @@ export default function AdminDashboard() {
                             {activeTab === "dashboard" && (
                                 <div className="space-y-8">
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                        <StatCard title="Total Products" value={stats.products} icon={Package} color="blue" />
-                                        <StatCard title="Journal Articles" value={stats.articles} icon={BookOpen} color="orange" />
-                                        <StatCard title="Total Users" value={stats.users} icon={Users} color="green" />
-                                        <StatCard title="Categories" value={stats.categories} icon={LayoutGrid} color="purple" />
+                                        <StatCard title="Total Products" value={stats.products === -1 ? "..." : stats.products} icon={Package} color="blue" />
+                                        <StatCard title="Journal Articles" value={stats.articles === -1 ? "..." : stats.articles} icon={BookOpen} color="orange" />
+                                        <StatCard title="Total Users" value={stats.users === -1 ? "..." : stats.users} icon={Users} color="green" />
+                                        <StatCard title="Categories" value={stats.categories === -1 ? "..." : stats.categories} icon={LayoutGrid} color="purple" />
                                     </div>
                                     
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
