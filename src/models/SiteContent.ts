@@ -84,7 +84,7 @@ const SiteContentSchema: Schema = new Schema(
         hero: {
             title: { type: String, default: 'Engineered Casting Solutions' },
             subtitle: { type: String, default: '100+ Years of Excellence' },
-            bgImage: { type: String, default: '/images2/Cover.jpg' }
+            bgImage: { type: String, default: '/images2/Image 1.png' }
         },
         about: {
             title: { type: String, default: 'About Atlas Foundries' },
@@ -109,7 +109,7 @@ const SiteContentSchema: Schema = new Schema(
             subtitle: { type: String, default: 'Contact us today to discuss your casting requirements and experience the Atlas advantage.' },
             buttonText: { type: String, default: 'Contact Us Now' },
             buttonLink: { type: String, default: '/contact-us' },
-            bgImage: { type: String, default: '/images2/Cover.jpg' }
+            bgImage: { type: String, default: '/images2/Image 1.png' }
         },
         aboutPage: {
             missionTitle: { type: String, default: 'Our Mission' },

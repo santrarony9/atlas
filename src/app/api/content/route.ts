@@ -17,7 +17,7 @@ export async function GET() {
                 hero: {
                     title: "Engineered Casting Solutions",
                     subtitle: "100+ Years of Excellence",
-                    bgImage: "/images2/Cover.jpg"
+                    bgImage: "/images2/Image 1.png"
                 },
                 about: {
                     title: "About Atlas Foundries",

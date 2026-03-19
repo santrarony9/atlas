@@ -180,7 +180,7 @@
 .hero {
     position: relative;
     height: 100vh;
-    background: url("/images2/Cover.jpg") center center / cover no-repeat;
+    background: url("/images2/Image 1.png") center center / cover no-repeat;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -426,7 +426,7 @@
     }
 
     50% {
-        background-image: url("/images2/Cover.jpg");
+        background-image: url("/images2/Image 1.png");
     }
 
     75% {

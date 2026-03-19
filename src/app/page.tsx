@@ -24,7 +24,7 @@ const defaultContent: SiteContentData = {
     hero: {
         title: "Engineered Casting Solutions",
         subtitle: "100+ Years of Excellence",
-        bgImage: "/images2/Cover.jpg"
+        bgImage: "/images2/Image 1.png"
     },
     about: {
         title: "About Atlas Foundries",
@@ -47,7 +47,7 @@ const defaultContent: SiteContentData = {
         subtitle: "Contact us today to discuss your casting requirements and experience the Atlas advantage.",
         buttonText: "Contact Us Now",
         buttonLink: "/contact-us",
-        bgImage: "/images2/Cover.jpg"
+        bgImage: "/images2/Image 1.png"
     },
     processPage: {
         steps: [
