@@ -1,10 +1,10 @@
-<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Outer Circle -->
-  <circle cx="16" cy="16" r="14" fill="#C52016"/>
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Circular Red Background -->
+  <circle cx="32" cy="32" r="30" fill="#C52016"/>
   
-  <!-- Stylished 'A' Shape -->
-  <path d="M16 6L24 22H20L16 14L12 22H8L16 6Z" fill="white"/>
+  <!-- Stylized White 'A' -->
+  <path d="M32 10L52 48H44L32 24L20 48H12L32 10Z" fill="white"/>
   
-  <!-- Swoosh effect -->
-  <path d="M6 24C10 20 22 20 28 24L26 26C20 22 10 22 6 26L6 24Z" fill="#7D7D7D"/>
+  <!-- Dynamic Grey Swoosh crossing the A -->
+  <path d="M8 50C18 38 46 38 56 48L54 52C44 42 18 42 8 54V50Z" fill="#A0A0A0"/>
 </svg>

@@ -1,7 +1,38 @@
 "use client";
 
-import { useState, useEffect, ChangeEvent } from "react";
+import React, { useState, useEffect, ChangeEvent } from "react";
 import Image from "next/image";
+import { 
+    LayoutDashboard, 
+    Package, 
+    BookOpen, 
+    Tag, 
+    LayoutGrid,
+    Settings, 
+    Users, 
+    LogOut,
+    Plus,
+    Search,
+    Filter,
+    ArrowRight,
+    Activity,
+    Trash2,
+    FileText,
+    ChevronLeft,
+    ChevronRight,
+    Menu,
+    X,
+    Bell,
+    Mail,
+    Lock,
+    Shield
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Component Imports
+import AdminSidebar from '@/components/admin/AdminSidebar';
+import StatCard from '@/components/admin/StatCard';
+import Toast, { ToastType } from '@/components/ui/Toast';
 
 interface Product {
     _id: string;
@@ -13,12 +44,28 @@ interface Product {
     tags?: Tag[];
 }
 
+interface Article {
+    _id: string;
+    title: string;
+    slug: string;
+    description: string;
+    content: string;
+    imageUrl: string;
+    author: string;
+    tags: string[];
+    isPublished: boolean;
+    createdAt: string;
+}
+
 interface SiteContentData {
     hero: { title: string; subtitle: string; bgImage: string };
-    about: { title: string; heading: string; description: string; imageUrl: string };
+    about: { title: string; heading: string; description: string; imageUrl: string; bulletPoints: string[] };
     features: { title: string; description: string; imageUrl: string; linkUrl: string }[];
     socialLinks: { facebook: string; twitter: string; linkedin: string; instagram: string; youtube: string };
     companyProfileUrl: string;
+    homeCTA: { title: string; subtitle: string; buttonText: string; buttonLink: string; bgImage: string };
+    aboutPage: { missionTitle: string; missionText: string; visionTitle: string; visionText: string };
+    processPage: { steps: { title: string; description: string; imageUrl: string }[] };
     infrastructure: { videoUrl: string; companyImages: string[]; certificates: string[] };
 }
 
@@ -34,27 +81,97 @@ interface Tag {
     slug: string;
 }
 
+interface User {
+    _id: string;
+    email: string;
+    role: string;
+}
+
+interface Feature {
+    title: string;
+    description: string;
+    imageUrl: string;
+    linkUrl: string;
+}
+
+interface ProcessStep {
+    title: string;
+    description: string;
+    imageUrl: string;
+}
+
 export default function AdminDashboard() {
-    const [activeTab, setActiveTab] = useState<"products" | "users" | "content" | "categories" | "tags">("products");
+    const [activeTab, setActiveTab] = useState<"dashboard" | "products" | "users" | "content" | "categories" | "tags" | "journal">("dashboard");
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+    const [stats, setStats] = useState({
+        products: 0,
+        articles: 0,
+        users: 0,
+        categories: 0
+    });
+    
     const [products, setProducts] = useState<Product[]>([]);
+    const [articles, setArticles] = useState<Article[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [tags, setTags] = useState<Tag[]>([]);
-    const [users, setUsers] = useState<{ _id: string, email: string, role: string }[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
     const [siteContent, setSiteContent] = useState<SiteContentData | null>(null);
 
+    const showToast = (message: string, type: ToastType = 'success') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 5000);
+    };
+
     // Product Form State
-    const [formData, setFormData] = useState({
+    interface ProductFormData {
+        title: string;
+        slug: string;
+        imageUrl: string;
+        description: string;
+        category: string;
+        tags: string[];
+    }
+
+    const [formData, setFormData] = useState<ProductFormData>({
         title: "",
         slug: "",
         imageUrl: "",
         description: "",
         category: "",
-        tags: [] as string[]
+        tags: []
     });
+    interface ArticleFormData {
+        title: string;
+        slug: string;
+        description: string;
+        content: string;
+        imageUrl: string;
+        author: string;
+        tags: string;
+        isPublished: boolean;
+    }
+
+    const [articleForm, setArticleForm] = useState<ArticleFormData>({
+        title: "",
+        slug: "",
+        description: "",
+        content: "",
+        imageUrl: "",
+        author: "",
+        tags: "",
+        isPublished: false
+    });
+    const [isEditingArticle, setIsEditingArticle] = useState<string | null>(null);
     const [isEditing, setIsEditing] = useState<string | null>(null);
 
+    interface UserFormData {
+        email: string;
+        password?: string;
+    }
+
     // User Form State
-    const [userForm, setUserForm] = useState({ email: "", password: "" });
+    const [userForm, setUserForm] = useState<UserFormData>({ email: "", password: "" });
 
     // Category Form State
     const [categoryForm, setCategoryForm] = useState({ name: "" });
@@ -79,6 +196,14 @@ export default function AdminDashboard() {
         }
     };
 
+    const fetchArticles = async () => {
+        const res = await fetch("/api/articles");
+        if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data)) setArticles(data);
+        }
+    };
+
     const fetchContent = async () => {
         const res = await fetch("/api/content");
         if (res.ok) {
@@ -87,6 +212,11 @@ export default function AdminDashboard() {
             if (!data.socialLinks) data.socialLinks = { facebook: "", twitter: "", linkedin: "", instagram: "", youtube: "" };
             if (!data.companyProfileUrl) data.companyProfileUrl = "";
             if (!data.infrastructure) data.infrastructure = { videoUrl: "", companyImages: [], certificates: [] };
+            if (!data.about) data.about = { title: "", heading: "", description: "", imageUrl: "", bulletPoints: [] };
+            if (!data.about.bulletPoints) data.about.bulletPoints = [];
+            if (!data.homeCTA) data.homeCTA = { title: "", subtitle: "", buttonText: "", buttonLink: "", bgImage: "" };
+            if (!data.aboutPage) data.aboutPage = { missionTitle: "", missionText: "", visionTitle: "", visionText: "" };
+            if (!data.processPage) data.processPage = { steps: [] };
             setSiteContent(data);
         }
     };
@@ -99,6 +229,28 @@ export default function AdminDashboard() {
         }
     };
 
+    const fetchStats = async () => {
+        try {
+            const [p, a, u, c] = await Promise.all([
+                fetch("/api/products"),
+                fetch("/api/articles"),
+                fetch("/api/users"),
+                fetch("/api/categories")
+            ]);
+            const [products, articles, users, categories] = await Promise.all([
+                p.json(), a.json(), u.json(), c.json()
+            ]);
+            setStats({
+                products: Array.isArray(products) ? products.length : 0,
+                articles: Array.isArray(articles) ? articles.length : 0,
+                users: Array.isArray(users) ? users.length : 0,
+                categories: Array.isArray(categories) ? categories.length : 0
+            });
+        } catch (error) {
+            console.error("Error fetching stats:", error);
+        }
+    };
+
     const fetchTags = async () => {
         const res = await fetch("/api/tags");
         if (res.ok) {
@@ -108,11 +260,13 @@ export default function AdminDashboard() {
     };
 
     useEffect(() => {
+        if (activeTab === "dashboard") fetchStats();
         if (activeTab === "products") { fetchProducts(); fetchCategories(); fetchTags(); }
         if (activeTab === "users") fetchUsers();
         if (activeTab === "content") fetchContent();
         if (activeTab === "categories") fetchCategories();
         if (activeTab === "tags") fetchTags();
+        if (activeTab === "journal") fetchArticles();
     }, [activeTab]);
 
     // --- Tag Handlers ---
@@ -127,8 +281,9 @@ export default function AdminDashboard() {
         if (res.ok) {
             setTagForm({ name: "" });
             fetchTags();
+            showToast("Tag created!", "success");
         } else {
-            alert("Error creating tag");
+            showToast("Error creating tag", "error");
         }
         setLoading(false);
     };
@@ -142,28 +297,28 @@ export default function AdminDashboard() {
     // --- Product Handlers ---
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData((prev: ProductFormData) => ({ ...prev, [name]: value }));
         if (name === "title") {
-            setFormData(prev => ({
+            setFormData((prev: ProductFormData) => ({
                 ...prev,
                 slug: value.toLowerCase().replace(/ /g, "-").replace(/[^\w-]+/g, "")
             }));
         }
     };
 
-    const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            if (file.size > 10 * 1024 * 1024) {
-                alert("File size too large! Please upload <= 10MB.");
-                e.target.value = "";
-                return;
-            }
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setFormData(prev => ({ ...prev, imageUrl: reader.result as string }));
-            };
-            reader.readAsDataURL(file);
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const res = await fetch("/api/upload", { method: "POST", body: formData });
+            const data = await res.json();
+            setFormData((prev: ProductFormData) => ({ ...prev, imageUrl: data.url }));
+        } catch (error) {
+            console.error("Error uploading image:", error);
         }
     };
 
@@ -178,16 +333,16 @@ export default function AdminDashboard() {
             body: JSON.stringify(formData)
         });
         if (res.ok) {
-            alert("Product saved successfully!");
+            showToast("Product saved successfully!");
             setFormData({ title: "", slug: "", imageUrl: "", description: "", category: "", tags: [] });
             setIsEditing(null);
             fetchProducts();
         } else {
             const errorData = await res.json();
-            const message = errorData.details 
-                ? `Error: ${errorData.error}\nDetails: ${errorData.details}`
+            const message = errorData.details
+                ? `Error: ${errorData.error}. ${errorData.details}`
                 : errorData.error || "Error saving product";
-            alert(message);
+            showToast(message, "error");
         }
         setLoading(false);
     };
@@ -205,7 +360,7 @@ export default function AdminDashboard() {
             imageUrl: product.imageUrl,
             description: product.description,
             category: product.category || "",
-            tags: product.tags ? product.tags.map(t => t._id) : []
+            tags: product.tags ? product.tags.map((t: { _id: string }) => t._id) : []
         });
         setIsEditing(product._id);
         window.scrollTo(0, 0);
@@ -214,7 +369,7 @@ export default function AdminDashboard() {
     // --- User Handlers ---
     const handleUserChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setUserForm(prev => ({ ...prev, [name]: value }));
+        setUserForm((prev: UserFormData) => ({ ...prev, [name]: value }));
     };
 
     const handleUserSubmit = async (e: React.FormEvent) => {
@@ -226,12 +381,12 @@ export default function AdminDashboard() {
             body: JSON.stringify(userForm)
         });
         if (res.ok) {
-            alert("Admin user created successfully!");
+            showToast("Admin user created successfully!");
             setUserForm({ email: "", password: "" });
             fetchUsers();
         } else {
             const data = await res.json();
-            alert(data.error || "Error creating user");
+            showToast(data.error || "Error creating user", "error");
         }
         setLoading(false);
     };
@@ -242,86 +397,109 @@ export default function AdminDashboard() {
         try {
             const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
             if (res.ok) {
-                alert("User deleted successfully!");
+                showToast("User deleted successfully!");
                 fetchUsers();
             } else {
                 const data = await res.json();
-                alert(data.error || "Error deleting user");
+                showToast(data.error || "Error deleting user", "error");
             }
         } catch (error) {
-            alert("An error occurred while deleting the user");
+            showToast("An error occurred while deleting the user", "error");
         }
         setLoading(false);
     };
 
     // --- Content Handlers ---
-    const handleContentChange = (section: 'hero' | 'about' | 'features' | 'socialLinks' | 'infrastructure', field: string, value: string | string[], index?: number) => {
-        setSiteContent(prev => {
+    const handleContentChange = (section: keyof SiteContentData, field: string, value: string | string[] | Feature[] | ProcessStep[], index?: number) => {
+        setSiteContent((prev: SiteContentData | null) => {
             if (!prev) return null;
             const newData = { ...prev };
 
             if (section === 'features' && typeof index === 'number') {
                 const newFeatures = [...newData.features];
-                newFeatures[index] = { ...newFeatures[index], [field]: value };
+                newFeatures[index] = { ...newFeatures[index], [field as keyof Feature]: value as string };
                 newData.features = newFeatures;
+            } else if (section === 'processPage' && field === 'steps' && Array.isArray(value)) {
+                newData.processPage = { ...newData.processPage, steps: value as ProcessStep[] };
+            } else if (section === 'about' && field === 'bulletPoints' && Array.isArray(value)) {
+                newData.about = { ...newData.about, bulletPoints: value as string[] };
             } else if (section === 'socialLinks') {
-                newData.socialLinks = { ...newData.socialLinks, [field]: value };
+                (newData.socialLinks as any)[field] = value as string;
             } else if (section === 'infrastructure') {
-                // If it's an array field (images), value is already the new array
-                // If it's a string field (videoUrl), update directly
-                newData.infrastructure = { ...newData.infrastructure, [field]: value };
-            } else {
-                (newData as any)[section] = { ...(newData as any)[section], [field]: value };
+                if (field === 'videoUrl') {
+                    newData.infrastructure.videoUrl = value as string;
+                } else if (field === 'companyImages' || field === 'certificates') {
+                    (newData.infrastructure as any)[field] = value as string[];
+                }
+            } else if (section === 'hero' || section === 'about' || section === 'homeCTA' || section === 'aboutPage') {
+                (newData[section] as any)[field] = value as string;
             }
             return newData;
         });
     };
 
     // Handler for direct root level fields like companyProfileUrl
-    const handleRootContentChange = (field: string, value: string) => {
-        setSiteContent(prev => {
+    const handleRootContentChange = (field: keyof SiteContentData, value: string) => {
+        setSiteContent((prev: SiteContentData | null) => {
             if (!prev) return null;
             return { ...prev, [field]: value };
         });
     };
 
-    const handleContentImageUpload = (e: ChangeEvent<HTMLInputElement>, section: 'hero' | 'about' | 'features' | 'companyProfile' | 'infrastructure', index?: number, arrayField?: 'companyImages' | 'certificates') => {
-        const file = e.target.files?.[0];
-        if (file) {
-            // Basic size check (4.5MB Vercel limit)
-            if (file.size > 4.5 * 1024 * 1024) {
-                alert("File too large. Max 4.5MB for Vercel.");
-                return;
-            }
+    interface ProcessStep {
+        title: string;
+        description: string;
+        imageUrl: string;
+    }
 
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const result = reader.result as string;
-                if (section === 'companyProfile') {
-                    handleRootContentChange('companyProfileUrl', result);
-                } else if (section === 'infrastructure' && arrayField) {
-                    // Append to array
-                    if (!siteContent) return;
-                    const currentArray = siteContent.infrastructure[arrayField] || [];
-                    handleContentChange('infrastructure', arrayField, [...currentArray, result]);
-                } else {
-                    handleContentChange(section as any, section === 'features' ? 'imageUrl' : (section === 'hero' ? 'bgImage' : 'imageUrl'), result, index);
-                }
-            };
-            reader.readAsDataURL(file);
+    const handleContentImageUpload = async (e: ChangeEvent<HTMLInputElement>, section: keyof SiteContentData | 'companyProfile', index?: number, arrayField?: 'companyImages' | 'certificates') => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const res = await fetch("/api/upload", { method: "POST", body: formData });
+            const data = await res.json();
+            const result = data.url;
+
+            if (section === 'companyProfile') {
+                handleRootContentChange('companyProfileUrl', result);
+            } else if (section === 'infrastructure' && arrayField) {
+                if (!siteContent) return;
+                const currentArray = siteContent.infrastructure[arrayField] || [];
+                handleContentChange('infrastructure', arrayField, [...currentArray, result]);
+            } else if (section === 'processPage' && typeof index === 'number') {
+                if (!siteContent) return;
+                const newSteps = [...siteContent.processPage.steps];
+                newSteps[index] = { ...newSteps[index], imageUrl: result };
+                handleContentChange('processPage', 'steps', newSteps);
+            } else {
+                const fieldMap: Record<string, string> = {
+                    hero: 'bgImage',
+                    about: 'imageUrl',
+                    features: 'imageUrl',
+                    homeCTA: 'bgImage',
+                    aboutPage: 'imageUrl' 
+                };
+                handleContentChange(section as keyof SiteContentData, fieldMap[section] || 'imageUrl', result, index);
+            }
+        } catch (error) {
+            console.error("Error uploading content image:", error);
         }
     };
 
     const removeInfrastructureImage = (arrayField: 'companyImages' | 'certificates', imgIndex: number) => {
         if (!siteContent) return;
         const currentArray = siteContent.infrastructure[arrayField] || [];
-        const newArray = currentArray.filter((_, i) => i !== imgIndex);
+        const newArray = currentArray.filter((_: string, i: number) => i !== imgIndex);
         handleContentChange('infrastructure', arrayField, newArray);
     };
 
     const removeFeature = (index: number) => {
         if (!siteContent) return;
-        const newFeatures = siteContent.features.filter((_, i) => i !== index);
+        const newFeatures = siteContent.features.filter((_: Feature, i: number) => i !== index);
         setSiteContent({ ...siteContent, features: newFeatures });
     };
 
@@ -341,11 +519,91 @@ export default function AdminDashboard() {
             body: JSON.stringify(siteContent)
         });
         if (res.ok) {
-            alert("Site content updated successfully!");
+            showToast("Site content updated successfully!");
         } else {
-            alert("Error updating content");
+            showToast("Error updating content", "error");
         }
         setLoading(false);
+    };
+
+    // --- Journal Handlers ---
+    const handleArticleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value, type } = e.target;
+        const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
+        setArticleForm((prev: ArticleFormData) => ({ ...prev, [name]: val }));
+
+        if (name === "title") {
+            const slug = value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+            setArticleForm((prev: ArticleFormData) => ({ ...prev, slug }));
+        }
+    };
+
+    const handleArticleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        const url = "/api/articles";
+        const method = isEditingArticle ? "PUT" : "POST";
+        const body = isEditingArticle ? { ...articleForm, _id: isEditingArticle } : articleForm;
+
+        const res = await fetch(url, {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+
+        if (res.ok) {
+            showToast(isEditingArticle ? "Article updated!" : "Article created!");
+            setArticleForm({ title: "", slug: "", description: "", content: "", imageUrl: "", author: "", tags: "", isPublished: false });
+            setIsEditingArticle(null);
+            fetchArticles();
+        } else {
+            showToast("Error saving article", "error");
+        }
+        setLoading(false);
+    };
+
+    const handleArticleEdit = (article: Article) => {
+        setArticleForm({
+            title: article.title,
+            slug: article.slug,
+            description: article.description,
+            content: article.content,
+            imageUrl: article.imageUrl,
+            author: article.author,
+            tags: article.tags.join(', '),
+            isPublished: article.isPublished
+        });
+        setIsEditingArticle(article._id);
+        window.scrollTo(0, 0);
+    };
+
+    const handleDeleteArticle = async (id: string) => {
+        if (!confirm("Are you sure you want to delete this article?")) return;
+        setLoading(true);
+        const res = await fetch(`/api/articles/${id}`, { method: "DELETE" });
+        if (res.ok) {
+            showToast("Article deleted!");
+            fetchArticles();
+        } else {
+            showToast("Error deleting article", "error");
+        }
+        setLoading(false);
+    };
+
+    const handleArticleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const res = await fetch("/api/upload", { method: "POST", body: formData });
+            const data = await res.json();
+            setArticleForm((prev: ArticleFormData) => ({ ...prev, imageUrl: data.url }));
+        } catch (error) {
+            console.error("Error uploading image:", error);
+        }
     };
 
     // --- Category Handlers ---
@@ -360,8 +618,9 @@ export default function AdminDashboard() {
         if (res.ok) {
             setCategoryForm({ name: "" });
             fetchCategories();
+            showToast("Category created!");
         } else {
-            alert("Error creating category");
+            showToast("Error creating category", "error");
         }
         setLoading(false);
     };
@@ -379,500 +638,944 @@ export default function AdminDashboard() {
     const buttonClass = "bg-brand-blue text-white px-8 py-3 rounded-lg hover:bg-brand-orange transition-colors font-bold shadow-md";
 
     return (
-        <div className="min-h-screen bg-slate-900 text-slate-100 p-8">
-            <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                <div className="flex items-center gap-4">
-                    <h1 className="text-4xl font-bold text-white tracking-tight">Admin<span className="text-brand-orange">Console</span></h1>
-                </div>
+        <div className="flex min-h-screen bg-slate-900 text-slate-100 overflow-hidden">
+            {/* Sidebar */}
+            <AdminSidebar 
+                activeTab={activeTab} 
+                setActiveTab={setActiveTab} 
+                isCollapsed={isSidebarCollapsed} 
+                setIsCollapsed={setIsSidebarCollapsed}
+                onLogout={() => window.location.href = "/api/auth/signout"}
+            />
 
-                <div className="flex gap-2 overflow-x-auto pb-4 md:pb-0 w-full md:w-auto scrollbar-hide">
-                    {(['products', 'categories', 'tags', 'users', 'content'] as const).map(tab => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`px-6 py-2 rounded-full font-bold capitalize whitespace-nowrap transition-all ${activeTab === tab
-                                ? "bg-brand-orange text-white shadow-lg"
-                                : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white"
-                                }`}
-                        >
-                            {tab === 'content' ? 'Site Content' : tab}
-                        </button>
-                    ))}
-                    <button
-                        onClick={() => window.location.href = "/api/auth/signout"}
-                        className="px-6 py-2 bg-red-600/20 text-red-500 rounded-full font-bold hover:bg-red-600 hover:text-white transition-all ml-4 border border-red-600/50"
-                    >
-                        Logout
-                    </button>
-                </div>
-            </div>
-
-            {/* --- PRODUCTS TAB --- */}
-            {activeTab === "products" && (
-                <>
-                    <div className={cardClass}>
-                        <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
-                            {isEditing ? "✏️ Edit Product" : "✨ Add New Product"}
-                        </h2>
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className={labelClass}>Product Title</label>
-                                    <input name="title" value={formData.title} onChange={handleChange} className={inputClass} placeholder="e.g. Heavy Duty Coupler" required />
-                                </div>
-                                <div>
-                                    <label className={labelClass}>Slug</label>
-                                    <input name="slug" value={formData.slug} onChange={handleChange} className={`${inputClass} bg-slate-950 text-slate-500 cursor-not-allowed`} readOnly />
-                                </div>
-                                <div>
-                                    <label className={labelClass}>Category</label>
-                                    <select name="category" value={formData.category} onChange={handleChange} className={inputClass}>
-                                        <option value="">No Category</option>
-                                        {categories.map(cat => (
-                                            <option key={cat._id} value={cat.name}>{cat.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className={labelClass}>Tags</label>
-                                    <div className="grid grid-cols-2 gap-2 bg-slate-900 p-3 rounded-lg border border-slate-600 max-h-40 overflow-y-auto">
-                                        {tags.map(tag => (
-                                            <label key={tag._id} className="flex items-center gap-2 cursor-pointer hover:text-brand-orange">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={formData.tags.includes(tag._id)}
-                                                    onChange={(e) => {
-                                                        const checked = e.target.checked;
-                                                        setFormData(prev => ({
-                                                            ...prev,
-                                                            tags: checked
-                                                                ? [...prev.tags, tag._id]
-                                                                : prev.tags.filter(id => id !== tag._id)
-                                                        }));
-                                                    }}
-                                                    className="accent-brand-orange"
-                                                />
-                                                <span className="text-sm">{tag.name}</span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className={labelClass}>Image</label>
-                                    <div className="flex flex-col gap-4">
-                                        <div className="flex items-center gap-4">
-                                            <div className="h-24 w-24 relative bg-slate-900 rounded-lg overflow-hidden border border-slate-700 shrink-0">
-                                                {formData.imageUrl ? (
-                                                    <Image src={formData.imageUrl} alt="Preview" fill className="object-cover" />
-                                                ) : (
-                                                    <div className="flex items-center justify-center h-full text-slate-600 text-xs">No Preview</div>
-                                                )}
-                                            </div>
-                                            <input type="file" accept="image/*" onChange={handleImageUpload} className="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-700 file:text-white hover:file:bg-slate-600 transition-all" />
-                                        </div>
-                                        <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-700/50">
-                                            <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1 flex items-center gap-1">
-                                                <span className="text-brand-orange">⚠️</span> Image Guide
-                                            </p>
-                                            <ul className="text-[10px] text-slate-500 space-y-0.5 list-disc pl-4 font-medium">
-                                                <li>Max File Size: <span className="text-slate-300">4.5 MB</span> (Vercel limit)</li>
-                                                <li>Recommended: <span className="text-slate-300">800×800px</span> or <span className="text-slate-300">1:1</span> Aspect Ratio</li>
-                                                <li>Formats: <span className="text-slate-300">WEBP</span>, <span className="text-slate-300">JPG</span>, or <span className="text-slate-300">PNG</span></li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <label className={labelClass}>Description</label>
-                                <textarea name="description" value={formData.description} onChange={handleChange} rows={4} className={inputClass} required></textarea>
-                            </div>
-                            <div className="flex gap-4">
-                                <button type="submit" disabled={loading} className={buttonClass}>
-                                    {loading ? "Saving..." : isEditing ? "Update Product" : "Create Product"}
-                                </button>
-                                {isEditing && <button type="button" onClick={() => { setIsEditing(null); setFormData({ title: "", slug: "", imageUrl: "", description: "", category: "", tags: [] }); }} className="text-slate-400 hover:text-white font-bold px-4">Cancel</button>}
-                            </div>
-                        </form>
+            {/* Main Content Area */}
+            <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+                {/* Header */}
+                <header className="h-20 bg-slate-800/50 backdrop-blur-md border-b border-slate-700 flex items-center justify-between px-8 z-30 shrink-0">
+                    <div className="flex items-center gap-4">
+                        <h1 className="text-2xl font-bold text-white capitalize flex items-center gap-3">
+                            {activeTab === 'dashboard' && <LayoutDashboard className="w-6 h-6 text-brand-orange" />}
+                            {activeTab === 'products' && <Package className="w-6 h-6 text-brand-orange" />}
+                            {activeTab === 'journal' && <BookOpen className="w-6 h-6 text-brand-orange" />}
+                            {activeTab === 'categories' && <LayoutGrid className="w-6 h-6 text-brand-orange" />}
+                            {activeTab === 'users' && <Users className="w-6 h-6 text-brand-orange" />}
+                            {activeTab === 'content' && <Settings className="w-6 h-6 text-brand-orange" />}
+                            {activeTab === 'tags' && <Tag className="w-6 h-6 text-brand-orange" />}
+                            {activeTab === 'content' ? 'Site Content' : activeTab}
+                        </h1>
                     </div>
+                </header>
 
-                    <div className="max-w-6xl mx-auto">
-                        <h2 className="text-2xl font-bold mb-6 text-white">Existing Products</h2>
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1">
-                            {products.map((product) => (
-                                <div key={product._id} className="bg-slate-800 p-4 rounded-xl shadow border border-slate-700 flex flex-col md:flex-row items-start md:items-center gap-6 hover:border-brand-orange transition-colors">
-                                    <div className="h-20 w-20 relative bg-slate-900 rounded-lg overflow-hidden shrink-0 border border-slate-700">
-                                        {product.imageUrl && <Image src={product.imageUrl} alt={product.title} fill className="object-cover" />}
+                {/* Content Container */}
+                <div className="flex-1 overflow-y-auto p-8 scrollbar-hide">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={activeTab}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            {activeTab === "dashboard" && (
+                                <div className="space-y-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                        <StatCard title="Total Products" value={stats.products} Icon={Package} color="blue" />
+                                        <StatCard title="Journal Articles" value={stats.articles} Icon={BookOpen} color="orange" />
+                                        <StatCard title="Total Users" value={stats.users} Icon={Users} color="green" />
+                                        <StatCard title="Categories" value={stats.categories} Icon={LayoutGrid} color="purple" />
                                     </div>
-                                    <div className="flex-1">
-                                        <h3 className="font-bold text-xl text-white">{product.title}</h3>
-                                        <div className="flex flex-wrap gap-2 mt-2">
-                                            <span className="inline-block bg-brand-blue/20 text-brand-blue px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">
-                                                {product.category}
-                                            </span>
-                                            {product.tags && product.tags.length > 0 && product.tags.map((tag: any) => (
-                                                <span key={tag._id || tag} className="inline-block bg-brand-orange/20 text-brand-orange px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">
-                                                    {typeof tag === 'object' ? tag.name : 'Tag'}
-                                                </span>
+                                    
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                        <div className={cardClass + " !mb-0"}>
+                                            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                                                <Plus className="w-5 h-5 text-brand-orange" />
+                                                Quick Actions
+                                            </h3>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <button onClick={() => setActiveTab('products')} className="p-4 bg-slate-900/50 hover:bg-slate-700 rounded-xl border border-slate-700 text-left transition-all group">
+                                                    <p className="font-bold text-slate-200 group-hover:text-brand-orange">Add Product</p>
+                                                    <p className="text-xs text-slate-500 mt-1">Insert new foundry item</p>
+                                                </button>
+                                                <button onClick={() => setActiveTab('journal')} className="p-4 bg-slate-900/50 hover:bg-slate-700 rounded-xl border border-slate-700 text-left transition-all group">
+                                                    <p className="font-bold text-slate-200 group-hover:text-brand-orange">Write Article</p>
+                                                    <p className="text-xs text-slate-500 mt-1">New journal entry</p>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className={cardClass + " !mb-0"}>
+                                            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                                                <Activity className="w-5 h-5 text-brand-orange" />
+                                                System Status
+                                            </h3>
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between items-center bg-slate-900/50 p-3 rounded-lg border border-slate-700">
+                                                    <span className="text-sm font-medium">Database Connection</span>
+                                                    <span className="flex items-center gap-2 text-xs text-green-500 font-bold uppercase tracking-widest">
+                                                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                                        Connected
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center bg-slate-900/50 p-3 rounded-lg border border-slate-700">
+                                                    <span className="text-sm font-medium">Media Storage</span>
+                                                    <span className="text-xs text-slate-400 font-bold uppercase tracking-widest">Available</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* --- PRODUCTS TAB --- */}
+                            {activeTab === "products" && (
+                                <div className="space-y-12">
+                                    <div className={cardClass}>
+                                        <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
+                                            <Plus className="w-6 h-6 text-brand-orange" />
+                                            {isEditing ? "Edit Product" : "Add New Product"}
+                                        </h2>
+                                        <form onSubmit={handleSubmit} className="space-y-6">
+                                            <div className="grid md:grid-cols-2 gap-6">
+                                                <div>
+                                                    <label className={labelClass}>Product Title</label>
+                                                    <input name="title" value={formData.title} onChange={handleChange} className={inputClass} placeholder="e.g. Heavy Duty Coupler" required />
+                                                </div>
+                                                <div>
+                                                    <label className={labelClass}>Slug</label>
+                                                    <input name="slug" value={formData.slug} onChange={handleChange} className={`${inputClass} bg-slate-950 text-slate-500 cursor-not-allowed`} readOnly />
+                                                </div>
+                                                <div>
+                                                    <label className={labelClass}>Category</label>
+                                                    <select name="category" value={formData.category} onChange={handleChange} className={inputClass}>
+                                                        <option value="">No Category</option>
+                                                        {categories.map((cat: Category) => (
+                                                            <option key={cat._id} value={cat.name}>{cat.name}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className={labelClass}>Tags</label>
+                                                    <div className="grid grid-cols-2 gap-2 bg-slate-900 p-3 rounded-lg border border-slate-600 max-h-40 overflow-y-auto">
+                                                        {tags.map((tag: Tag) => (
+                                                            <label key={tag._id} className="flex items-center gap-2 cursor-pointer hover:text-brand-orange">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={formData.tags.includes(tag._id)}
+                                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                                        const checked = e.target.checked;
+                                                                        setFormData((prev: ProductFormData) => ({
+                                                                            ...prev,
+                                                                            tags: checked
+                                                                                ? [...prev.tags, tag._id]
+                                                                                : prev.tags.filter((id: string) => id !== tag._id)
+                                                                        }));
+                                                                    }}
+                                                                    className="accent-brand-orange"
+                                                                />
+                                                                <span className="text-sm">{tag.name}</span>
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label className={labelClass}>Image</label>
+                                                    <div className="flex flex-col gap-4">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="h-24 w-24 relative bg-slate-900 rounded-lg overflow-hidden border border-slate-700 shrink-0">
+                                                                {formData.imageUrl ? (
+                                                                    <Image src={formData.imageUrl} alt="Preview" fill className="object-cover" />
+                                                                ) : (
+                                                                    <div className="flex items-center justify-center h-full text-slate-600 text-xs text-center p-2">No Preview</div>
+                                                                )}
+                                                            </div>
+                                                            <input type="file" accept="image/*" onChange={handleImageUpload} className="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-700 file:text-white hover:file:bg-slate-600 transition-all cursor-pointer" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className={labelClass}>Description</label>
+                                                <textarea name="description" value={formData.description} onChange={handleChange} rows={4} className={inputClass} required></textarea>
+                                            </div>
+                                            <div className="flex gap-4">
+                                                <button type="submit" disabled={loading} className={buttonClass}>
+                                                    {loading ? "Saving..." : isEditing ? "Update Product" : "Create Product"}
+                                                </button>
+                                                {isEditing && <button type="button" onClick={() => { setIsEditing(null); setFormData({ title: "", slug: "", imageUrl: "", description: "", category: "", tags: [] }); }} className="text-slate-400 hover:text-white font-bold px-4">Cancel</button>}
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <h2 className="text-2xl font-bold text-white">Existing Products</h2>
+                                        <div className="grid gap-4">
+                                            {products.map((product: Product) => (
+                                                <div key={product._id} className="bg-slate-800 p-4 rounded-xl shadow border border-slate-700 flex flex-col md:flex-row items-start md:items-center gap-6 hover:border-brand-orange transition-colors group">
+                                                    <div className="h-20 w-20 relative bg-slate-900 rounded-lg overflow-hidden shrink-0 border border-slate-700 group-hover:border-brand-orange/50 transition-colors">
+                                                        {product.imageUrl && <Image src={product.imageUrl} alt={product.title} fill className="object-cover" />}
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <h3 className="font-bold text-xl text-white group-hover:text-brand-orange transition-colors">{product.title}</h3>
+                                                        <div className="flex flex-wrap gap-2 mt-2">
+                                                            <span className="inline-block bg-brand-blue/20 text-brand-blue px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">
+                                                                {product.category}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-3 mt-4 md:mt-0 w-full md:w-auto">
+                                                        <button onClick={() => handleEdit(product)} className="flex-1 md:flex-none px-5 py-2.5 bg-slate-700 hover:bg-white hover:text-slate-900 rounded-lg text-sm font-bold transition-all text-center">
+                                                            Edit
+                                                        </button>
+                                                        <button onClick={() => handleDelete(product._id)} className="flex-1 md:flex-none px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-bold transition-all text-center">
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             ))}
                                         </div>
                                     </div>
-                                    <div className="flex gap-3 mt-4 md:mt-0 w-full md:w-auto">
-                                        <button onClick={() => handleEdit(product)} className="flex-1 md:flex-none px-5 py-2.5 bg-slate-700 hover:bg-white hover:text-slate-900 rounded-lg text-sm font-bold transition-all text-center">
-                                            Edit
-                                        </button>
-                                        <button onClick={() => handleDelete(product._id)} className="flex-1 md:flex-none px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-bold shadow-lg shadow-red-900/20 transition-all transform hover:scale-105 text-center">
-                                            Delete
-                                        </button>
-                                    </div>
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-                </>
-            )}
-
-            {/* --- TAGS TAB --- */}
-            {activeTab === "tags" && (
-                <div className="max-w-4xl mx-auto">
-                    <div className={cardClass}>
-                        <h2 className="text-2xl font-bold mb-6 text-white">Add New Tag</h2>
-                        <form onSubmit={handleTagSubmit} className="flex gap-4">
-                            <div className="flex-1">
-                                <input
-                                    value={tagForm.name}
-                                    onChange={(e) => setTagForm({ name: e.target.value })}
-                                    className={inputClass}
-                                    placeholder="Tag Name (e.g. High Strength)"
-                                    required
-                                />
-                            </div>
-                            <button type="submit" disabled={loading} className={buttonClass}>
-                                {loading ? "Adding..." : "Add"}
-                            </button>
-                        </form>
-                    </div>
-
-                    <div className="grid gap-4">
-                        {tags.map((tag) => (
-                            <div key={tag._id} className="bg-slate-800 p-4 rounded-xl shadow border border-slate-700 flex items-center justify-between">
-                                <h3 className="font-bold text-lg text-white">{tag.name}</h3>
-                                <button onClick={() => handleDeleteTag(tag._id)} className="px-4 py-2 bg-red-600/20 text-red-500 hover:bg-red-600 hover:text-white rounded-lg text-sm font-bold transition-all">
-                                    Delete
-                                </button>
-                            </div>
-                        ))}
-                        {tags.length === 0 && <p className="text-slate-500 text-center py-8">No tags found.</p>}
-                    </div>
-                </div>
-            )}
-
-            {/* --- CATEGORIES TAB --- */}
-            {activeTab === "categories" && (
-                <div className="max-w-4xl mx-auto">
-                    <div className={cardClass}>
-                        <h2 className="text-2xl font-bold mb-6 text-white">Add New Category</h2>
-                        <form onSubmit={handleCategorySubmit} className="flex gap-4">
-                            <div className="flex-1">
-                                <input
-                                    value={categoryForm.name}
-                                    onChange={(e) => setCategoryForm({ name: e.target.value })}
-                                    className={inputClass}
-                                    placeholder="Category Name"
-                                    required
-                                />
-                            </div>
-                            <button type="submit" disabled={loading} className={buttonClass}>
-                                {loading ? "Adding..." : "Add"}
-                            </button>
-                        </form>
-                    </div>
-
-                    <div className="grid gap-4">
-                        {categories.map((cat) => (
-                            <div key={cat._id} className="bg-slate-800 p-4 rounded-xl shadow border border-slate-700 flex items-center justify-between">
-                                <h3 className="font-bold text-lg text-white">{cat.name}</h3>
-                                <button onClick={() => handleDeleteCategory(cat._id)} className="px-4 py-2 bg-red-600/20 text-red-500 hover:bg-red-600 hover:text-white rounded-lg text-sm font-bold transition-all">
-                                    Delete
-                                </button>
-                            </div>
-                        ))}
-                        {categories.length === 0 && <p className="text-slate-500 text-center py-8">No categories found.</p>}
-                    </div>
-                </div>
-            )}
-
-
-            {/* --- USERS TAB --- */}
-            {activeTab === "users" && (
-                <div className="max-w-4xl mx-auto">
-                    <div className={cardClass}>
-                        <h2 className="text-2xl font-bold mb-6 text-white">Add New Admin User</h2>
-                        <form onSubmit={handleUserSubmit} className="space-y-6">
-                            <div>
-                                <label className={labelClass}>Email Address</label>
-                                <input name="email" type="email" value={userForm.email} onChange={handleUserChange} className={inputClass} required />
-                            </div>
-                            <div>
-                                <label className={labelClass}>Password</label>
-                                <input name="password" type="password" value={userForm.password} onChange={handleUserChange} className={inputClass} required />
-                            </div>
-                            <button type="submit" disabled={loading} className={buttonClass}>
-                                {loading ? "Creating..." : "Create Admin User"}
-                            </button>
-                        </form>
-                    </div>
-                    <div className="grid gap-4">
-                        {users.map((user) => (
-                            <div key={user._id} className="bg-slate-800 p-4 rounded-xl shadow border border-slate-700 flex items-center justify-between group">
-                                <div className="flex items-center gap-4">
-                                    <div className="h-10 w-10 rounded-full bg-brand-blue/20 flex items-center justify-center text-brand-blue font-bold uppercase">
-                                        {user.email.charAt(0)}
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-lg text-white">{user.email}</h3>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xs bg-slate-900 text-slate-400 px-2 py-0.5 rounded uppercase tracking-tighter font-bold">{user.role}</span>
-                                            <span className="text-[10px] text-slate-600 font-mono">ID: {user._id}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button 
-                                    onClick={() => handleDeleteUser(user._id)} 
-                                    className="px-4 py-2 bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white rounded-lg text-xs font-bold transition-all opacity-0 group-hover:opacity-100 border border-red-600/30"
-                                >
-                                    Delete User
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* --- SITE CONTENT TAB --- */}
-            {activeTab === "content" && siteContent && (
-                <div className="max-w-5xl mx-auto space-y-8">
-                    <div className="flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-slate-700 sticky top-4 z-20 shadow-2xl">
-                        <h2 className="text-xl font-bold text-white">Site Content Editor</h2>
-                        <button onClick={handleContentSubmit} disabled={loading} className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-500 transition-colors font-bold shadow-lg">
-                            {loading ? "Saving..." : "💾 Save Changes"}
-                        </button>
-                    </div>
-
-                    {/* HERO SECTION */}
-                    <section className="bg-slate-800 p-8 rounded-xl shadow-lg border border-slate-700 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-1 h-full bg-brand-orange"></div>
-                        <h3 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
-                            🏠 Hero Section
-                        </h3>
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div>
-                                <label className={labelClass}>Main Title</label>
-                                <input value={siteContent.hero.title} onChange={(e) => handleContentChange('hero', 'title', e.target.value)} className={inputClass} />
-                            </div>
-                            <div>
-                                <label className={labelClass}>Subtitle</label>
-                                <input value={siteContent.hero.subtitle} onChange={(e) => handleContentChange('hero', 'subtitle', e.target.value)} className={inputClass} />
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className={labelClass}>Background Image</label>
-                                <div className="flex items-center gap-4 bg-slate-900 p-4 rounded-lg border border-slate-700">
-                                    <div className="relative h-24 w-40 bg-slate-800 rounded overflow-hidden border border-slate-600">
-                                        {siteContent.hero.bgImage && <Image src={siteContent.hero.bgImage} alt="Hero" fill className="object-cover" />}
-                                    </div>
-                                    <input type="file" accept="image/*" onChange={(e) => handleContentImageUpload(e, 'hero')} className="flex-1 text-slate-300" />
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* SOCIAL LINKS SECTION */}
-                    <section className="bg-slate-800 p-8 rounded-xl shadow-lg border border-slate-700 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
-                        <h3 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
-                            🌐 Social Media Links
-                        </h3>
-                        <p className="text-sm text-slate-400 mb-6">Enter the full URLs for your social media profiles (e.g., https://facebook.com/your-page).</p>
-                        <div className="grid md:grid-cols-2 gap-6">
-                            {(['facebook', 'twitter', 'linkedin', 'instagram', 'youtube'] as const).map(platform => (
-                                <div key={platform}>
-                                    <label className={labelClass}>{platform}</label>
-                                    <div className="relative">
-                                        <i className={`icon-${platform} absolute left-3 top-3.5 text-slate-500`}></i>
-                                        <input
-                                            value={siteContent.socialLinks[platform]}
-                                            onChange={(e) => handleContentChange('socialLinks', platform, e.target.value)}
-                                            className={`${inputClass} pl-10`}
-                                            placeholder={`https://${platform}.com/...`}
-                                        />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-
-                    {/* COMPANY PROFILE PDF */}
-                    <section className="bg-slate-800 p-8 rounded-xl shadow-lg border border-slate-700 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
-                        <h3 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
-                            📄 Company Profile
-                        </h3>
-                        <div className="bg-slate-900 p-4 rounded-lg border border-slate-700 flex flex-col md:flex-row gap-4 items-center">
-                            <div className="flex-1">
-                                <p className="text-sm text-slate-400 mb-2">Upload your Company Profile PDF here. It will be downloadable from the site.</p>
-                                <input type="file" accept="application/pdf" onChange={(e) => handleContentImageUpload(e, 'companyProfile')} className="w-full text-slate-300" />
-                            </div>
-                            {siteContent.companyProfileUrl && (
-                                <a href={siteContent.companyProfileUrl} target="_blank" rel="noopener noreferrer" className="bg-brand-orange text-white px-4 py-2 rounded font-bold hover:bg-white hover:text-brand-orange transition-colors">
-                                    View Current PDF
-                                </a>
                             )}
-                        </div>
-                    </section>
 
-                    {/* INFRASTRUCTURE SECTION */}
-                    <section className="bg-slate-800 p-8 rounded-xl shadow-lg border border-slate-700 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
-                        <h3 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
-                            🏗️ Infrastructure Page
-                        </h3>
-
-                        {/* Video URL */}
-                        <div className="mb-8">
-                            <label className={labelClass}>Manufacturing Process Video URL (YouTube Embed)</label>
-                            <input
-                                value={siteContent.infrastructure.videoUrl}
-                                onChange={(e) => handleContentChange('infrastructure', 'videoUrl', e.target.value)}
-                                className={inputClass}
-                                placeholder="Paste your YouTube video link here"
-                            />
-                        </div>
-
-                        {/* Company Images */}
-                        <div className="mb-8">
-                            <label className={labelClass}>Company Images Gallery</label>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                                {siteContent.infrastructure.companyImages.map((img, idx) => (
-                                    <div key={idx} className="relative aspect-square bg-slate-900 rounded-lg overflow-hidden group">
-                                        <Image src={img} alt="Gallery" fill className="object-cover" />
-                                        <button onClick={() => removeInfrastructureImage('companyImages', idx)} className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity transform hover:scale-110">
-                                            ✕
-                                        </button>
-                                    </div>
-                                ))}
-                                <label className="flex flex-col items-center justify-center aspect-square bg-slate-900 rounded-lg border-2 border-dashed border-slate-700 hover:border-brand-orange cursor-pointer transition-colors">
-                                    <span className="text-4xl text-slate-500">+</span>
-                                    <span className="text-xs text-slate-500 mt-2 uppercase font-bold">Add Image</span>
-                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleContentImageUpload(e, 'infrastructure', undefined, 'companyImages')} />
-                                </label>
-                            </div>
-                        </div>
-
-                        {/* Certificates */}
-                        <div>
-                            <label className={labelClass}>Certificates Gallery</label>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                {siteContent.infrastructure.certificates.map((img, idx) => (
-                                    <div key={idx} className="relative aspect-[3/4] bg-slate-900 rounded-lg overflow-hidden group">
-                                        <Image src={img} alt="Certificate" fill className="object-cover" />
-                                        <button onClick={() => removeInfrastructureImage('certificates', idx)} className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity transform hover:scale-110">
-                                            ✕
-                                        </button>
-                                    </div>
-                                ))}
-                                <label className="flex flex-col items-center justify-center aspect-[3/4] bg-slate-900 rounded-lg border-2 border-dashed border-slate-700 hover:border-brand-orange cursor-pointer transition-colors">
-                                    <span className="text-4xl text-slate-500">+</span>
-                                    <span className="text-xs text-slate-500 mt-2 uppercase font-bold">Add Cert</span>
-                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleContentImageUpload(e, 'infrastructure', undefined, 'certificates')} />
-                                </label>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* ABOUT SECTION */}
-                    <section className="bg-slate-800 p-8 rounded-xl shadow-lg border border-slate-700 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-1 h-full bg-brand-blue"></div>
-                        <h3 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
-                            📖 About Section
-                        </h3>
-                        <div className="grid gap-6">
-                            <div>
-                                <label className={labelClass}>Section Title (Small)</label>
-                                <input value={siteContent.about.title} onChange={(e) => handleContentChange('about', 'title', e.target.value)} className={inputClass} />
-                            </div>
-                            <div>
-                                <label className={labelClass}>Main Heading</label>
-                                <input value={siteContent.about.heading} onChange={(e) => handleContentChange('about', 'heading', e.target.value)} className={inputClass} />
-                            </div>
-                            <div>
-                                <label className={labelClass}>Description Text</label>
-                                <textarea value={siteContent.about.description} onChange={(e) => handleContentChange('about', 'description', e.target.value)} rows={5} className={inputClass} />
-                            </div>
-                            <div>
-                                <label className={labelClass}>Side Image</label>
-                                <div className="flex items-center gap-4 bg-slate-900 p-4 rounded-lg border border-slate-700">
-                                    <div className="relative h-24 w-24 bg-slate-800 rounded overflow-hidden border border-slate-600">
-                                        {siteContent.about.imageUrl && <Image src={siteContent.about.imageUrl} alt="About" fill className="object-cover" />}
-                                    </div>
-                                    <input type="file" accept="image/*" onChange={(e) => handleContentImageUpload(e, 'about')} className="flex-1 text-slate-300" />
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* FEATURES SECTION */}
-                    <section className="bg-slate-800 p-8 rounded-xl shadow-lg border border-slate-700 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-1 h-full bg-gray-500"></div>
-                        <h3 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
-                            🛠️ Service Cards
-                        </h3>
-                        <div className="grid gap-8">
-                            {siteContent.features.map((feature, index) => (
-                                <div key={index} className="border border-slate-700 p-6 rounded-lg bg-slate-800/50 relative group">
-                                    <button 
-                                        onClick={() => removeFeature(index)}
-                                        className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1.5 shadow-lg opacity-0 group-hover:opacity-100 transition-all transform hover:scale-110 z-10"
-                                        title="Delete Card"
-                                    >
-                                        ✕
-                                    </button>
-                                    <span className="absolute top-0 right-0 bg-slate-700 px-3 py-1 rounded-bl-lg font-bold text-xs text-slate-300 border-l border-b border-slate-600">
-                                        Card #{index + 1}
-                                    </span>
-                                    <div className="grid md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Title</label>
-                                            <input value={feature.title} onChange={(e) => handleContentChange('features', 'title', e.target.value, index)} className={inputClass} />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Link URL</label>
-                                            <input value={feature.linkUrl} onChange={(e) => handleContentChange('features', 'linkUrl', e.target.value, index)} className={inputClass} />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Description</label>
-                                            <textarea value={feature.description} onChange={(e) => handleContentChange('features', 'description', e.target.value, index)} rows={2} className={inputClass} />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Card Image</label>
-                                            <div className="flex items-center gap-4 bg-slate-900 p-2 rounded border border-slate-700">
-                                                <div className="relative h-16 w-24 bg-slate-800 rounded overflow-hidden border border-slate-600">
-                                                    {feature.imageUrl && <Image src={feature.imageUrl} alt="Card" fill className="object-cover" />}
-                                                </div>
-                                                <input type="file" accept="image/*" onChange={(e) => handleContentImageUpload(e, 'features', index)} className="text-sm w-full text-slate-400" />
+                            {/* --- TAGS TAB --- */}
+                            {activeTab === "tags" && (
+                                <div className="max-w-4xl mx-auto space-y-8">
+                                    <div className={cardClass}>
+                                        <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
+                                            <Tag className="w-6 h-6 text-brand-orange" />
+                                            Add New Tag
+                                        </h2>
+                                        <form onSubmit={handleTagSubmit} className="flex gap-4">
+                                            <div className="flex-1">
+                                                <input
+                                                    value={tagForm.name}
+                                                    onChange={(e) => setTagForm({ name: e.target.value })}
+                                                    className={inputClass}
+                                                    placeholder="Tag Name (e.g. High Strength)"
+                                                    required
+                                                />
                                             </div>
+                                            <button type="submit" disabled={loading} className={buttonClass}>
+                                                {loading ? "Adding..." : "Add Tag"}
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <div className="grid sm:grid-cols-2 gap-4">
+                                        {tags.map((tag: Tag) => (
+                                            <div key={tag._id} className="bg-slate-800 p-4 rounded-xl shadow border border-slate-700 flex items-center justify-between group hover:border-brand-orange transition-colors">
+                                                <h3 className="font-bold text-lg text-white">{tag.name}</h3>
+                                                <button onClick={() => handleDeleteTag(tag._id)} className="p-2 text-slate-500 hover:text-red-500 transition-colors">
+                                                    <Trash2 className="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        {tags.length === 0 && <p className="text-slate-500 text-center py-8 col-span-2">No tags found.</p>}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* --- CATEGORIES TAB --- */}
+                            {activeTab === "categories" && (
+                                <div className="max-w-4xl mx-auto space-y-8">
+                                    <div className={cardClass}>
+                                        <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
+                                            <LayoutGrid className="w-6 h-6 text-brand-orange" />
+                                            Add New Category
+                                        </h2>
+                                        <form onSubmit={handleCategorySubmit} className="flex gap-4">
+                                            <div className="flex-1">
+                                                <input
+                                                    value={categoryForm.name}
+                                                    onChange={(e) => setCategoryForm({ name: e.target.value })}
+                                                    className={inputClass}
+                                                    placeholder="Category Name"
+                                                    required
+                                                />
+                                            </div>
+                                            <button type="submit" disabled={loading} className={buttonClass}>
+                                                {loading ? "Adding..." : "Add Category"}
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <div className="grid sm:grid-cols-2 gap-4">
+                                        {categories.map((cat: Category) => (
+                                            <div key={cat._id} className="bg-slate-800 p-4 rounded-xl shadow border border-slate-700 flex items-center justify-between group hover:border-brand-orange transition-colors">
+                                                <h3 className="font-bold text-lg text-white">{cat.name}</h3>
+                                                <button onClick={() => handleDeleteCategory(cat._id)} className="p-2 text-slate-500 hover:text-red-500 transition-colors">
+                                                    <Trash2 className="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        {categories.length === 0 && <p className="text-slate-500 text-center py-8 col-span-2">No categories found.</p>}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* --- USERS TAB --- */}
+                            {activeTab === "users" && (
+                                <div className="max-w-4xl mx-auto space-y-8">
+                                    <div className={cardClass}>
+                                        <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
+                                            <Users className="w-6 h-6 text-brand-orange" />
+                                            Add New Admin User
+                                        </h2>
+                                        <form onSubmit={handleUserSubmit} className="space-y-6">
+                                            <div className="grid md:grid-cols-2 gap-6">
+                                                <div>
+                                                    <label className={labelClass}>Email Address</label>
+                                                    <input name="email" type="email" value={userForm.email} onChange={handleUserChange} className={inputClass} required />
+                                                </div>
+                                                <div>
+                                                    <label className={labelClass}>Password</label>
+                                                    <input name="password" type="password" value={userForm.password} onChange={handleUserChange} className={inputClass} required />
+                                                </div>
+                                            </div>
+                                            <button type="submit" disabled={loading} className={buttonClass}>
+                                                {loading ? "Creating..." : "Create Admin User"}
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div className="grid gap-4">
+                                        {users.map((user: User) => (
+                                            <div key={user._id} className="bg-slate-800 p-4 rounded-xl shadow border border-slate-700 flex items-center justify-between group hover:border-brand-orange transition-colors">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="h-10 w-10 rounded-full bg-brand-blue/20 flex items-center justify-center text-brand-blue font-bold uppercase shrink-0">
+                                                        {user.email.charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-bold text-white group-hover:text-brand-orange transition-colors">{user.email}</h3>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[10px] bg-slate-900 text-slate-400 px-2 py-0.5 rounded uppercase font-bold">{user.role}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleDeleteUser(user._id)}
+                                                    className="p-2 text-slate-500 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                                >
+                                                    <Trash2 className="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* --- JOURNAL TAB --- */}
+                            {activeTab === "journal" && (
+                                <div className="max-w-6xl mx-auto space-y-12">
+                                    <div className={cardClass}>
+                                        <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
+                                            <BookOpen className="w-6 h-6 text-brand-orange" />
+                                            {isEditingArticle ? "Edit Article" : "Write New Article"}
+                                        </h2>
+                                        <form onSubmit={handleArticleSubmit} className="space-y-6">
+                                            <div className="grid md:grid-cols-2 gap-6">
+                                                <div>
+                                                    <label className={labelClass}>Article Title</label>
+                                                    <input name="title" value={articleForm.title} onChange={handleArticleChange} className={inputClass} placeholder="e.g. The Future of Lost Foam" required />
+                                                </div>
+                                                <div>
+                                                    <label className={labelClass}>Slug</label>
+                                                    <input name="slug" value={articleForm.slug} readOnly className={`${inputClass} bg-slate-950 text-slate-500 cursor-not-allowed`} title="Generated from title" />
+                                                </div>
+                                                <div>
+                                                    <label className={labelClass}>Author</label>
+                                                    <input name="author" value={articleForm.author} onChange={handleArticleChange} className={inputClass} placeholder="Author name" required />
+                                                </div>
+                                                <div>
+                                                    <label className={labelClass}>Tags (comma separated)</label>
+                                                    <input name="tags" value={articleForm.tags} onChange={handleArticleChange} className={inputClass} placeholder="e.g. Technical, Innovation" />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className={labelClass}>Short Description</label>
+                                                <textarea name="description" value={articleForm.description} onChange={handleArticleChange} rows={2} className={inputClass} placeholder="Summarize the article..." required></textarea>
+                                            </div>
+                                            <div>
+                                                <label className={labelClass}>Content (HTML/Text)</label>
+                                                <textarea name="content" value={articleForm.content} onChange={handleArticleChange} rows={10} className={`${inputClass} font-mono text-sm`} placeholder="Write your article content here..." required></textarea>
+                                            </div>
+                                            <div className="grid md:grid-cols-2 gap-6">
+                                                <div>
+                                                    <label className={labelClass}>Cover Image</label>
+                                                    <div className="flex items-center gap-4 bg-slate-900 p-3 rounded-lg border border-slate-700">
+                                                        <div className="h-16 w-16 relative bg-slate-800 rounded overflow-hidden shrink-0 border border-slate-700">
+                                                            {articleForm.imageUrl && <Image src={articleForm.imageUrl} alt="Article Preview" fill className="object-cover" />}
+                                                        </div>
+                                                        <input type="file" accept="image/*" onChange={handleArticleImageUpload} className="w-full text-xs text-slate-400" />
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center">
+                                                    <label className="flex items-center gap-3 cursor-pointer group">
+                                                        <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${articleForm.isPublished ? 'bg-brand-orange border-brand-orange' : 'border-slate-600'}`}>
+                                                            {articleForm.isPublished && <Activity className="w-4 h-4 text-white" />}
+                                                            <input type="checkbox" name="isPublished" checked={articleForm.isPublished} onChange={handleArticleChange} className="hidden" />
+                                                        </div>
+                                                        <span className="font-bold text-slate-300 group-hover:text-white transition-colors">Publish Article</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-4">
+                                                <button type="submit" disabled={loading} className={buttonClass}>
+                                                    {loading ? "Saving..." : isEditingArticle ? "Update Article" : "Publish Article"}
+                                                </button>
+                                                {isEditingArticle && (
+                                                    <button type="button" onClick={() => { setIsEditingArticle(null); setArticleForm({ title: "", slug: "", description: "", content: "", imageUrl: "", author: "", tags: "", isPublished: false }); }} className="text-slate-400 hover:text-white font-bold px-4 transition-colors">
+                                                        Cancel
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <div>
+                                        <h3 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
+                                            <FileText className="w-6 h-6 text-brand-orange" />
+                                            Manage Articles
+                                        </h3>
+                                        <div className="grid gap-4">
+                                            {articles.map((article: Article) => (
+                                                <div key={article._id} className="bg-slate-800 p-4 rounded-xl border border-slate-700 flex items-center gap-6 group hover:border-brand-orange transition-all">
+                                                    <div className="h-16 w-24 relative bg-slate-900 rounded overflow-hidden shrink-0">
+                                                        {article.imageUrl && <Image src={article.imageUrl} alt={article.title} fill className="object-cover" />}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h4 className="font-bold text-white group-hover:text-brand-orange transition-colors truncate">{article.title}</h4>
+                                                        <div className="flex items-center gap-3 mt-1">
+                                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-tighter ${article.isPublished ? 'bg-green-600/20 text-green-500' : 'bg-slate-900 text-slate-500'}`}>
+                                                                {article.isPublished ? 'Published' : 'Draft'}
+                                                            </span>
+                                                            <span className="text-xs text-slate-500">{new Date(article.createdAt).toLocaleDateString()}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-2 shrink-0">
+                                                        <button onClick={() => handleArticleEdit(article)} className="p-2 bg-slate-700 hover:bg-white hover:text-slate-900 rounded-lg text-xs font-bold transition-all transition-colors">
+                                                            Edit
+                                                        </button>
+                                                        <button onClick={() => handleDeleteArticle(article._id)} className="p-2 bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white rounded-lg text-xs font-bold transition-all border border-red-600/30">
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            {articles.length === 0 && <p className="text-slate-500 text-center py-12 border border-dashed border-slate-700 rounded-xl">No articles found.</p>}
                                         </div>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                        <button 
-                            onClick={addFeature}
-                            className="w-full mt-6 py-4 border-2 border-dashed border-slate-700 rounded-lg text-slate-500 font-bold hover:border-brand-orange hover:text-brand-orange transition-all uppercase tracking-widest text-sm"
-                        >
-                            + Add New Service Card
-                        </button>
-                    </section>
+                            )}
+
+                            {/* --- SITE CONTENT TAB --- */}
+                            {activeTab === "content" && siteContent && (
+                                <div className="max-w-6xl mx-auto space-y-12 pb-24">
+                                    {/* Tab Header - Sticky */}
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center sticky top-[-2rem] z-40 bg-slate-900/90 backdrop-blur-xl py-6 border-b border-slate-800/50 mb-10 gap-4">
+                                        <div>
+                                            <h2 className="text-3xl font-black text-white flex items-center gap-3 tracking-tight">
+                                                <div className="p-2 bg-brand-orange/10 rounded-lg">
+                                                    <Settings className="w-6 h-6 text-brand-orange" />
+                                                </div>
+                                                Site Content Editor
+                                            </h2>
+                                            <p className="text-sm text-slate-500 mt-1 font-medium">Global configuration and section management</p>
+                                        </div>
+                                        <div className="flex items-center gap-4 w-full sm:w-auto">
+                                            <button 
+                                                onClick={handleContentSubmit} 
+                                                disabled={loading} 
+                                                className="flex-1 sm:flex-none bg-gradient-to-r from-brand-orange to-orange-600 text-white px-10 py-3 rounded-xl hover:shadow-[0_0_30px_rgba(255,107,0,0.4)] transition-all duration-300 font-bold text-sm uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed group"
+                                            >
+                                                {loading ? (
+                                                    <span className="flex items-center gap-2">
+                                                        <Activity className="w-4 h-4 animate-spin" />
+                                                        Saving...
+                                                    </span>
+                                                ) : (
+                                                    <span className="flex items-center gap-2">
+                                                        Save Changes
+                                                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                                    </span>
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 gap-10">
+                                        {/* HERO SECTION */}
+                                        <section className={`${cardClass} relative overflow-hidden group hover:border-brand-orange/30 transition-all duration-500`}>
+                                            <div className="absolute top-0 left-0 w-1.5 h-full bg-brand-orange shadow-[0_0_15px_rgba(255,107,0,0.5)]"></div>
+                                            <div className="flex items-center justify-between mb-8">
+                                                <h3 className="text-2xl font-black flex items-center gap-3 text-white">
+                                                    <LayoutGrid className="w-6 h-6 text-brand-orange" />
+                                                    Home Hero Section
+                                                </h3>
+                                                <div className="px-3 py-1 bg-brand-orange/10 text-brand-orange text-[10px] font-black uppercase tracking-widest rounded-full">Primary Content</div>
+                                            </div>
+                                            
+                                            <div className="grid lg:grid-cols-2 gap-10">
+                                                <div className="space-y-6">
+                                                    <div className="space-y-2">
+                                                        <label className={labelClass}>Main Headline</label>
+                                                        <input 
+                                                            value={siteContent.hero.title} 
+                                                            onChange={(e: ChangeEvent<HTMLInputElement>) => handleContentChange('hero', 'title', e.target.value)} 
+                                                            className={inputClass} 
+                                                            placeholder="e.g. Precision Engineering for Modern Foundry" 
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className={labelClass}>Supporting Subtitle</label>
+                                                        <textarea 
+                                                            value={siteContent.hero.subtitle} 
+                                                            onChange={(e: ChangeEvent<HTMLTextAreaElement>) => handleContentChange('hero', 'subtitle', e.target.value)} 
+                                                            className={`${inputClass} min-h-[100px]`} 
+                                                            placeholder="Tell your brand story in a few words..." 
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-4">
+                                                    <label className={labelClass}>Hero Background Image</label>
+                                                    <div className="relative aspect-video rounded-2xl overflow-hidden border-2 border-slate-700/50 bg-slate-900 group/image">
+                                                        {siteContent.hero.bgImage ? (
+                                                            <Image src={siteContent.hero.bgImage} alt="Hero PREVIEW" fill className="object-cover transition-transform duration-700 group-hover/image:scale-110" />
+                                                        ) : (
+                                                            <div className="absolute inset-0 flex items-center justify-center text-slate-600">No Image Uploaded</div>
+                                                        )}
+                                                        <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover/image:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                                                            <label className="cursor-pointer bg-white text-slate-900 px-6 py-2.5 rounded-full font-bold text-sm shadow-xl hover:scale-105 transition-transform flex items-center gap-2">
+                                                                <Plus className="w-4 h-4" />
+                                                                Replace Image
+                                                                <input type="file" accept="image/*" onChange={(e) => handleContentImageUpload(e, 'hero')} className="hidden" />
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider text-center">Recommended size: 1920x1080px (Lossless WEBP/JPG)</p>
+                                                </div>
+                                            </div>
+                                        </section>
+
+                                        {/* ABOUT SECTION (HOME) */}
+                                        <section className={`${cardClass} relative overflow-hidden group hover:border-blue-500/30 transition-all duration-500`}>
+                                            <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)]"></div>
+                                            <h3 className="text-2xl font-black mb-8 flex items-center gap-3 text-white">
+                                                <Activity className="w-6 h-6 text-blue-500" />
+                                                Company Introduction (Home)
+                                            </h3>
+                                            <div className="grid lg:grid-cols-2 gap-10">
+                                                <div className="space-y-6">
+                                                    <div className="grid sm:grid-cols-2 gap-4">
+                                                        <div className="space-y-2">
+                                                            <label className={labelClass}>Small Label</label>
+                                                            <input value={siteContent.about.title} onChange={(e: ChangeEvent<HTMLInputElement>) => handleContentChange('about', 'title', e.target.value)} className={inputClass} placeholder="WHO WE ARE" />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <label className={labelClass}>Main Section Title</label>
+                                                            <input value={siteContent.about.heading} onChange={(e: ChangeEvent<HTMLInputElement>) => handleContentChange('about', 'heading', e.target.value)} className={inputClass} placeholder="Excellence in Engineering" />
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className={labelClass}>Introduction Text</label>
+                                                        <textarea value={siteContent.about.description} onChange={(e: ChangeEvent<HTMLTextAreaElement>) => handleContentChange('about', 'description', e.target.value)} rows={6} className={inputClass} placeholder="Full company introduction..." />
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-6">
+                                                    <div className="space-y-2">
+                                                        <label className={labelClass}>Key Highlight Points (JSON or New line)</label>
+                                                        <textarea 
+                                                            value={siteContent.about.bulletPoints.join('\n')} 
+                                                            onChange={(e: ChangeEvent<HTMLTextAreaElement>) => handleContentChange('about', 'bulletPoints', e.target.value.split('\n').filter(p => p.trim()))} 
+                                                            rows={4} 
+                                                            className={inputClass} 
+                                                            placeholder="Point 1&#10;Point 2&#10;Point 3" 
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className={labelClass}>About Image</label>
+                                                        <div className="relative h-44 rounded-xl overflow-hidden border border-slate-700 bg-slate-900 group/item">
+                                                            {siteContent.about.imageUrl && <Image src={siteContent.about.imageUrl} alt="About" fill className="object-cover" />}
+                                                            <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover/item:opacity-100 flex items-center justify-center transition-opacity">
+                                                                <label className="cursor-pointer p-3 bg-white rounded-full text-slate-900 shadow-xl hover:scale-110 transition-transform">
+                                                                    <Plus className="w-5 h-5" />
+                                                                    <input type="file" accept="image/*" onChange={(e: ChangeEvent<HTMLInputElement>) => handleContentImageUpload(e, 'about')} className="hidden" />
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+
+                                        {/* SOCIAL LINKS & COMPANY PROFILE */}
+                                        <section className={`${cardClass} relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-500`}>
+                                            <div className="absolute top-0 left-0 w-1.5 h-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
+                                            <h3 className="text-2xl font-black mb-8 flex items-center gap-3 text-white">
+                                                <Users className="w-6 h-6 text-emerald-500" />
+                                                Connections & Resources
+                                            </h3>
+                                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                                <div className="space-y-6 lg:col-span-2">
+                                                    <div className="grid sm:grid-cols-2 gap-4">
+                                                        {(['facebook', 'linkedin', 'instagram', 'twitter', 'youtube'] as const).map(platform => (
+                                                            <div key={platform} className="space-y-1">
+                                                                <label className="text-[10px] font-black text-slate-500 uppercase flex items-center gap-2">
+                                                                    <span className="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
+                                                                    {platform}
+                                                                </label>
+                                                                <input value={siteContent.socialLinks[platform]} onChange={(e: ChangeEvent<HTMLInputElement>) => handleContentChange('socialLinks', platform, e.target.value)} className={inputClass} placeholder={`https://${platform}.com/...`} />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <div className="bg-slate-900/50 p-6 rounded-2xl border border-slate-700/50 flex flex-col justify-center gap-4">
+                                                    <div className="p-3 bg-emerald-500/10 rounded-xl w-fit">
+                                                        <FileText className="w-6 h-6 text-emerald-500" />
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-bold text-white mb-1">Company Profile PDF</h4>
+                                                        <p className="text-xs text-slate-500 mb-4">Direct link to your brochure or profile document.</p>
+                                                    </div>
+                                                    <input 
+                                                        value={siteContent.companyProfileUrl} 
+                                                        onChange={(e: ChangeEvent<HTMLInputElement>) => handleRootContentChange('companyProfileUrl', e.target.value)} 
+                                                        className={inputClass} 
+                                                        placeholder="Paste PDF Link here..." 
+                                                    />
+                                                </div>
+                                            </div>
+                                        </section>
+
+                                        {/* INFRASTRUCTURE & GALLERIES */}
+                                        <section className={`${cardClass} relative overflow-hidden group hover:border-purple-500/30 transition-all duration-500`}>
+                                            <div className="absolute top-0 left-0 w-1.5 h-full bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.5)]"></div>
+                                            <h3 className="text-2xl font-black mb-8 flex items-center gap-3 text-white">
+                                                <Activity className="w-6 h-6 text-purple-500" />
+                                                Infrastructure & Visual Assets
+                                            </h3>
+                                            <div className="space-y-10">
+                                                <div className="space-y-2">
+                                                    <label className={labelClass}>Infrastructure Overview Video (YouTube URL)</label>
+                                                    <input value={siteContent.infrastructure.videoUrl} onChange={(e) => handleContentChange('infrastructure', 'videoUrl', e.target.value)} className={inputClass} placeholder="https://www.youtube.com/watch?v=..." />
+                                                </div>
+                                                
+                                                <div className="space-y-6">
+                                                    <div className="flex items-center justify-between border-b border-slate-700 pb-2">
+                                                        <h4 className="font-bold text-slate-300 uppercase text-xs tracking-widest flex items-center gap-2">
+                                                            <LayoutGrid className="w-4 h-4" />
+                                                            Company Facility Gallery
+                                                        </h4>
+                                                        <span className="text-[10px] text-slate-500 font-bold">{siteContent.infrastructure.companyImages.length} IMAGES</span>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+                                                        {siteContent.infrastructure.companyImages.map((img: string, idx: number) => (
+                                                            <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-slate-700 bg-slate-900 group/gal">
+                                                                <Image src={img} alt="Facility" fill className="object-cover" />
+                                                                <button 
+                                                                    onClick={() => removeInfrastructureImage('companyImages', idx)} 
+                                                                    className="absolute top-2 right-2 bg-red-600 p-1.5 rounded-lg text-white opacity-0 group-hover/gal:opacity-100 transition-all hover:scale-110 shadow-lg"
+                                                                >
+                                                                    <Trash2 className="w-3 h-3" />
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                        <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-700 rounded-xl hover:border-brand-orange hover:bg-brand-orange/5 transition-all cursor-pointer aspect-square bg-slate-900/30 group/upload">
+                                                            <Plus className="w-8 h-8 text-slate-600 group-hover/upload:text-brand-orange transition-colors" />
+                                                            <span className="text-[10px] text-slate-500 mt-2 font-black uppercase">Add Photo</span>
+                                                            <input type="file" accept="image/*" onChange={(e: ChangeEvent<HTMLInputElement>) => handleContentImageUpload(e, 'infrastructure', undefined, 'companyImages')} className="hidden" />
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-6">
+                                                    <div className="flex items-center justify-between border-b border-slate-700 pb-2">
+                                                        <h4 className="font-bold text-slate-300 uppercase text-xs tracking-widest flex items-center gap-2">
+                                                            <Shield className="w-4 h-4 text-brand-orange" />
+                                                            Certificates & Licensing
+                                                        </h4>
+                                                        <span className="text-[10px] text-slate-500 font-bold">{siteContent.infrastructure.certificates.length} DOCUMENTS</span>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+                                                        {siteContent.infrastructure.certificates.map((img: string, idx: number) => (
+                                                            <div key={idx} className="relative aspect-[3/4] rounded-xl overflow-hidden border border-slate-700 bg-slate-900 group/cert">
+                                                                <Image src={img} alt="Certificate" fill className="object-cover" />
+                                                                <button 
+                                                                    onClick={() => removeInfrastructureImage('certificates', idx)} 
+                                                                    className="absolute top-2 right-2 bg-red-600 p-1.5 rounded-lg text-white opacity-0 group-hover/cert:opacity-100 transition-all hover:scale-110 shadow-lg"
+                                                                >
+                                                                    <Trash2 className="w-3 h-3" />
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                        <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-700 rounded-xl hover:border-brand-orange hover:bg-brand-orange/5 transition-all cursor-pointer aspect-[3/4] bg-slate-900/30 group/upload">
+                                                            <Plus className="w-8 h-8 text-slate-600 group-hover/upload:text-brand-orange transition-colors" />
+                                                            <span className="text-[10px] text-slate-500 mt-2 font-black uppercase text-center px-2">Upload Certificate</span>
+                                                            <input type="file" accept="image/*" onChange={(e) => handleContentImageUpload(e, 'infrastructure', undefined, 'certificates')} className="hidden" />
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+
+                                        {/* ABOUT PAGE SECTIONS (MISSION/VISION) */}
+                                        <section className={`${cardClass} relative overflow-hidden group hover:border-sky-500/30 transition-all duration-500`}>
+                                            <div className="absolute top-0 left-0 w-1.5 h-full bg-sky-500 shadow-[0_0_15px_rgba(14,165,233,0.5)]"></div>
+                                            <h3 className="text-2xl font-black mb-8 flex items-center gap-3 text-white">
+                                                <Activity className="w-6 h-6 text-sky-500" />
+                                                About Us Page Strategy
+                                            </h3>
+                                            <div className="grid lg:grid-cols-2 gap-8">
+                                                <div className="bg-slate-900/50 p-6 rounded-2xl border border-slate-700/50 space-y-4">
+                                                    <div className="flex items-center gap-3 mb-2">
+                                                        <div className="p-2 bg-sky-500/10 rounded-lg">
+                                                            <ArrowRight className="w-5 h-5 text-sky-500" />
+                                                        </div>
+                                                        <h4 className="font-bold text-white uppercase text-sm tracking-wider">Mission Statement</h4>
+                                                    </div>
+                                                    <div className="space-y-4">
+                                                        <div>
+                                                            <label className={labelClass}>Mission Title</label>
+                                                            <input value={siteContent.aboutPage.missionTitle} onChange={(e) => handleContentChange('aboutPage', 'missionTitle', e.target.value)} className={inputClass} placeholder="Our Mission" />
+                                                        </div>
+                                                        <div>
+                                                            <label className={labelClass}>Mission Description</label>
+                                                            <textarea value={siteContent.aboutPage.missionText} onChange={(e) => handleContentChange('aboutPage', 'missionText', e.target.value)} rows={4} className={inputClass} placeholder="We strive to..." />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="bg-slate-900/50 p-6 rounded-2xl border border-slate-700/50 space-y-4">
+                                                    <div className="flex items-center gap-3 mb-2">
+                                                        <div className="p-2 bg-brand-orange/10 rounded-lg">
+                                                            <Activity className="w-5 h-5 text-brand-orange" />
+                                                        </div>
+                                                        <h4 className="font-bold text-white uppercase text-sm tracking-wider">Vision Statement</h4>
+                                                    </div>
+                                                    <div className="space-y-4">
+                                                        <div>
+                                                            <label className={labelClass}>Vision Title</label>
+                                                            <input value={siteContent.aboutPage.visionTitle} onChange={(e) => handleContentChange('aboutPage', 'visionTitle', e.target.value)} className={inputClass} placeholder="Our Vision" />
+                                                        </div>
+                                                        <div>
+                                                            <label className={labelClass}>Vision Description</label>
+                                                            <textarea value={siteContent.aboutPage.visionText} onChange={(e) => handleContentChange('aboutPage', 'visionText', e.target.value)} rows={4} className={inputClass} placeholder="To become the benchmark..." />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+
+                                        {/* PROCESS STEPS */}
+                                        <section className={`${cardClass} relative overflow-hidden group hover:border-yellow-500/30 transition-all duration-500`}>
+                                            <div className="absolute top-0 left-0 w-1.5 h-full bg-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.5)]"></div>
+                                            <div className="flex items-center justify-between mb-8">
+                                                <h3 className="text-2xl font-black flex items-center gap-3 text-white">
+                                                    <Activity className="w-6 h-6 text-yellow-500" />
+                                                    Production Workflow Steps
+                                                </h3>
+                                                <button 
+                                                    onClick={() => {
+                                                        const newSteps = [...siteContent.processPage.steps, { title: "New Step", description: "Step detail", imageUrl: "" }];
+                                                        handleContentChange('processPage', 'steps', newSteps);
+                                                    }}
+                                                    className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-black rounded-lg font-black text-[10px] uppercase transition-transform hover:scale-105"
+                                                >
+                                                    <Plus className="w-4 h-4" />
+                                                    Add Step
+                                                </button>
+                                            </div>
+                                            
+                                            <div className="space-y-6">
+                                                {siteContent.processPage.steps.map((step: ProcessStep, idx: number) => (
+                                                    <div key={idx} className="bg-slate-900/80 p-6 rounded-2xl border border-slate-700/50 flex flex-col md:flex-row gap-6 relative group/step h-fit transition-colors hover:border-slate-500/50">
+                                                        <div className="absolute top-[-0.75rem] left-[-0.75rem] w-8 h-8 rounded-full bg-yellow-500 text-black flex items-center justify-center font-black z-10 shadow-lg select-none">
+                                                            {idx + 1}
+                                                        </div>
+                                                        <div className="w-full md:w-1/3 space-y-4">
+                                                            <div className="relative aspect-video rounded-xl overflow-hidden border border-slate-700 bg-slate-950 group/img">
+                                                                {step.imageUrl && <Image src={step.imageUrl} alt={step.title} fill className="object-cover" />}
+                                                                <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity">
+                                                                    <label className="cursor-pointer bg-white text-slate-900 p-2 rounded-full font-bold shadow-xl hover:scale-110 transition-transform">
+                                                                        <Plus className="w-4 h-4" />
+                                                                        <input type="file" accept="image/*" onChange={(e) => handleContentImageUpload(e, 'processPage', idx)} className="hidden" />
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex-1 space-y-4">
+                                                            <div>
+                                                                <label className={labelClass}>Step Title</label>
+                                                                <input 
+                                                                    value={step.title} 
+                                                                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                                                                        const newSteps = [...siteContent.processPage.steps];
+                                                                        newSteps[idx] = { ...newSteps[idx], title: e.target.value };
+                                                                        handleContentChange('processPage', 'steps', newSteps);
+                                                                    }} 
+                                                                    className={inputClass} 
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className={labelClass}>Step Description</label>
+                                                                <textarea 
+                                                                    value={step.description} 
+                                                                    onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
+                                                                        const newSteps = [...siteContent.processPage.steps];
+                                                                        newSteps[idx] = { ...newSteps[idx], description: e.target.value };
+                                                                        handleContentChange('processPage', 'steps', newSteps);
+                                                                    }} 
+                                                                    rows={2} 
+                                                                    className={inputClass} 
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <button 
+                                                            onClick={() => {
+                                                                const newSteps = siteContent.processPage.steps.filter((_, i) => i !== idx);
+                                                                handleContentChange('processPage', 'steps', newSteps);
+                                                            }}
+                                                            className="absolute top-4 right-4 text-slate-600 hover:text-red-500 transition-colors opacity-0 group-hover/step:opacity-100"
+                                                        >
+                                                            <Trash2 className="w-5 h-5" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                                {siteContent.processPage.steps.length === 0 && (
+                                                    <div className="text-center py-20 border border-dashed border-slate-700 rounded-3xl">
+                                                        <div className="p-4 bg-slate-800 rounded-2xl w-fit mx-auto mb-4 border border-slate-700">
+                                                            <Activity className="w-8 h-8 text-slate-600" />
+                                                        </div>
+                                                        <h4 className="font-bold text-slate-500 mb-1 tracking-tight">Workflow is Empty</h4>
+                                                        <p className="text-xs text-slate-600">Click "Add Step" to begin building your production process section.</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </section>
+
+                                        {/* FEATURES / SERVICES */}
+                                        <section className={`${cardClass} relative overflow-hidden group hover:border-brand-blue/30 transition-all duration-500`}>
+                                            <div className="absolute top-0 left-0 w-1.5 h-full bg-brand-blue shadow-[0_0_15px_rgba(0,113,255,0.5)]"></div>
+                                            <div className="flex items-center justify-between mb-8">
+                                                <h3 className="text-2xl font-black flex items-center gap-3 text-white">
+                                                    <LayoutGrid className="w-6 h-6 text-brand-blue" />
+                                                    Service Features & Capabilities
+                                                </h3>
+                                                <button 
+                                                    onClick={addFeature}
+                                                    className="flex items-center gap-2 px-4 py-2 bg-brand-blue text-white rounded-lg font-black text-[10px] uppercase transition-transform hover:scale-105"
+                                                >
+                                                    <Plus className="w-4 h-4" />
+                                                    Add Feature
+                                                </button>
+                                            </div>
+                                            
+                                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                {siteContent.features.map((feature: Feature, idx: number) => (
+                                                    <div key={idx} className="bg-slate-900/80 p-6 rounded-2xl border border-slate-700/50 space-y-4 relative group/feat overflow-hidden h-fit transition-all hover:border-brand-blue/50">
+                                                        <div className="relative aspect-video rounded-xl overflow-hidden border border-slate-700 bg-slate-950 group/img">
+                                                            {feature.imageUrl && <Image src={feature.imageUrl} alt={feature.title} fill className="object-cover" />}
+                                                            <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity">
+                                                                <label className="cursor-pointer bg-white text-slate-900 p-2 rounded-full font-bold shadow-xl hover:scale-110 transition-transform">
+                                                                    <Plus className="w-4 h-4" />
+                                                                    <input type="file" accept="image/*" onChange={(e) => handleContentImageUpload(e, 'features', idx)} className="hidden" />
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <input 
+                                                                value={feature.title} 
+                                                                onChange={(e) => handleContentChange('features', 'title', e.target.value, idx)} 
+                                                                className="w-full bg-transparent border-none text-white font-black text-lg p-0 focus:ring-0 placeholder:text-slate-700" 
+                                                                placeholder="Feature Name"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <textarea 
+                                                                value={feature.description} 
+                                                                onChange={(e) => handleContentChange('features', 'description', e.target.value, idx)} 
+                                                                rows={3} 
+                                                                className="w-full bg-transparent border-none text-slate-400 text-sm p-0 focus:ring-0 resize-none placeholder:text-slate-700" 
+                                                                placeholder="Short description of the service..."
+                                                            />
+                                                        </div>
+                                                        <div className="pt-2 border-t border-slate-800">
+                                                            <label className="text-[10px] font-black text-slate-600 uppercase mb-1 block tracking-wider">Internal Link URL</label>
+                                                            <input 
+                                                                value={feature.linkUrl} 
+                                                                onChange={(e) => handleContentChange('features', 'linkUrl', e.target.value, idx)} 
+                                                                className="w-full bg-transparent border-none text-brand-blue text-xs p-0 focus:ring-0 placeholder:text-slate-700 font-bold" 
+                                                                placeholder="/products"
+                                                            />
+                                                        </div>
+                                                        <button 
+                                                            onClick={() => removeFeature(idx)}
+                                                            className="absolute top-4 right-4 text-slate-600 hover:text-red-500 transition-colors opacity-0 group-hover/feat:opacity-100"
+                                                        >
+                                                            <Trash2 className="w-5 h-5" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </section>
+
+                                        {/* CTA SECTION (HOME) */}
+                                        <section className={`${cardClass} relative overflow-hidden group hover:border-red-500/30 transition-all duration-500 mb-20`}>
+                                            <div className="absolute top-0 left-0 w-1.5 h-full bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)]"></div>
+                                            <h3 className="text-2xl font-black mb-8 flex items-center gap-3 text-white">
+                                                <ArrowRight className="w-6 h-6 text-red-500" />
+                                                Action Incentive (Bottom CTA)
+                                            </h3>
+                                            <div className="grid lg:grid-cols-2 gap-10">
+                                                <div className="space-y-6">
+                                                    <div className="space-y-2">
+                                                        <label className={labelClass}>CTA Headline</label>
+                                                        <input value={siteContent.homeCTA.title} onChange={(e) => handleContentChange('homeCTA', 'title', e.target.value)} className={inputClass} placeholder="Let's build together" />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className={labelClass}>Supporting Message</label>
+                                                        <input value={siteContent.homeCTA.subtitle} onChange={(e) => handleContentChange('homeCTA', 'subtitle', e.target.value)} className={inputClass} placeholder="Contact us for a quote" />
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div className="space-y-2">
+                                                            <label className={labelClass}>Button Text</label>
+                                                            <input value={siteContent.homeCTA.buttonText} onChange={(e) => handleContentChange('homeCTA', 'buttonText', e.target.value)} className={inputClass} placeholder="Get Started" />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <label className={labelClass}>Target Link</label>
+                                                            <input value={siteContent.homeCTA.buttonLink} onChange={(e) => handleContentChange('homeCTA', 'buttonLink', e.target.value)} className={inputClass} placeholder="/contact-us" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-4">
+                                                    <label className={labelClass}>CTA Background / Side Image</label>
+                                                    <div className="relative aspect-video rounded-2xl overflow-hidden border border-slate-700 bg-slate-900 group/cta">
+                                                        {siteContent.homeCTA.bgImage && <Image src={siteContent.homeCTA.bgImage} alt="CTA" fill className="object-cover" />}
+                                                        <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover/cta:opacity-100 flex items-center justify-center transition-opacity">
+                                                            <label className="cursor-pointer bg-white text-slate-900 px-4 py-2 rounded-lg font-bold shadow-xl hover:scale-105 transition-transform flex items-center gap-2">
+                                                                <Plus className="w-4 h-4" />
+                                                                Change Image
+                                                                <input type="file" accept="image/*" onChange={(e: ChangeEvent<HTMLInputElement>) => handleContentImageUpload(e, 'homeCTA')} className="hidden" />
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+                                    </div>
+                                </div>
+                            )}
+
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
+            </main>
+
+            {/* Toast Notifications */}
+            {toast && (
+                <Toast 
+                    message={toast.message} 
+                    type={toast.type} 
+                    onClose={() => setToast(null)} 
+                />
             )}
         </div>
     );

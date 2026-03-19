@@ -18,6 +18,7 @@ export interface ISiteContent extends Document {
         heading: string;
         description: string;
         imageUrl: string;
+        bulletPoints: string[];
     };
     features: IFeatureCard[];
     contactEmail: string;
@@ -29,6 +30,22 @@ export interface ISiteContent extends Document {
         youtube: string;
     };
     companyProfileUrl: string;
+    homeCTA: {
+        title: string;
+        subtitle: string;
+        buttonText: string;
+        buttonLink: string;
+        bgImage: string;
+    };
+    aboutPage: {
+        missionTitle: string;
+        missionText: string;
+        visionTitle: string;
+        visionText: string;
+    };
+    processPage: {
+        steps: { title: string; description: string; imageUrl: string }[];
+    };
     infrastructure: {
         videoUrl: string;
         companyImages: string[];
@@ -56,7 +73,8 @@ const SiteContentSchema: Schema = new Schema(
             title: { type: String, default: 'About Atlas Foundries' },
             heading: { type: String, default: 'World-Class Manufacturing in the Heart of India' },
             description: { type: String, default: 'Atlas Foundries is a pioneering force in the metal casting industry...' },
-            imageUrl: { type: String, default: '/images2/about1.png' }
+            imageUrl: { type: String, default: '/images2/about1.png' },
+            bulletPoints: [{ type: String, default: ['ISO 9001:2015 Certified', 'Specialized in Complex Geometries', 'Exporting to 15+ Countries'] }]
         },
         features: [FeatureCardSchema],
         contactEmail: { type: String, default: 'info@atlasfoundries.com' },
@@ -68,6 +86,26 @@ const SiteContentSchema: Schema = new Schema(
             youtube: { type: String, default: "" },
         },
         companyProfileUrl: { type: String, default: "" },
+        homeCTA: {
+            title: { type: String, default: 'Ready to upgrade your supply chain?' },
+            subtitle: { type: String, default: 'Contact us today to discuss your casting requirements and experience the Atlas advantage.' },
+            buttonText: { type: String, default: 'Contact Us Now' },
+            buttonLink: { type: String, default: '/contact-us' },
+            bgImage: { type: String, default: '/images2/Cover.jpg' }
+        },
+        aboutPage: {
+            missionTitle: { type: String, default: 'Our Mission' },
+            missionText: { type: String, default: '"To bring a change in the engineered castings market through better technology, improved quality, lower costs, and reduced impact on the environment by adoption of green technologies."' },
+            visionTitle: { type: String, default: 'Our Vision' },
+            visionText: { type: String, default: '"To be a pioneer in the casting industry by sustainably and profitably establishing latest production methodologies through continuous research, development, and adoption of best practices."' }
+        },
+        processPage: {
+            steps: [{
+                title: { type: String },
+                description: { type: String },
+                imageUrl: { type: String }
+            }]
+        },
         infrastructure: {
             videoUrl: { type: String, default: "" },
             companyImages: [{ type: String }],

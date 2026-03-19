@@ -2,8 +2,33 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+
+interface AboutContent {
+    about: { title: string; heading: string; description: string; imageUrl: string };
+    aboutPage: { missionTitle: string; missionText: string; visionTitle: string; visionText: string };
+}
 
 export default function AboutUs() {
+    const [content, setContent] = useState<AboutContent | null>(null);
+
+    useEffect(() => {
+        const fetchContent = async () => {
+            const res = await fetch("/api/content");
+            if (res.ok) {
+                const data = await res.json();
+                setContent(data);
+            }
+        };
+        fetchContent();
+    }, []);
+
+    // Fallback data
+    const mission = content?.aboutPage?.missionText || "To bring a change in the engineered castings market through better technology, improved quality, lower costs, and reduced impact on the environment by adoption of green technologies.";
+    const missionTitle = content?.aboutPage?.missionTitle || "Our Mission";
+    const vision = content?.aboutPage?.visionText || "To be a pioneer in the casting industry by sustainably and profitably establishing latest production methodologies through continuous research, development, and adoption of best practices.";
+    const visionTitle = content?.aboutPage?.visionTitle || "Our Vision";
+
     return (
         <div className="bg-white">
             {/* Page Header */}
@@ -46,7 +71,7 @@ export default function AboutUs() {
                         </div>
                         <div className="relative h-[400px] rounded-lg overflow-hidden shadow-2xl border-4 border-white">
                             <Image
-                                src="/images2/about1.png"
+                                src={content?.about?.imageUrl || "/images2/about1.png"}
                                 alt="Factory Interior"
                                 fill
                                 className="object-cover"
@@ -66,9 +91,9 @@ export default function AboutUs() {
                             <div className="w-16 h-16 bg-brand-orange/10 rounded-full flex items-center justify-center text-3xl mb-6">
                                 👁️
                             </div>
-                            <h3 className="text-2xl font-bold text-brand-blue mb-4">Our Vision</h3>
+                            <h3 className="text-2xl font-bold text-brand-blue mb-4">{visionTitle}</h3>
                             <p className="text-gray-600 italic">
-                                "To be a pioneer in the casting industry by sustainably and profitably establishing latest production methodologies through continuous research, development, and adoption of best practices."
+                                "{vision}"
                             </p>
                         </div>
 
@@ -77,9 +102,9 @@ export default function AboutUs() {
                             <div className="w-16 h-16 bg-brand-blue/10 rounded-full flex items-center justify-center text-3xl mb-6">
                                 🎯
                             </div>
-                            <h3 className="text-2xl font-bold text-brand-blue mb-4">Our Mission</h3>
+                            <h3 className="text-2xl font-bold text-brand-blue mb-4">{missionTitle}</h3>
                             <p className="text-gray-600 italic">
-                                "To bring a change in the engineered castings market through better technology, improved quality, lower costs, and reduced impact on the environment by adoption of green technologies."
+                                "{mission}"
                             </p>
                         </div>
                     </div>

@@ -11,8 +11,9 @@ import ScaleOnHover from "@/components/animations/ScaleOnHover";
 // Define the shape of our content
 interface SiteContentData {
     hero: { title: string; subtitle: string; bgImage: string };
-    about: { title: string; heading: string; description: string; imageUrl: string };
+    about: { title: string; heading: string; description: string; imageUrl: string; bulletPoints: string[] };
     features: { title: string; description: string; imageUrl: string; linkUrl: string }[];
+    homeCTA: { title: string; subtitle: string; buttonText: string; buttonLink: string; bgImage: string };
 }
 
 // Default content (Initial State / Fallback)
@@ -26,13 +27,25 @@ const defaultContent: SiteContentData = {
         title: "About Atlas Foundries",
         heading: "World-Class Manufacturing in the Heart of India",
         description: "Atlas Foundries is a pioneering force in the metal casting industry. We combine traditional craftsmanship with modern Lost Foam technology to produce complex, high-precision components that traditional sand casting cannot achieve.",
-        imageUrl: "/images2/about1.png"
+        imageUrl: "/images2/about1.png",
+        bulletPoints: [
+            "ISO 9001:2015 Certified",
+            "Specialized in Complex Geometries",
+            "Exporting to 15+ Countries"
+        ]
     },
     features: [
         { title: "Railway", description: "Couplers, draft gears, and bogie components engineered for durability.", imageUrl: "/images2/2.jpg", linkUrl: "/products" },
         { title: "Marine", description: "Corrosion-resistant castings for ship building and offshore platforms.", imageUrl: "/images2/3.jpg", linkUrl: "/products" },
         { title: "Industrial", description: "Valves, pumps, and heavy machinery parts made with Lost Foam precision.", imageUrl: "/images2/73.png", linkUrl: "/products" }
-    ]
+    ],
+    homeCTA: {
+        title: "Ready to upgrade your supply chain?",
+        subtitle: "Contact us today to discuss your casting requirements and experience the Atlas advantage.",
+        buttonText: "Contact Us Now",
+        buttonLink: "/contact-us",
+        bgImage: "/images2/Cover.jpg"
+    }
 };
 
 export default function Home() {
@@ -130,18 +143,12 @@ export default function Home() {
                                     {content.about.description}
                                 </p>
                                 <ul className="space-y-4 mb-8">
-                                    <li className="flex items-center gap-3">
-                                        <div className="w-6 h-6 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue text-sm">✓</div>
-                                        <span className="font-semibold text-gray-700">ISO 9001:2015 Certified</span>
-                                    </li>
-                                    <li className="flex items-center gap-3">
-                                        <div className="w-6 h-6 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue text-sm">✓</div>
-                                        <span className="font-semibold text-gray-700">Specialized in Complex Geometries</span>
-                                    </li>
-                                    <li className="flex items-center gap-3">
-                                        <div className="w-6 h-6 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue text-sm">✓</div>
-                                        <span className="font-semibold text-gray-700">Exporting to 15+ Countries</span>
-                                    </li>
+                                    {content.about.bulletPoints?.map((point, idx) => (
+                                        <li key={idx} className="flex items-center gap-3">
+                                            <div className="w-6 h-6 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue text-sm">✓</div>
+                                            <span className="font-semibold text-gray-700">{point}</span>
+                                        </li>
+                                    ))}
                                 </ul>
                                 <Link href="/about-us" className="text-brand-blue font-bold hover:text-brand-orange transition-colors flex items-center gap-2">
                                     Read More <span>→</span>
@@ -189,16 +196,16 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* CTA Section (Kept Static for now as user only asked for Hero/About/Services) */}
+            {/* CTA Section */}
             <section className="py-20 bg-brand-blue relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10">
-                    <Image src="/images2/Cover.jpg" alt="bg" fill className="object-cover" />
+                    <Image src={content.homeCTA.bgImage} alt="bg" fill className="object-cover" />
                 </div>
-                <div className="container mx-auto px-4 relative z-10 text-center">
-                    <h2 className="text-4xl text-white font-bold mb-6">Ready to upgrade your supply chain?</h2>
-                    <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">Contact us today to discuss your casting requirements and experience the Atlas advantage.</p>
-                    <Link href="/contact-us" className="px-10 py-4 bg-brand-orange text-white font-bold rounded-full hover:bg-white hover:text-brand-orange transition-all shadow-lg inline-block">
-                        Contact Us Now
+                <div className="container mx-auto px-4 relative z-10 text-center text-white">
+                    <h2 className="text-4xl font-bold mb-6">{content.homeCTA.title}</h2>
+                    <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">{content.homeCTA.subtitle}</p>
+                    <Link href={content.homeCTA.buttonLink} className="px-10 py-4 bg-brand-orange text-white font-bold rounded hover:bg-white hover:text-brand-orange transition-all shadow-lg inline-block">
+                        {content.homeCTA.buttonText}
                     </Link>
                 </div>
             </section>

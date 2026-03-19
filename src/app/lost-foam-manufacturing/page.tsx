@@ -2,48 +2,74 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import FadeIn from "@/components/animations/FadeIn";
 import StaggerContainer from "@/components/animations/StaggerContainer";
 import FadeInItem from "@/components/animations/FadeInItem";
 import ScaleOnHover from "@/components/animations/ScaleOnHover";
 
+interface ProcessStep {
+    title: string;
+    description: string;
+    imageUrl: string;
+}
+
+interface ProcessContent {
+    processPage: {
+        steps: ProcessStep[];
+    };
+}
+
 export default function LostFoam() {
     const [activeStep, setActiveStep] = useState(0);
+    const [content, setContent] = useState<ProcessContent | null>(null);
 
-    const steps = [
+    useEffect(() => {
+        const fetchContent = async () => {
+            const res = await fetch("/api/content");
+            if (res.ok) {
+                const data = await res.json();
+                setContent(data);
+            }
+        };
+        fetchContent();
+    }, []);
+
+    const defaultSteps = [
         {
             title: "EPS Beads Pre-forming",
-            desc: "EPS is the primary raw material that is steam treated to make patterns which will be later used to cast the actual product.",
-            img: "/images2/73.png"
+            description: "EPS is the primary raw material that is steam treated to make patterns which will be later used to cast the actual product.",
+            imageUrl: "/images2/73.png"
         },
         {
             title: "Forming / Moulding",
-            desc: "Preformed beads are injected in a custom-made die to produce patterns by application of steam and pressure. These patterns are an exact replica of the actual product.",
-            img: "/images2/4.jpg"
+            description: "Preformed beads are injected in a custom-made die to produce patterns by application of steam and pressure. These patterns are an exact replica of the actual product.",
+            imageUrl: "/images2/4.jpg"
         },
         {
             title: "Assembly",
-            desc: "Patterns are inspected for deformities. They are glued to a formed cluster and dried to make them stable for the next process.",
-            img: "/images2/Assembly_1.jpg"
+            description: "Patterns are inspected for deformities. They are glued to a formed cluster and dried to make them stable for the next process.",
+            imageUrl: "/images2/Assembly_1.jpg"
         },
         {
             title: "Coating",
-            desc: "Patterns are coated with refractory material which acts as a barrier between sand and liquid metal. Coated patterns are dried in heating rooms.",
-            img: "/images2/68.png"
+            description: "Patterns are coated with refractory material which acts as a barrier between sand and liquid metal. Coated patterns are dried in heating rooms.",
+            imageUrl: "/images2/68.png"
         },
         {
             title: "Compaction",
-            desc: "Patterns are compacted in free-flowing sand using 3-axis vibration. This gives strength to withstand pressure during pouring.",
-            img: "/images2/features-5.png"
+            description: "Patterns are compacted in free-flowing sand using 3-axis vibration. This gives strength to withstand pressure during pouring.",
+            imageUrl: "/images2/features-5.png"
         },
         {
             title: "Vacuum Pouring",
-            desc: "Liquid metal is poured under high vacuum pressure to ensure all gas generated from foam evaporation is extracted.",
-            img: "/images2/features-6.png"
+            description: "Liquid metal is poured under high vacuum pressure to ensure all gas generated from foam evaporation is extracted.",
+            imageUrl: "/images2/features-6.png"
         }
     ];
+
+    const steps = content?.processPage?.steps || defaultSteps;
 
     return (
         <div className="bg-white min-h-screen">
@@ -114,26 +140,35 @@ export default function LostFoam() {
                         {/* Step Detail */}
                         <FadeIn direction="left" className="lg:col-span-2">
                             <div className="bg-white rounded-xl shadow-2xl p-8 min-h-[500px] flex flex-col relative overflow-hidden">
-                                <div key={activeStep} className="h-full"> {/* Forces re-render for animation */}
-                                    <FadeIn delay={0.1} className="flex flex-col md:flex-row gap-8 items-center h-full">
-                                        <div className="w-full md:w-1/2 relative h-64 md:h-80 rounded-lg overflow-hidden shrink-0 shadow-inner">
-                                            <Image
-                                                src={steps[activeStep].img}
-                                                alt={steps[activeStep].title}
-                                                fill
-                                                className="object-cover"
-                                                sizes="(max-width: 768px) 100vw, 50vw"
-                                            />
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={activeStep}
+                                        initial={{ opacity: 0, x: 20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -20 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="h-full"
+                                    >
+                                        <div className="flex flex-col md:flex-row gap-8 items-center h-full">
+                                            <div className="w-full md:w-1/2 relative h-64 md:h-80 rounded-lg overflow-hidden shrink-0 shadow-inner">
+                                                <Image
+                                                    src={steps[activeStep]?.imageUrl || "/images2/placeholder.png"}
+                                                    alt={steps[activeStep]?.title || "Process Step"}
+                                                    fill
+                                                    className="object-cover"
+                                                    sizes="(max-width: 768px) 100vw, 50vw"
+                                                />
+                                            </div>
+                                            <div className="w-full md:w-1/2">
+                                                <div className="text-9xl font-bold text-gray-100 absolute top-4 right-4 -z-0 select-none">0{activeStep + 1}</div>
+                                                <h3 className="text-3xl font-bold text-brand-blue mb-6 relative z-10">{steps[activeStep]?.title}</h3>
+                                                <p className="text-gray-600 leading-relaxed text-lg relative z-10">
+                                                    {steps[activeStep]?.description}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className="w-full md:w-1/2">
-                                            <div className="text-9xl font-bold text-gray-100 absolute top-4 right-4 -z-0 select-none">0{activeStep + 1}</div>
-                                            <h3 className="text-3xl font-bold text-brand-blue mb-6 relative z-10">{steps[activeStep].title}</h3>
-                                            <p className="text-gray-600 leading-relaxed text-lg relative z-10">
-                                                {steps[activeStep].desc}
-                                            </p>
-                                        </div>
-                                    </FadeIn>
-                                </div>
+                                    </motion.div>
+                                </AnimatePresence>
                             </div>
                         </FadeIn>
                     </div>
