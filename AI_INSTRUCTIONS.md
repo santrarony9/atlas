@@ -28,5 +28,10 @@ These instructions MUST be followed by any AI agent working on this codebase to 
 - **Favicon**: The project uses a dynamic favicon system managed through the "Branding" tab. Ensure the `faviconUrl` is correctly fetched in the main `layout.tsx`.
 - **Company Profile**: Use the direct PDF upload feature in the "Connections & Resources" tab for profile management.
 
+## 6. Footer Management & Dashboard Stats
+- **Footer Configuration**: Site contact details (addresses, phone, email, copyright) are managed through the **Branding** tab in the Admin Dashboard.
+- **Dynamic Footer**: The `Footer.tsx` component is dynamic and relies on the `SiteContent` model. Always verify site content connectivity if the footer disappears.
+- **Dashboard Stats**: The "Total Products" count uses a robust `fetchStats` logic. Ensure any API changes continue to return a standard array of products to avoid the count reverting to zero.
+
 ---
 *Created by Antigravity on 2026-03-19*
