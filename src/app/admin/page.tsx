@@ -679,10 +679,10 @@ export default function AdminDashboard() {
                             {activeTab === "dashboard" && (
                                 <div className="space-y-8">
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                        <StatCard title="Total Products" value={stats.products} Icon={Package} color="blue" />
-                                        <StatCard title="Journal Articles" value={stats.articles} Icon={BookOpen} color="orange" />
-                                        <StatCard title="Total Users" value={stats.users} Icon={Users} color="green" />
-                                        <StatCard title="Categories" value={stats.categories} Icon={LayoutGrid} color="purple" />
+                                        <StatCard title="Total Products" value={stats.products} icon={Package} color="blue" />
+                                        <StatCard title="Journal Articles" value={stats.articles} icon={BookOpen} color="orange" />
+                                        <StatCard title="Total Users" value={stats.users} icon={Users} color="green" />
+                                        <StatCard title="Categories" value={stats.categories} icon={LayoutGrid} color="purple" />
                                     </div>
                                     
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
