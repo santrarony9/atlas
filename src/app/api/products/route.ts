@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Product from '@/models/Product';
+import Tag from '@/models/Tag';
 
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
